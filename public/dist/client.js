@@ -1,3 +1,4 @@
+minispade.register('game.js', function() {
 /*
 Here we define a "game object" that includes a start, pause, 
 and changeState method.  
@@ -8,13 +9,14 @@ entity store for creating and storing entities,
 audio manager for playing sounds,
 an event manager for handling player input,
 */
+
 var Game = function () {};
 
 Game.prototype = (function () {
 
   var isRunning = false
     , timeStamps = []
-    , timeStampsLength = 20
+    , timeStampsMaxLength = 20
     , fps;
 
   //public
@@ -42,32 +44,32 @@ Game.prototype = (function () {
     //only 1 timestamp, cannot evaluate fps
     if (timeStampCount === 1) {
       fps = 0;
-    }  else {
-      totalTimeDelta = timeStamps[timeStampCount-1] - timeStamps[0];
+    } else {
+      totalTimeDelta = timeStamps[0] - timeStamps[timeStampCount-1];
       fps = timeStampCount / totalTimeDelta * 1000;
     }
 
     return fps;
   };
-  
+
   //private
   /*
-  loop is intended to be an imperative shell wrapping mostly functional
-  behavior (where possible)
+  loop is intended to be an imperative shell wrapping 
+  mostly functional behavior (where possible)
   */
   var _loop = function () {
-    if (isRunning) {
-      timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsLength);
-      window.requestAnimationFrame(_loop);
-    }
+    if (!isRunning) { return; }
+
+    timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsMaxLength);
+    window.requestAnimationFrame(_loop);
   };
 
   var _addTimeStamp = function (timestamp, timeStamps, maxlength) {
-    if (timeStamps.length === maxlength) {
-      timeStamps.pop(); 
-    }
-    timeStamps.push(timestamp);
-    return timeStamps;
+
+    timeStamps.unshift(timestamp);
+    return timeStamps.filter(function(stamp, index) {
+      return (index >= maxlength) ? false : true;
+    });
   };
 
   //public api
@@ -81,3 +83,12 @@ Game.prototype = (function () {
 })();
 
 var game = new Game();
+game.start();
+
+});
+
+minispade.register('main.js', function() {
+
+minispade.require('game.js');
+
+});

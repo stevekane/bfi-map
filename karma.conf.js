@@ -4,8 +4,9 @@ files = [
   MOCHA,
   MOCHA_ADAPTER,
   {pattern: 'public/javascripts/libs/chai.js', include: true},
-  {pattern: 'public/javascripts/client.js', include: true},
-  'tests/**/*.js'
+  {pattern: 'public/javascripts/libs/minispade.js', include: true},
+  {pattern: 'public/dist/client.js', include: true},
+  {pattern: 'tests/**/*.js', include: true}
 ];
 reporters = ['progress'];
 port = 9876;

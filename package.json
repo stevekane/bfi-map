@@ -14,5 +14,15 @@
     "game"
   ],
   "author": "Steve Kane",
-  "license": "BSD"
+  "license": "BSD",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-minispade": "~0.1.7",
+    "grunt-contrib-sass": "~0.3.0",
+    "grunt-contrib-jshint": "~0.5.4",
+    "grunt-contrib-watch": "~0.4.3"
+  },
+  "dependencies": {
+    "express": "~3.2.5"
+  }
 }

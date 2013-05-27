@@ -9,7 +9,10 @@ module.exports = (grunt) ->
     jsSrcDir: "<%= jsDir %>/src"
     #javascript libraries
     jsLibDir: "<%= jsDir %>/libs"
-    jsCompiled: "app.js"
+    jsCompiled: "client.js"
+
+    #tests
+    testDir: "tests/"
 
     #sass files
     sassDir: "public/sass"
@@ -37,6 +40,8 @@ module.exports = (grunt) ->
           '<%= distDir %>/<%= sassCompiled %>': '<%= sassDir %>/<%= mainSassFile %>'
 
     jshint:
+      options:
+        laxcomma: true
       all: ['<%= jsSrcDir %>/**/*.js']
 
     watch:
@@ -47,12 +52,11 @@ module.exports = (grunt) ->
           livereload: true
 
       js:
-        files: ['<%= jsSrcDir %>/**/*.js']
+        files: ['<%= jsSrcDir %>/**/*.js', '<%= testDir %>/**/*.js']
         tasks: ['jshint', 'minispade']
         options:
           livereload: true
-
-
+    
   grunt.loadNpmTasks('grunt-minispade')
   grunt.loadNpmTasks('grunt-contrib-sass')
   grunt.loadNpmTasks('grunt-contrib-jshint')

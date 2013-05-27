@@ -1,3 +1,5 @@
+minispade.require('game.js');
+
 mocha.setup('bdd');
 var assert = chai.assert;
 
