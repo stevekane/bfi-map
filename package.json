@@ -1,0 +1,18 @@
+{
+  "name": "jumpduck",
+  "version": "0.0.0",
+  "description": "recreation of classic game from fusion frenzy",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stevekane/jumpduck"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "Steve Kane",
+  "license": "BSD"
+}
