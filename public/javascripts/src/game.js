@@ -7,6 +7,27 @@ Kane.Game.prototype = (function () {
     , timeStampsMaxLength = 20
     , fps;
 
+  //private
+  /*
+  loop is intended to be an imperative shell wrapping 
+  mostly functional behavior (where possible)
+  */
+  var _loop = function () {
+    if (!isRunning) { return; }
+
+    timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsMaxLength);
+    window.requestAnimationFrame(_loop);
+  };
+
+  var _addTimeStamp = function (timestamp, timeStamps, maxlength) {
+
+    timeStamps.unshift(timestamp);
+    return timeStamps.filter(function(stamp, index) {
+      return (index >= maxlength) ? false : true;
+    });
+  };
+
+
   //public
   var start = function () {
     isRunning = true;
@@ -38,26 +59,6 @@ Kane.Game.prototype = (function () {
     }
 
     return fps;
-  };
-
-  //private
-  /*
-  loop is intended to be an imperative shell wrapping 
-  mostly functional behavior (where possible)
-  */
-  var _loop = function () {
-    if (!isRunning) { return; }
-
-    timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsMaxLength);
-    window.requestAnimationFrame(_loop);
-  };
-
-  var _addTimeStamp = function (timestamp, timeStamps, maxlength) {
-
-    timeStamps.unshift(timestamp);
-    return timeStamps.filter(function(stamp, index) {
-      return (index >= maxlength) ? false : true;
-    });
   };
 
   //public api

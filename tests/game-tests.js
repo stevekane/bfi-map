@@ -3,7 +3,12 @@ minispade.require('main.js');
 var assert = chai.assert;
 
 describe('Kane.Game', function () {
-  var game = new Kane.Game();
+  var game;
+  
+  //get a new instance of Kane.Game for each test
+  beforeEach(function () {
+    game = new Kane.Game();
+  });
 
   it('should create a new object', function () {
     assert.isObject(game); 
@@ -11,7 +16,7 @@ describe('Kane.Game', function () {
   
   it('should have start, stop methods', function () {
     assert.isFunction(game.start,'game start defined');
-    assert.isFunction(game.stop,'game start defined');
+    assert.isFunction(game.stop,'game stop defined');
     assert.isFunction(game.getIsRunning, 'game getIsRunning defined');
     assert.isFunction(game.getFPS, 'game getFPS defined');
   });
@@ -48,8 +53,6 @@ describe('Kane.Game', function () {
   });
 
   describe('#getFPS()', function () {
-    var game = new Kane.Game();
-
     it('should return 0 if the game is not running', function (done) {
       var fps = game.getFPS();
       assert.equal(fps, 0, 'fps is 0 when game is not running');
