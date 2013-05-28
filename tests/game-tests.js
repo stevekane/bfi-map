@@ -1,10 +1,9 @@
-minispade.require('game.js');
+minispade.require('main.js');
 
-mocha.setup('bdd');
 var assert = chai.assert;
 
-describe('Game', function () {
-  var game = new Game();
+describe('Kane.Game', function () {
+  var game = new Kane.Game();
 
   it('should create a new object', function () {
     assert.isObject(game); 
@@ -49,7 +48,7 @@ describe('Game', function () {
   });
 
   describe('#getFPS()', function () {
-    var game = new Game();
+    var game = new Kane.Game();
 
     it('should return 0 if the game is not running', function (done) {
       var fps = game.getFPS();
@@ -68,5 +67,4 @@ describe('Game', function () {
       }, 100);
     });
   });
-
 });

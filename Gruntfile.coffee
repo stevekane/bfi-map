@@ -25,7 +25,7 @@ module.exports = (grunt) ->
     minispade:
       options:
         renameRequire: true
-        useStrict: false
+        useStrict: true
         prefixToRemove: '<%= jsSrcDir %>'+'/'
       files:
         src: ['<%= jsSrcDir %>/**/*.js']
@@ -53,7 +53,7 @@ module.exports = (grunt) ->
 
       js:
         files: ['<%= jsSrcDir %>/**/*.js', '<%= testDir %>/**/*.js']
-        tasks: ['jshint', 'minispade']
+        tasks: ['minispade']
         options:
           livereload: true
     
@@ -65,5 +65,4 @@ module.exports = (grunt) ->
   grunt.registerTask('default', [
                                         'sass',
                                         'minispade',
-                                        'jshint',
                                         'watch'])

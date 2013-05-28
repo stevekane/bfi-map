@@ -1,17 +1,6 @@
-/*
-Here we define a "game object" that includes a start, pause, 
-and changeState method.  
+Kane.Game = function () {};
 
-This object defines a screen (canvas) for rendering,
-state machine for changing the overall game state,
-entity store for creating and storing entities,
-audio manager for playing sounds,
-an event manager for handling player input,
-*/
-
-var Game = function () {};
-
-Game.prototype = (function () {
+Kane.Game.prototype = (function () {
 
   var isRunning = false
     , timeStamps = []
@@ -80,6 +69,3 @@ Game.prototype = (function () {
   };
 
 })();
-
-var game = new Game();
-game.start();
