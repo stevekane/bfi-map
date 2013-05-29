@@ -14,17 +14,73 @@ describe('Kane.DrawPlane', function () {
     assert.isObject(drawPlane);
   });
 
-  describe("#getCtx()", function () {
-    it('should expose a context object', function () {
-      assert.isObject(drawPlane.getCtx(), "context object available");
+  describe("#setBoard()", function () {
+    it('should throw if provided with no arguments', function () {
+      assert.throws(function () {
+        drawPlane.setBoard();
+      });
     });
-  }); 
+
+    it('should throw if provided a non-string for the name', function () {
+      assert.throws(function () { drawPlane.setBoard(5); });
+      assert.throws(function () { drawPlane.setBoard([]); });
+      assert.throws(function () { drawPlane.setBoard({}); });
+      assert.doesNotThrow(function () { drawPlane.setBoard('gamespace'); });
+    });
+
+    it('should create a board object and context object', function (done) {
+      drawPlane.setBoard('gameboard');
+      assert.isObject(drawPlane.getBoard(), "board exists");
+      assert.isObject(drawPlane.getCtx(), "ctx exists");
+      done();
+    });
+    
+    it('should attach to document body if no target specified', function () {
+      var parent;
+
+      drawPlane.setBoard('attachedToBody');
+      parent = drawPlane.getBoard().parentNode;
+      assert.equal(
+        document.body,
+        parent,
+        "parent is document body when no target specified"
+      ); 
+    });
+
+    it('should attach canvas to specified target domnode', function (done) {
+      var El = document.createElement('div')
+        , id= "target"
+        , target
+        , board;
+
+      El.id = id;
+      document.body.appendChild(El);
+      targetNode = document.getElementById(id);
+
+      drawPlane.setBoard('child', targetNode);
+      target = targetNode.children[0]; 
+      board = drawPlane.getBoard();
+
+      assert.equal(
+        target, 
+        board,
+        "board attached to target node"
+      );
+      done();
+    });
+  });
 
   describe("#getBoard()", function () {
     it('should return the canvas board element', function () {
       assert.isObject(drawPlane.getBoard(), "board object available");
     });
   });
+
+  describe("#getCtx()", function () {
+    it('should expose a context object', function () {
+      assert.isObject(drawPlane.getCtx(), "context object available");
+    });
+  }); 
 
   describe("#setHeight()", function () {
     it('should set height of canvas id=board', function (done) {

@@ -1,3 +1,6 @@
+/*
+game is the main object responsible for starting/stopping the game
+*/
 Kane.Game = function () {};
 
 Kane.Game.prototype = (function () {

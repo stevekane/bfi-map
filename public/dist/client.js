@@ -3,43 +3,45 @@ minispade.register('drawplane.js', function() {
 /*
 drawplane is responsible for drawing the main gamespace
 */
-Kane.DrawPlane = function (canvas) {
-  this.board = canvas;
-};
+Kane.DrawPlane = function () {};
 
 Kane.DrawPlane.prototype = (function () {
 
-  var board = document.getElementById('board')
+  var board
     , ctx;
 
   //private
-  //create new board object if none defined
-  var _createBoard = function (name) {
-    var newBoard = document.createElement('canvas');
-
-    newBoard.id = name;
-    document.body.appendChild(newBoard); 
-    return document.getElementById(name);
-  };
-
   //helper method for drawing
   var _validateColor = function (color) {
     var validColor = /^#[0123456789abcdef]*$/i;
     return color.match(validColor);  
   };
 
-  if (board === null) {
-    board = _createBoard("board"); 
-  }
-  
-  board.height = 200;
-  board.width = 200;
-
-  ctx = board.getContext('2d');
+  //creates new canvas and attaches it to target of DOM
+  var _createBoard = function (name, target) {
+    var boardEl = document.createElement('canvas');
+    boardEl.id = name;
+    target.appendChild(boardEl);
+    return document.getElementById(name);
+  };
 
   //public
   var getCtx = function () {
     return ctx;
+  };
+
+  var setBoard = function (name, target) {
+    if (!name) { throw new Error('no name provided to setBoard'); }
+    if (typeof(name) !== "string") { throw new Error('name must be string!'); }
+
+    var existingBoard = document.getElementById(name)
+      , boardInDom;
+
+    //if no target provided, use document.body
+    target = (target) ? target : document.body;
+    boardInDom = (existingBoard) ? existingBoard : _createBoard(name, target);
+    board = boardInDom;
+    ctx = boardInDom.getContext('2d');
   };
 
   var getBoard = function () {
@@ -55,8 +57,7 @@ Kane.DrawPlane.prototype = (function () {
   };
 
   var setWidth = function (width) {
-    board.width = width;
-  };
+    board.width = width; };
 
   var getWidth = function () {
     return board.width;
@@ -84,6 +85,7 @@ Kane.DrawPlane.prototype = (function () {
 
   return {
     getCtx: getCtx,
+    setBoard: setBoard,
     getBoard: getBoard,
     setHeight: setHeight,
     getHeight: getHeight,
@@ -101,6 +103,9 @@ Kane.DrawPlane.prototype = (function () {
 
 minispade.register('game.js', function() {
 "use strict";
+/*
+game is the main object responsible for starting/stopping the game
+*/
 Kane.Game = function () {};
 
 Kane.Game.prototype = (function () {
@@ -183,6 +188,6 @@ minispade.require('game.js');
 minispade.require('drawplane.js');
 
 var game = new Kane.Game();
-var drawplane = new Kane.DrawPlane();
+//var drawplane = new Kane.DrawPlane();
 
 });
