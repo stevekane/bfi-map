@@ -1,183 +1,118 @@
 minispade.register('drawplane.js', function() {
 "use strict";
-/*
-drawplane is responsible for drawing the main gamespace
-*/
-Kane.DrawPlane = function () {};
+var DrawPlaneInterface = {
+  fillAll: function (hexColor) {},
+  drawRect: function (color, x, y, w, h) {},
+  drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  clearAll: function () {}
+};
 
-Kane.DrawPlane.prototype = (function () {
+Kane.DrawPlane = function (board) {
+  if (!board) { throw new Error('must provide canvas domnode'); }
 
-  var board
-    , ctx;
+  this.board = board;
+  this.ctx = board.getContext('2d');
+};
 
-  //private
-  //helper method for drawing
-  var _validateColor = function (color) {
-    var validColor = /^#[0123456789abcdef]*$/i;
-    return color.match(validColor);  
-  };
+Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
 
-  //creates new canvas and attaches it to target of DOM
-  var _createBoard = function (name, target) {
-    var boardEl = document.createElement('canvas');
-    boardEl.id = name;
-    target.appendChild(boardEl);
-    return document.getElementById(name);
-  };
+//private
+Kane.DrawPlane.prototype._validateColor = function (color) {
+  var validColor = /^#[0123456789abcdef]*$/i;
 
-  //public
-  var getCtx = function () {
-    return ctx;
-  };
+  return color.match(validColor);  
+};
 
-  var setBoard = function (name, target) {
-    if (!name) { throw new Error('no name provided to setBoard'); }
-    if (typeof(name) !== "string") { throw new Error('name must be string!'); }
+//creates new canvas and attaches it to target of DOM
+var _createBoard = function (name, target) {
+  var boardEl = document.createElement('canvas');
 
-    var existingBoard = document.getElementById(name)
-      , boardInDom;
+  boardEl.id = name;
+  target.appendChild(boardEl);
+  return document.getElementById(name);
+};
 
-    //if no target provided, use document.body
-    target = (target) ? target : document.body;
-    boardInDom = (existingBoard) ? existingBoard : _createBoard(name, target);
-    board = boardInDom;
-    ctx = boardInDom.getContext('2d');
-  };
+//public
+//this method will fill the entire board with a solid color
+Kane.DrawPlane.prototype.fillAll = function (color) {
+  this.drawRect(color, 0, 0, this.board.width, this.board.height);
+};
 
-  var getBoard = function () {
-    return board;
-  };
+//draw rect w/ provided location/dimesions
+Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
+  if (!this._validateColor(color)) { 
+    throw new TypeError('invalid color'); 
+  }
+  //color must be valid hex
+  this.ctx.fillStyle = color;
+  this.ctx.fillRect(x, y, w, h);
+};
 
-  var setHeight = function (height) {
-    board.height = height;
-  };
+Kane.DrawPlane.prototype.drawImage = function ( image, 
+                                                sx, sy, sw, sh, 
+                                                x, y, w, h) {
+  var isValidImage = image instanceof Image;
 
-  var getHeight = function () {
-    return board.height;
-  };
+  if (!isValidImage) { throw new Error('not a valid image!'); }
+  this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+};
 
-  var setWidth = function (width) {
-    board.width = width; };
+Kane.DrawPlane.prototype.clearAll = function () {
+  this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+};
 
-  var getWidth = function () {
-    return board.width;
-  };
+});
 
-  //this method will fill the entire board with a solid color
-  var fillAll = function (color) {
-    drawRect(color, 0, 0, board.width, board.height);
-  };
+minispade.register('entitymanager.js', function() {
+"use strict";
+var EntityManagerInterface = {
 
-  //draw rect w/ provided location/dimesions
-  var drawRect = function (color, x, y, width, height) {
-    if (!_validateColor(color)) { 
-      throw new TypeError('invalid color'); 
-      return;
-    }
-    //color must be valid hex
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-  };
+};
 
-  var clearAll = function () {
-    ctx.clearRect(0, 0, board.width, board.height);
-  };
+Kane.EntityManager = function (entClass) {
+  if (!entClass) { throw new Error ('must provide entity class!'); } 
 
-  return {
-    getCtx: getCtx,
-    setBoard: setBoard,
-    getBoard: getBoard,
-    setHeight: setHeight,
-    getHeight: getHeight,
-    setWidth: setWidth,
-    getWidth: getWidth,
+  var array = new Array();
+  this.entities = array; 
+};
 
-    fillAll: fillAll,
-    drawRect: drawRect,
-    clearAll: clearAll 
-  };
-
-})();
+Kane.EntityManager.prototype = Object.create(EntityManagerInterface);
 
 });
 
 minispade.register('game.js', function() {
 "use strict";
-/*
-game is the main object responsible for starting/stopping the game
-*/
-Kane.Game = function () {};
+var GameInterface = {
+  start: function () {},
+  stop: function () {}
+};
 
-Kane.Game.prototype = (function () {
+Kane.Game = function (entityManager) {
+  this.isRunning = false;
+  this.entityManager = entityManager;
+};
 
-  var isRunning = false
-    , timeStamps = []
-    , timeStampsMaxLength = 20
-    , fps;
+Kane.Game.prototype = Object.create(GameInterface); 
 
-  //private
-  /*
-  loop is intended to be an imperative shell wrapping 
-  mostly functional behavior (where possible)
-  */
-  var _loop = function () {
-    if (!isRunning) { return; }
+//private
+Kane.Game.prototype._loop = function () {
+  if (!this.isRunning) { return; }
 
-    timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsMaxLength);
-    window.requestAnimationFrame(_loop);
-  };
+  //update all entity positions
+  //scroll the background
+  //play sounds?
+  window.requestAnimationFrame(this._loop.bind(this));
+};
 
-  var _addTimeStamp = function (timestamp, timeStamps, maxlength) {
+//public
+Kane.Game.prototype.start = function () {
+  this.isRunning = true;
+  window.requestAnimationFrame(this._loop.bind(this));
+};
 
-    timeStamps.unshift(timestamp);
-    return timeStamps.filter(function(stamp, index) {
-      return (index >= maxlength) ? false : true;
-    });
-  };
-
-
-  //public
-  var start = function () {
-    isRunning = true;
-    window.requestAnimationFrame(_loop);
-  };
-
-  var stop = function () {
-    isRunning = false;
-  };
-
-  var getIsRunning = function () {
-    return isRunning;
-  };
-  
-  var getFPS = function () {
-    //sanity checks
-    if (!isRunning) { return 0; }
-
-    var timeStampCount = timeStamps.length
-      , totalTimeDelta
-      , fps;
-    
-    //only 1 timestamp, cannot evaluate fps
-    if (timeStampCount === 1) {
-      fps = 0;
-    } else {
-      totalTimeDelta = timeStamps[0] - timeStamps[timeStampCount-1];
-      fps = timeStampCount / totalTimeDelta * 1000;
-    }
-
-    return fps;
-  };
-
-  //public api
-  return {
-    start: start,
-    stop: stop,
-    getIsRunning: getIsRunning,
-    getFPS: getFPS
-  };
-
-})();
+Kane.Game.prototype.stop = function () {
+  this.isRunning = false;
+};
 
 });
 
@@ -186,8 +121,96 @@ minispade.register('main.js', function() {
 window.Kane = {};
 minispade.require('game.js');
 minispade.require('drawplane.js');
+minispade.require('player.js');
+minispade.require('entitymanager.js');
 
+var canvas = document.createElement('canvas');
+canvas.id = "board";
+canvas.height = 480;
+canvas.width = 640;
+
+document.body.appendChild(canvas);
+var canvasInDom = document.getElementById('board'); 
+
+var board = new Kane.DrawPlane(canvasInDom);
 var game = new Kane.Game();
-//var drawplane = new Kane.DrawPlane();
+var player = new Kane.Player();
+
+board.fillAll('#123456');
+
+game.start();
+
+});
+
+minispade.register('player.js', function() {
+"use strict";
+var PlayerInterface = {
+  move: function () {},
+  getYVelocity: function () {},
+  getJumpVelocity: function () {},
+  jump: function () {},
+  duck: function () {}
+};
+
+Kane.Player = function () {
+  this.isJumping = false;
+  this.isDucking = false;
+  this.yVelocity = 0;
+  this.height = 60;
+  this.y = 0 + this.height;
+
+  this.jumpVelocity = 20; 
+  this.duckDuration = 700;
+  this.grav = -5;
+};
+
+Kane.Player.prototype = Object.create(PlayerInterface);
+
+//timeDelta is in seconds
+Kane.Player.prototype.move = function (timeDelta) {
+  var newHeight;
+
+  if (null === timeDelta) { 
+    throw new Error('no timeDelta provided to move');
+  }
+  if ('number' !== typeof(timeDelta)) {
+    throw new Error('move must be provided a numerical timeDelta');
+  }
+  //calculate new position
+  newHeight = calcPos(timeDelta, this.yVelocity, this.y, this.grav);
+  newHeight = (newHeight < this.height) ? this.height : newHeight;
+  this.y = newHeight; 
+  console.log(this.y);
+};
+
+Kane.Player.prototype.getYVelocity = function () {
+  return this.yVelocity;
+};
+
+Kane.Player.prototype.getJumpVelocity = function () {
+  return this.jumpVelocity;
+};
+
+Kane.Player.prototype.jump = function () {
+  //do nothing if player is not on the ground
+  if (this.yVelocity !== 0) { return; }
+
+  this.isJumping = true;
+  this.yVelocity = this.yVelocity + this.jumpVelocity;
+};
+
+Kane.Player.prototype.duck = function () {
+  if (this.isDucking) { return; } 
+  if (this.isJumping) { return; }
+
+  this.isDucking = true;
+  window.setTimeout(function () {
+    this.isDucking = false;    
+  }.bind(this), this.duckDuration);
+};
+
+function calcPos (dT, vel, pos, accel) {
+  return (.5 * accel * dT * dT + vel * dT + pos);
+};
 
 });

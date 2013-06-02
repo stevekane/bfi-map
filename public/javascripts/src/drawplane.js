@@ -1,98 +1,60 @@
-/*
-drawplane is responsible for drawing the main gamespace
-*/
-Kane.DrawPlane = function () {};
+var DrawPlaneInterface = {
+  fillAll: function (hexColor) {},
+  drawRect: function (color, x, y, w, h) {},
+  drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  clearAll: function () {}
+};
 
-Kane.DrawPlane.prototype = (function () {
+Kane.DrawPlane = function (board) {
+  if (!board) { throw new Error('must provide canvas domnode'); }
 
-  var board
-    , ctx;
+  this.board = board;
+  this.ctx = board.getContext('2d');
+};
 
-  //private
-  //helper method for drawing
-  var _validateColor = function (color) {
-    var validColor = /^#[0123456789abcdef]*$/i;
-    return color.match(validColor);  
-  };
+Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
 
-  //creates new canvas and attaches it to target of DOM
-  var _createBoard = function (name, target) {
-    var boardEl = document.createElement('canvas');
-    boardEl.id = name;
-    target.appendChild(boardEl);
-    return document.getElementById(name);
-  };
+//private
+Kane.DrawPlane.prototype._validateColor = function (color) {
+  var validColor = /^#[0123456789abcdef]*$/i;
 
-  //public
-  var getCtx = function () {
-    return ctx;
-  };
+  return color.match(validColor);  
+};
 
-  var setBoard = function (name, target) {
-    if (!name) { throw new Error('no name provided to setBoard'); }
-    if (typeof(name) !== "string") { throw new Error('name must be string!'); }
+//creates new canvas and attaches it to target of DOM
+var _createBoard = function (name, target) {
+  var boardEl = document.createElement('canvas');
 
-    var existingBoard = document.getElementById(name)
-      , boardInDom;
+  boardEl.id = name;
+  target.appendChild(boardEl);
+  return document.getElementById(name);
+};
 
-    //if no target provided, use document.body
-    target = (target) ? target : document.body;
-    boardInDom = (existingBoard) ? existingBoard : _createBoard(name, target);
-    board = boardInDom;
-    ctx = boardInDom.getContext('2d');
-  };
+//public
+//this method will fill the entire board with a solid color
+Kane.DrawPlane.prototype.fillAll = function (color) {
+  this.drawRect(color, 0, 0, this.board.width, this.board.height);
+};
 
-  var getBoard = function () {
-    return board;
-  };
+//draw rect w/ provided location/dimesions
+Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
+  if (!this._validateColor(color)) { 
+    throw new TypeError('invalid color'); 
+  }
+  //color must be valid hex
+  this.ctx.fillStyle = color;
+  this.ctx.fillRect(x, y, w, h);
+};
 
-  var setHeight = function (height) {
-    board.height = height;
-  };
+Kane.DrawPlane.prototype.drawImage = function ( image, 
+                                                sx, sy, sw, sh, 
+                                                x, y, w, h) {
+  var isValidImage = image instanceof Image;
 
-  var getHeight = function () {
-    return board.height;
-  };
+  if (!isValidImage) { throw new Error('not a valid image!'); }
+  this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+};
 
-  var setWidth = function (width) {
-    board.width = width; };
-
-  var getWidth = function () {
-    return board.width;
-  };
-
-  //this method will fill the entire board with a solid color
-  var fillAll = function (color) {
-    drawRect(color, 0, 0, board.width, board.height);
-  };
-
-  //draw rect w/ provided location/dimesions
-  var drawRect = function (color, x, y, width, height) {
-    if (!_validateColor(color)) { 
-      throw new TypeError('invalid color'); 
-      return;
-    }
-    //color must be valid hex
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-  };
-
-  var clearAll = function () {
-    ctx.clearRect(0, 0, board.width, board.height);
-  };
-
-  return {
-    getCtx: getCtx,
-    setBoard: setBoard,
-    getBoard: getBoard,
-    setHeight: setHeight,
-    getHeight: getHeight,
-    setWidth: setWidth,
-    getWidth: getWidth,
-
-    fillAll: fillAll,
-    drawRect: drawRect,
-    clearAll: clearAll 
-  };
-
-})();
+Kane.DrawPlane.prototype.clearAll = function () {
+  this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+};

@@ -1,75 +1,31 @@
-/*
-game is the main object responsible for starting/stopping the game
-*/
-Kane.Game = function () {};
+var GameInterface = {
+  start: function () {},
+  stop: function () {}
+};
 
-Kane.Game.prototype = (function () {
+Kane.Game = function (entityManager) {
+  this.isRunning = false;
+  this.entityManager = entityManager;
+};
 
-  var isRunning = false
-    , timeStamps = []
-    , timeStampsMaxLength = 20
-    , fps;
+Kane.Game.prototype = Object.create(GameInterface); 
 
-  //private
-  /*
-  loop is intended to be an imperative shell wrapping 
-  mostly functional behavior (where possible)
-  */
-  var _loop = function () {
-    if (!isRunning) { return; }
+//private
+Kane.Game.prototype._loop = function () {
+  if (!this.isRunning) { return; }
 
-    timeStamps = _addTimeStamp(Date.now(), timeStamps, timeStampsMaxLength);
-    window.requestAnimationFrame(_loop);
-  };
+  //update all entity positions
+  //scroll the background
+  //play sounds?
+  window.requestAnimationFrame(this._loop.bind(this));
+};
 
-  var _addTimeStamp = function (timestamp, timeStamps, maxlength) {
+//public
+Kane.Game.prototype.start = function () {
+  this.isRunning = true;
+  window.requestAnimationFrame(this._loop.bind(this));
+};
 
-    timeStamps.unshift(timestamp);
-    return timeStamps.filter(function(stamp, index) {
-      return (index >= maxlength) ? false : true;
-    });
-  };
-
-
-  //public
-  var start = function () {
-    isRunning = true;
-    window.requestAnimationFrame(_loop);
-  };
-
-  var stop = function () {
-    isRunning = false;
-  };
-
-  var getIsRunning = function () {
-    return isRunning;
-  };
-  
-  var getFPS = function () {
-    //sanity checks
-    if (!isRunning) { return 0; }
-
-    var timeStampCount = timeStamps.length
-      , totalTimeDelta
-      , fps;
-    
-    //only 1 timestamp, cannot evaluate fps
-    if (timeStampCount === 1) {
-      fps = 0;
-    } else {
-      totalTimeDelta = timeStamps[0] - timeStamps[timeStampCount-1];
-      fps = timeStampCount / totalTimeDelta * 1000;
-    }
-
-    return fps;
-  };
-
-  //public api
-  return {
-    start: start,
-    stop: stop,
-    getIsRunning: getIsRunning,
-    getFPS: getFPS
-  };
-
-})();
+Kane.Game.prototype.stop = function () {
+  this.isRunning = false;
+};
