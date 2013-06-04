@@ -2,7 +2,7 @@ window.Kane = {};
 
 require('game.js');
 require('drawplane.js');
-require('player.js');
+require('entity.js');
 require('entitymanager.js');
 
 var canvas = document.createElement('canvas');
@@ -15,7 +15,6 @@ var canvasInDom = document.getElementById('board');
 
 var board = new Kane.DrawPlane(canvasInDom);
 var game = new Kane.Game();
-var player = new Kane.Player();
 
 board.fillAll('#123456');
 

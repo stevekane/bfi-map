@@ -63,20 +63,153 @@ Kane.DrawPlane.prototype.clearAll = function () {
 
 });
 
+minispade.register('entity.js', function() {
+"use strict";
+var EntityInterface = {
+  activate: function () {},
+  update: function (dT) {}, 
+  draw: function () {},
+};
+
+Kane.Entity = function (drawplane) {
+  if (!drawplane) { 
+    throw new Error('must provide valid drawplane'); 
+  }
+  if ("object" !== typeof drawplane) { 
+    throw new Error('drawplane must be object'); 
+  }
+  
+  //boolean flag to determine if this object is in use already
+  this.isActive = false;
+  
+  //rendering surface for this entity
+  this.drawplane = drawplane;
+  
+  //default color if no image available
+  this.color = "#11ffbb";
+
+  //position
+  this.x = 0;
+  this.y = 0;
+
+  //previous positions
+  this.lastx = 0;
+  this.lasty = 0;
+
+  //dimensions
+  this.w = 0;
+  this.h = 0;
+
+  //velocity
+  this.dx = 0;
+  this.dy = 0;
+
+  //accel
+  this.ddx = 0;
+  this.ddy = 0;
+
+  //render order
+  this.zIndex = 0;
+
+  //identifiers
+  this.id = Math.round(Math.random() * 100000);
+  this.name = "";
+  this.type = "";
+  
+  //animation info  
+  this.anims = [];
+  this.currentAnim = {}
+};
+
+Kane.Entity.prototype = Object.create(EntityInterface);
+
+Kane.Entity.prototype.activate = function (settings) {
+  if (!settings) { throw new Error('activate requires a hash of settings'); }
+  
+  //check if keys in hash are valid
+  for (var key in settings) {
+    if(!this.hasOwnProperty(key)) {
+      throw new Error('invalid key provided in activate settings'); 
+    }
+    
+    //assign each setting to the entity
+    this[key] = settings[key];
+  }
+  this.isActive = true;
+};
+
+Kane.Entity.prototype.update = function (dT) {
+  var potentialY;
+  if (!dT) { throw new Error('delta time not provided'); }
+  
+  this.x = updatePosition(dT, this.dx, this.ddx, this.x);
+  potentialY = updatePosition(dT, this.dy, this.ddy, this.y);
+  this.y = (potentialY >= 0) ? potentialY : 0;
+};
+
+Kane.Entity.prototype.draw = function () {
+  if (false == this.isActive) { throw new Error('cannot draw an inactive entity'); }
+
+  if (!this.image) {
+    this.drawplane.drawRect(this.color, this.x, this.y, this.w, this.h);
+  } else {
+    //this.drawplane.drawImage
+  }
+};
+
+function updatePosition(dT, v, a, oldPos) {
+  return (.5 * a * dT * dT) + (v * dT) + oldPos;
+};
+
+
+});
+
 minispade.register('entitymanager.js', function() {
 "use strict";
 var EntityManagerInterface = {
-
+  activateFromStore: function () {},
+  deactivate: function (entity) {},
 };
 
-Kane.EntityManager = function (entClass) {
-  if (!entClass) { throw new Error ('must provide entity class!'); } 
+//requires array of entities
+Kane.EntityManager = function (entities) {
+  if (!entities) { throw new Error('must provide array of entities'); }
 
-  var array = new Array();
-  this.entities = array; 
+  this.store = entities;
+  this.active = [];
 };
 
 Kane.EntityManager.prototype = Object.create(EntityManagerInterface);
+
+Kane.EntityManager.prototype.activateFromStore = function (settings) {
+  var storeEntity;
+  if (!settings) { throw new Error('no settings hash provided!'); }
+  if (0 === this.store.length) { throw new Error('store is empty!'); }
+
+  storeEntity = this.store.shift();
+
+  //set this entity's active flag
+  storeEntity.activate(settings);
+
+  //add store entity to active array
+  this.active.unshift(storeEntity);
+};
+
+Kane.EntityManager.prototype.deactivate = function (entity) {
+  var activeEnt;
+  if (!entity) { throw new Error('no entity provided to deactivate'); } 
+
+  activeEnt = this.active.filter(function (ent) { return entity === ent })[0]; 
+  if (!activeEnt) { throw new Error('entity not found in active!'); }
+  
+  //weird method to target this element and remove it
+  removeElement(activeEnt, this.active);  
+  this.store.unshift(activeEnt);
+};
+
+function removeElement (element, array) {
+  array.splice(array.indexOf(element), 1);
+};
 
 });
 
@@ -121,7 +254,7 @@ minispade.register('main.js', function() {
 window.Kane = {};
 minispade.require('game.js');
 minispade.require('drawplane.js');
-minispade.require('player.js');
+minispade.require('entity.js');
 minispade.require('entitymanager.js');
 
 var canvas = document.createElement('canvas');
@@ -134,83 +267,9 @@ var canvasInDom = document.getElementById('board');
 
 var board = new Kane.DrawPlane(canvasInDom);
 var game = new Kane.Game();
-var player = new Kane.Player();
 
 board.fillAll('#123456');
 
 game.start();
-
-});
-
-minispade.register('player.js', function() {
-"use strict";
-var PlayerInterface = {
-  move: function () {},
-  getYVelocity: function () {},
-  getJumpVelocity: function () {},
-  jump: function () {},
-  duck: function () {}
-};
-
-Kane.Player = function () {
-  this.isJumping = false;
-  this.isDucking = false;
-  this.yVelocity = 0;
-  this.height = 60;
-  this.y = 0 + this.height;
-
-  this.jumpVelocity = 20; 
-  this.duckDuration = 700;
-  this.grav = -5;
-};
-
-Kane.Player.prototype = Object.create(PlayerInterface);
-
-//timeDelta is in seconds
-Kane.Player.prototype.move = function (timeDelta) {
-  var newHeight;
-
-  if (null === timeDelta) { 
-    throw new Error('no timeDelta provided to move');
-  }
-  if ('number' !== typeof(timeDelta)) {
-    throw new Error('move must be provided a numerical timeDelta');
-  }
-  //calculate new position
-  newHeight = calcPos(timeDelta, this.yVelocity, this.y, this.grav);
-  newHeight = (newHeight < this.height) ? this.height : newHeight;
-  this.y = newHeight; 
-  console.log(this.y);
-};
-
-Kane.Player.prototype.getYVelocity = function () {
-  return this.yVelocity;
-};
-
-Kane.Player.prototype.getJumpVelocity = function () {
-  return this.jumpVelocity;
-};
-
-Kane.Player.prototype.jump = function () {
-  //do nothing if player is not on the ground
-  if (this.yVelocity !== 0) { return; }
-
-  this.isJumping = true;
-  this.yVelocity = this.yVelocity + this.jumpVelocity;
-};
-
-Kane.Player.prototype.duck = function () {
-  if (this.isDucking) { return; } 
-  if (this.isJumping) { return; }
-
-  this.isDucking = true;
-  window.setTimeout(function () {
-    this.isDucking = false;    
-  }.bind(this), this.duckDuration);
-};
-
-function calcPos (dT, vel, pos, accel) {
-  return (.5 * accel * dT * dT + vel * dT + pos);
-};
 
 });
