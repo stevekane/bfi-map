@@ -1,12 +1,16 @@
 var EntityManagerInterface = {
-  activateFromStore: function () {},
+  activateFromStore: function (settings) {},
   deactivate: function (entity) {},
+  updateActive: function (dT) {},
+  drawActive: function () {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities) {
+Kane.EntityManager = function (entities, drawplane) {
   if (!entities) { throw new Error('must provide array of entities'); }
-
+  if (!drawplane) { throw new Error('must provide drawplane'); }
+  
+  this.drawplane = drawplane;
   this.store = entities;
   this.active = [];
 };
@@ -36,9 +40,27 @@ Kane.EntityManager.prototype.deactivate = function (entity) {
   
   //weird method to target this element and remove it
   removeElement(activeEnt, this.active);  
+
+  //call entity's deactivate method
+  activeEnt.deactivate();
   this.store.unshift(activeEnt);
+};
+
+Kane.EntityManager.prototype.updateActive = function (dT) {
+  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
+
+  this.active.forEach(function (entity) { 
+    entity.update(dT); 
+  });
 };
 
 function removeElement (element, array) {
   array.splice(array.indexOf(element), 1);
+};
+
+Kane.EntityManager.prototype.drawActive = function () {
+  this.drawplane.clearAll();
+  this.active.forEach(function (entity) { 
+    entity.draw(); 
+  });
 };

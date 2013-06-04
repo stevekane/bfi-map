@@ -9,7 +9,7 @@ describe('Kane.EntityManager', function () {
     , em;
 
   beforeEach(function () {
-    em = Test.createEntityManager(entities);
+    em = Test.createEntityManager(entities, drawplane);
   });
 
   it('should define a store of entities with the passed entities', function () {
@@ -25,16 +25,22 @@ describe('Kane.EntityManager', function () {
     assert.isArray(em.active);
   });
 
-  it('should throw if no entities provided to constructor', function () {
+  it('should throw if entities and drawplane not provided to constructor', function () {
     assert.throws(function () {
       em = Test.createEntityManager();
     });
+    assert.throws(function () {
+      em = Test.createEntityManager(entities);
+    });
+    assert.doesNotThrow(function () {
+      em = Test.createEntityManager(entities, drawplane);
+    }); 
   });
   
   describe('#activateFromStore()', function () {
 
     beforeEach(function () {
-      em = Test.createEntityManager(entities);
+      em = Test.createEntityManager(entities, drawplane);
     });
 
     it('should be a function', function () {
@@ -129,8 +135,10 @@ describe('Kane.EntityManager', function () {
 
       em.activateFromStore({});
       activeEnt = em.active[0];
+
       em.deactivate(activeEnt);
       entReturnedToStore = em.store[0];
+
       assert.equal(
         activeEnt,
         entReturnedToStore,
@@ -138,5 +146,28 @@ describe('Kane.EntityManager', function () {
       );
     });
   });
-});
 
+  describe('#updateActive()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.updateActive);
+    });  
+    
+    it('should throw if not provided a dT argument', function () {
+      var dT = 1000;
+
+      assert.throws(function () {
+        em.updateActive();
+      });
+
+      assert.doesNotThrow(function () {
+        em.updateActive(dT);
+      });
+    });
+  });
+
+  describe('#drawActive()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.drawActive);
+    });  
+  });
+});

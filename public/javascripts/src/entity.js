@@ -46,7 +46,7 @@ Kane.Entity.prototype.deactivate = function () {
 
 Kane.Entity.prototype.update = function (dT) {
   var potentialY;
-  if (!dT) { throw new Error('delta time not provided'); }
+  if (undefined == dT) { throw new Error('delta time not provided'); }
   
   this.x = updatePosition(dT, this.dx, this.ddx, this.x);
   potentialY = updatePosition(dT, this.dy, this.ddy, this.y);

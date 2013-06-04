@@ -23,8 +23,7 @@ window.Test = {
     return ents;
   },
   
-  createEntityManager: function (entities) {
-    return new Kane.EntityManager(entities);
+  createEntityManager: function (entities, drawplane) {
+    return new Kane.EntityManager(entities, drawplane);
   },  
-
 };
