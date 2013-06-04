@@ -1,5 +1,6 @@
 var EntityInterface = {
-  activate: function () {},
+  activate: function (settings) {},
+  deactivate: function () {},
   update: function (dT) {}, 
   draw: function () {},
 };
@@ -11,47 +12,14 @@ Kane.Entity = function (drawplane) {
   if ("object" !== typeof drawplane) { 
     throw new Error('drawplane must be object'); 
   }
-  
-  //boolean flag to determine if this object is in use already
-  this.isActive = false;
-  
-  //rendering surface for this entity
+
+  //assign id once (no need to clear this)
+  this.id = Math.round(Math.random() * 100000);
+
+  //rendering surface for entity entity
   this.drawplane = drawplane;
   
-  //default color if no image available
-  this.color = "#11ffbb";
-
-  //position
-  this.x = 0;
-  this.y = 0;
-
-  //previous positions
-  this.lastx = 0;
-  this.lasty = 0;
-
-  //dimensions
-  this.w = 0;
-  this.h = 0;
-
-  //velocity
-  this.dx = 0;
-  this.dy = 0;
-
-  //accel
-  this.ddx = 0;
-  this.ddy = 0;
-
-  //render order
-  this.zIndex = 0;
-
-  //identifiers
-  this.id = Math.round(Math.random() * 100000);
-  this.name = "";
-  this.type = "";
-  
-  //animation info  
-  this.anims = [];
-  this.currentAnim = {}
+  setDefaults(this); 
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
@@ -69,6 +37,11 @@ Kane.Entity.prototype.activate = function (settings) {
     this[key] = settings[key];
   }
   this.isActive = true;
+};
+
+Kane.Entity.prototype.deactivate = function () {
+  this.isActive = false; 
+  setDefaults(this);
 };
 
 Kane.Entity.prototype.update = function (dT) {
@@ -94,3 +67,41 @@ function updatePosition(dT, v, a, oldPos) {
   return (.5 * a * dT * dT) + (v * dT) + oldPos;
 };
 
+function setDefaults (entity) {
+  //boolean flag to determine if this object is in use already
+  entity.isActive = false;
+  
+  //default color if no image available
+  entity.color = "#11ffbb";
+
+  //position
+  entity.x = 0;
+  entity.y = 0;
+
+  //previous positions
+  entity.lastx = 0;
+  entity.lasty = 0;
+
+  //dimensions
+  entity.w = 0;
+  entity.h = 0;
+
+  //velocity
+  entity.dx = 0;
+  entity.dy = 0;
+
+  //accel
+  entity.ddx = 0;
+  entity.ddy = 0;
+
+  //render order
+  entity.zIndex = 0;
+
+  //identifiers
+  entity.name = "";
+  entity.type = "";
+  
+  //animation info  
+  entity.anims = [];
+  entity.currentAnim = {}
+};

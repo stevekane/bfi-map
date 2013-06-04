@@ -2,24 +2,12 @@ minispade.require('main.js');
 
 var assert = chai.assert;
 
-//helper to create a drawplane object
-function createDrawPlane (name) {
-  var drawPlane
-    , domNode
-    , canvas = document.createElement('canvas');
-
-  canvas.id = name;
-  document.body.appendChild(canvas);
-  domNode = document.getElementById(name); 
-  return new Kane.DrawPlane(domNode);
-};
-
 describe('Kane.Entity', function () {
   var en
-    , drawPlane = createDrawPlane('tests');
+    , drawplane = Test.createDrawPlane('tests');
   
   beforeEach(function () {
-    en = new Kane.Entity(drawPlane);
+    en = Test.createEntity(drawplane);
   });
 
   it('should return an object', function () {
@@ -119,6 +107,55 @@ describe('Kane.Entity', function () {
       assert.equal(name, en.name);
       assert.equal(type, en.type);
     });
+  });
+
+  describe("#deactivate()", function () {
+    it('should be a function', function () {
+      assert.isFunction(en.deactivate);
+    });
+
+    it('should set isActive to false', function () {
+      en.isActive = true;
+      en.deactivate();
+      assert.isFalse(en.isActive);
+    });
+
+    //not sure this test will hold up under refactor?  currently resets
+    //to states of a newly created object
+    it('should reset x, y, lastx, lasty, w, h, dx, dy, ddx, ddy, zIndex, name, type', function () {
+      var baseEnt = Test.createEntity(drawplane);
+
+      en.activate({
+        x: 1,
+        y: 1,
+        lastx: 1,
+        lasty: 1,
+        w: 1,
+        h: 1,
+        dx: 1,
+        dy: 1,
+        ddx: 1,
+        ddy: 1,
+        zIndex: 1,
+        name: 'testname',
+        type: 'testent'
+      });
+      en.deactivate();
+      
+      assert.equal(en.x, baseEnt.x);      
+      assert.equal(en.y, baseEnt.y);      
+      assert.equal(en.lastx, baseEnt.lastx);      
+      assert.equal(en.lasty, baseEnt.lasty);      
+      assert.equal(en.w, baseEnt.w);      
+      assert.equal(en.h, baseEnt.h);      
+      assert.equal(en.dx, baseEnt.dx);      
+      assert.equal(en.dy, baseEnt.dy);      
+      assert.equal(en.ddx, baseEnt.ddx);      
+      assert.equal(en.ddy, baseEnt.ddy);      
+      assert.equal(en.zIndex, baseEnt.zIndex);      
+      assert.equal(en.name, baseEnt.name);      
+      assert.equal(en.type, baseEnt.type);      
+    }); 
   });
 
   describe("#update()", function () {
