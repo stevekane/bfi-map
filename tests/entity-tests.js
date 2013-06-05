@@ -163,7 +163,8 @@ describe('Kane.Entity', function () {
     var dT = 100 
       , dx = 2
       , ddx = 2
-      , dy = 2;
+      , dy = 2
+      , ddy = 2;
 
     it('is a function', function () {
       assert.isFunction(en.update);
@@ -178,52 +179,40 @@ describe('Kane.Entity', function () {
       });
     });
   
-    it('should change x based on dT, dx, and ddx', function () {
+    it('should change x and dx based on dT, dx, ddx', function () {
       var oldPos = en.x
-        , newPos;
+        , newPos
+        , oldVel = dx
+        , newVel;
 
       en.dx = dx;
       en.ddx = ddx;
       en.update(dT); 
 
-      newPos = (.5 * en.ddx * dT * dT) + (en.dx * dT) + oldPos;
+      newPos = oldPos + dT * dx;
+      newVel = oldVel + dT * ddx;
       
-      assert.equal(
-        newPos,
-        en.x,
-        "new Pos matches expected new Pos"
-      ); 
+      assert.equal(newPos, en.x); 
+      assert.equal(newVel, en.dx); 
     });
 
-    it('should change y based on dT, dy, and ddy', function () {
+    it('should change y and dy based on dT, dy, ddy', function () {
       var oldPos = en.y
-        , newPos;
+        , newPos
+        , oldVel = dy
+        , newVel;
 
       en.dy = dy;
+      en.ddy = ddy;
       en.update(dT); 
 
-      newPos = (.5 * en.ddy * dT * dT) + (en.dy * dT) + oldPos;
+      newPos = oldPos + dT * dy;
+      newVel = oldVel + dT * ddy;
       
-      assert.equal(
-        newPos,
-        en.y,
-        "new Pos matches expected new Pos"
-      ); 
+      assert.equal(newPos, en.y); 
+      assert.equal(newVel, en.dy); 
     });
 
-    it('should return 0 for y if new y is less than 0', function () {
-      en.y = 0;
-      en.dy = 0;
-      en.ddy = -10;
-
-      en.update(dT);
-
-      assert.equal(
-        0,
-        en.y,
-        "position is bounded by 0"
-      );
-    });
   });
 
   describe('#draw()', function () {

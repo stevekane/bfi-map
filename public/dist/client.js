@@ -92,7 +92,9 @@ Kane.Entity = function (drawplane) {
 Kane.Entity.prototype = Object.create(EntityInterface);
 
 Kane.Entity.prototype.activate = function (settings) {
-  if (!settings) { throw new Error('activate requires a hash of settings'); }
+  if (!settings) { 
+    throw new Error('activate requires a hash of settings'); 
+  }
   
   //check if keys in hash are valid
   for (var key in settings) {
@@ -113,26 +115,42 @@ Kane.Entity.prototype.deactivate = function () {
 
 Kane.Entity.prototype.update = function (dT) {
   var potentialY;
+
   if (undefined == dT) { throw new Error('delta time not provided'); }
   
-  this.x = updatePosition(dT, this.dx, this.ddx, this.x);
-  potentialY = updatePosition(dT, this.dy, this.ddy, this.y);
-  this.y = (potentialY >= 0) ? potentialY : 0;
+  //update positions after checking for 0
+  this.x = updatePosition(dT, this.dx, this.x);
+  this.y = updatePosition(dT, this.dy, this.y);
+
+  this.dx = updateVelocity(dT, this.ddx, this.dx);
+  this.dy = updateVelocity(dT, this.ddy, this.dy);
 };
 
 Kane.Entity.prototype.draw = function () {
-  if (false == this.isActive) { throw new Error('cannot draw an inactive entity'); }
+  if (false == this.isActive) { 
+    throw new Error('cannot draw an inactive entity'); 
+  }
 
   if (!this.image) {
-    this.drawplane.drawRect(this.color, this.x, this.y, this.w, this.h);
+    this.drawplane.drawRect(
+      this.color, 
+      Math.floor(this.x),
+      Math.floor(this.y), 
+      this.w, 
+      this.h
+    );
   } else {
     //this.drawplane.drawImage
   }
 };
 
-function updatePosition(dT, v, a, oldPos) {
-  return (.5 * a * dT * dT) + (v * dT) + oldPos;
+function updatePosition(dT, v, oldPos) {
+  return oldPos + dT * v;
 };
+
+function updateVelocity(dT, a, oldVel) {
+  return oldVel + dT * a;
+}; 
 
 function setDefaults (entity) {
   //boolean flag to determine if this object is in use already
@@ -298,6 +316,85 @@ Kane.Game.prototype.stop = function () {
 
 });
 
+minispade.register('inputevent.js', function() {
+"use strict";
+Kane.InputEvent = function (type, data) {
+  this.type = type;
+  this.data = data;  
+};
+
+});
+
+minispade.register('inputmanager.js', function() {
+"use strict";
+
+minispade.require('inputevent.js');
+
+var InputManagerInterface = {
+  handleInputEvent: function () {},
+};
+
+Kane.InputManager = function (inputQueue, domNode) {
+  if (!inputQueue) { 
+    throw new Error('no inputQueue provided to constructor'); 
+  }
+  this.inputQueue = inputQueue;
+  this.domNode = (domNode) ? domNode : document.body;
+};
+
+Kane.InputManager.prototype = Object.create(InputManagerInterface);
+
+//type is a string, data is an object
+Kane.InputManager.prototype.handleInputEvent = function (type, data) {
+  var inputEvent
+  if (!type) { throw new Error('must provide type to handleInputEvent'); }
+  if (!data) { throw new Error('must provide data to handleInputEvent'); }
+};
+
+});
+
+minispade.register('inputqueue.js', function() {
+"use strict";
+var InputQueueInterface = {
+  enqueueEvent: function () {},
+  fetchNextEvent: function () {},
+  fetchAllEvents: function () {},
+  resetQueue: function () {},
+};
+
+Kane.InputQueue = function () {
+  this.eventQueue = [];
+};
+
+Kane.InputQueue.prototype = Object.create(InputQueueInterface);
+
+//pushes events onto tail of the queue
+Kane.InputQueue.prototype.enqueueEvent = function (ev) {
+  this.eventQueue.push(ev);
+};
+
+//shifts events from head of the queue
+Kane.InputQueue.prototype.fetchNextEvent = function () {
+  if (0 === this.eventQueue.length) { return null; }
+  return this.eventQueue.shift(); 
+};
+
+//returns the eventQueue array and resets it
+Kane.InputQueue.prototype.fetchAllEvents = function () {
+  var events = [];
+
+  events = this.eventQueue;
+  this.resetQueue();
+  return events; 
+};
+
+//This does NOT return the queue, just resets it
+Kane.InputQueue.prototype.resetQueue = function () {
+  this.eventQueue = [];
+};
+
+});
+
 minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
@@ -305,6 +402,9 @@ minispade.require('game.js');
 minispade.require('drawplane.js');
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
+minispade.require('inputevent.js');
+minispade.require('inputqueue.js');
+minispade.require('inputmanager.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -340,30 +440,48 @@ function createGame (entityManager) {
   return new Kane.Game(entityManager);
 };
 
-var bgCanvas = createCanvas(640, 480, 'gameboard')
+var entityCount = 2000 
+  , bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = createDrawPlane(bgCanvas)
   , entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
   
-  , entities = createEntities(entityPlane, 200)
+  , entities = createEntities(entityPlane, entityCount)
   , entityManager = createEntityManager(entities, entityPlane)
-  , game = createGame(entityManager)
-  , entityCount = 200;
+  , game = createGame(entityManager);
 
 //color background
 bgPlane.fillAll('#123aaa');
 
 //create entities 
-for (var i=0; i<entityCount; i++) {
+for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
-    x: Math.floor(Math.random() * 40),
-    y: Math.floor(Math.random() * 40),
+    x: 0,
+    y: 480,
     h: 20,
     w: 20,
     dx: Math.random()/10,
-    dy: Math.random()/10 
+    dy: -1 * Math.random(),
+    ddy: .0005,
+    color: generateColor()
   });
 }
+for (var i=0; i<entityCount/2; i++) {
+  entityManager.activateFromStore({
+    x: 640,
+    y: 480,
+    h: 20,
+    w: 20,
+    dx: -Math.random()/10,
+    dy: -1 * Math.random(),
+    ddy: .0005,
+    color: generateColor()
+  });
+}
+
+function generateColor () {
+  return "#" + Math.random().toString(16).slice(2, 8);
+};
 
 game.start();
 

@@ -26,4 +26,12 @@ window.Test = {
   createEntityManager: function (entities, drawplane) {
     return new Kane.EntityManager(entities, drawplane);
   },  
+
+  createInputEvent: function () {
+    return new Kane.InputEvent();
+  },
+
+  createInputQueue: function () {
+    return new Kane.InputQueue(); 
+  },
 };

@@ -4,6 +4,9 @@ require('game.js');
 require('drawplane.js');
 require('entity.js');
 require('entitymanager.js');
+require('inputevent.js');
+require('inputqueue.js');
+require('inputmanager.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -39,29 +42,47 @@ function createGame (entityManager) {
   return new Kane.Game(entityManager);
 };
 
-var bgCanvas = createCanvas(640, 480, 'gameboard')
+var entityCount = 2000 
+  , bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = createDrawPlane(bgCanvas)
   , entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
   
-  , entities = createEntities(entityPlane, 200)
+  , entities = createEntities(entityPlane, entityCount)
   , entityManager = createEntityManager(entities, entityPlane)
-  , game = createGame(entityManager)
-  , entityCount = 200;
+  , game = createGame(entityManager);
 
 //color background
 bgPlane.fillAll('#123aaa');
 
 //create entities 
-for (var i=0; i<entityCount; i++) {
+for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
-    x: Math.floor(Math.random() * 40),
-    y: Math.floor(Math.random() * 40),
+    x: 0,
+    y: 480,
     h: 20,
     w: 20,
     dx: Math.random()/10,
-    dy: Math.random()/10 
+    dy: -1 * Math.random(),
+    ddy: .0005,
+    color: generateColor()
   });
 }
+for (var i=0; i<entityCount/2; i++) {
+  entityManager.activateFromStore({
+    x: 640,
+    y: 480,
+    h: 20,
+    w: 20,
+    dx: -Math.random()/10,
+    dy: -1 * Math.random(),
+    ddy: .0005,
+    color: generateColor()
+  });
+}
+
+function generateColor () {
+  return "#" + Math.random().toString(16).slice(2, 8);
+};
 
 game.start();
