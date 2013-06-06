@@ -1,4 +1,9 @@
 var GameInterface = {
+  addScene: function (scene) {},
+  removeScene: function (name) {},
+  getScenes: function () {},
+  getCurrentScene: function () {},
+  setCurrentScene: function (name) {},
   start: function () {},
   stop: function () {}
 };
@@ -6,6 +11,10 @@ var GameInterface = {
 Kane.Game = function (entityManager, inputQueue) {
   this.entityManager = entityManager;
   this.inputQueue = inputQueue;
+  
+  //a scenes object
+  this.scenes = {};
+  this.currentScene = null;
 
   this.isRunning = false;
   this.currentTimeStamp = 0;
@@ -44,6 +53,48 @@ Kane.Game.prototype._loop = function () {
   this.ms.end();
 
   window.requestAnimationFrame(this._loop.bind(this));
+};
+
+Kane.Game.prototype.addScene = function (scene) {
+  if (!scene) { throw new Error('no scene provided'); } 
+  if (!scene.name) { throw new Error('scene must have a name!'); }
+
+  this.scenes[scene.name] = scene;
+};
+
+Kane.Game.prototype.removeScene = function (name) {
+  var targetScene;
+  if (!name) { throw new Error('no name provided'); }
+  
+  targetScene = this.scenes[name];
+  if (!targetScene) { throw new Error('no scene by that name found'); }
+  delete this.scenes[name]; 
+
+  return targetScene; 
+};
+
+Kane.Game.prototype.getScenes = function () {
+  return this.scenes;
+};
+
+Kane.Game.prototype.getCurrentScene = function () {
+  if (!this.currentScene) { throw new Error('no currentScene defined!'); }
+  return this.currentScene;
+};
+
+Kane.Game.prototype.setCurrentScene = function (name) {
+  var matchingScene;
+
+  if (!name) { throw new Error('scene name not provided!'); } 
+
+  //if the scene does not exist in list of scenes, throw
+  matchingScene = this.scenes[name];
+  if (!matchingScene) { 
+    throw new Error('scene by that name does not exist'); 
+  } else {
+    this.currentScene = matchingScene;
+  } 
+  
 };
 
 //public
