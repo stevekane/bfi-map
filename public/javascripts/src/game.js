@@ -34,15 +34,11 @@ Kane.Game.prototype._loop = function () {
 
   //update all entity positions
   this.entityManager.updateActive(dT);
+  this.entityManager.updatePlayer(dT);
   //draw all active entities
   this.entityManager.drawActive();
+  this.entityManager.drawPlayer();
 
-  //test of input queue
-  if (this.inputQueue) {
-    inputs = this.inputQueue.fetchAllEvents();
-    if (0 < inputs.length) { console.log(inputs); }
-  }
-  
   //TODO TESTING FOR FPS
   this.fps.end();
   this.ms.end();

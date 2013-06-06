@@ -6,7 +6,7 @@ describe('Kane.InputEvent', function () {
   var ie;
   
   beforeEach(function () {
-    ie = new Kane.InputEvent;
+    ie = new Kane.InputEvent('testType', {});
   });
 
   it('should return an object', function () {

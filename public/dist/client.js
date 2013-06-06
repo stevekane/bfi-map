@@ -76,9 +76,6 @@ Kane.Entity = function (drawplane) {
   if (!drawplane) { 
     throw new Error('must provide valid drawplane'); 
   }
-  if ("object" !== typeof drawplane) { 
-    throw new Error('drawplane must be object'); 
-  }
 
   //assign id once (no need to clear this)
   this.id = Math.round(Math.random() * 100000);
@@ -199,16 +196,20 @@ var EntityManagerInterface = {
   activateFromStore: function (settings) {},
   deactivate: function (entity) {},
   updateActive: function (dT) {},
-  drawActive: function () {}
+  drawActive: function () {},
+  updatePlayer: function (dT) {},
+  drawPlayer: function () {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities, drawplane) {
+Kane.EntityManager = function (entities, drawplane, player) {
   if (!entities) { throw new Error('must provide array of entities'); }
   if (!drawplane) { throw new Error('must provide drawplane'); }
+  if (!player) { throw new Error('must provide player'); }
   
-  this.drawplane = drawplane;
   this.store = entities;
+  this.drawplane = drawplane;
+  this.player = player;
   this.active = [];
 };
 
@@ -251,16 +252,28 @@ Kane.EntityManager.prototype.updateActive = function (dT) {
   });
 };
 
-function removeElement (element, array) {
-  array.splice(array.indexOf(element), 1);
-};
-
 Kane.EntityManager.prototype.drawActive = function () {
   this.drawplane.clearAll();
   this.active.forEach(function (entity) { 
     entity.draw(); 
   });
 };
+
+Kane.EntityManager.prototype.updatePlayer = function (dT) {
+  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
+
+  this.player.processInputs();
+  this.player.update(dT);
+};
+
+Kane.EntityManager.prototype.drawPlayer = function () {
+  this.player.draw();
+};
+
+function removeElement (element, array) {
+  array.splice(array.indexOf(element), 1);
+};
+
 
 });
 
@@ -302,15 +315,11 @@ Kane.Game.prototype._loop = function () {
 
   //update all entity positions
   this.entityManager.updateActive(dT);
+  this.entityManager.updatePlayer(dT);
   //draw all active entities
   this.entityManager.drawActive();
+  this.entityManager.drawPlayer();
 
-  //test of input queue
-  if (this.inputQueue) {
-    inputs = this.inputQueue.fetchAllEvents();
-    if (0 < inputs.length) { console.log(inputs); }
-  }
-  
   //TODO TESTING FOR FPS
   this.fps.end();
   this.ms.end();
@@ -429,10 +438,18 @@ function searchForMatch (array, matchee) {
 };
 
 function keyUpHandler (e) {
+  //TODO: hack to only prevent for movement keys, should be made more general
+  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
+    e.preventDefault();
+  }
   this.handleInputEvent('keyup', {keyCode: e.keyCode});
 };
 
 function keyDownHandler (e) {
+  //TODO: hack to only prevent for movement keys, should be made more general
+  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
+    e.preventDefault();
+  }
   this.handleInputEvent('keydown', {keyCode: e.keyCode});
 };
 
@@ -441,7 +458,7 @@ function keyDownHandler (e) {
 minispade.register('inputqueue.js', function() {
 "use strict";
 var InputQueueInterface = {
-  enqueueEvent: function () {},
+  enqueueEvent: function (ev) {},
   fetchNextEvent: function () {},
   fetchAllEvents: function () {},
   resetQueue: function () {},
@@ -487,6 +504,7 @@ minispade.require('game.js');
 minispade.require('drawplane.js');
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
+minispade.require('player.js');
 minispade.require('inputevent.js');
 minispade.require('inputqueue.js');
 minispade.require('inputmanager.js');
@@ -526,8 +544,12 @@ function createEntities (drawplane, count) {
   return ar;
 };
 
-function createEntityManager (entities, drawplane) {
-  return new Kane.EntityManager(entities, drawplane);
+function createEntityManager (entities, drawplane, player) {
+  return new Kane.EntityManager(entities, drawplane, player);
+};
+
+function createPlayer (drawPlane, inputQueue) {
+  return new Kane.Player(drawPlane, inputQueue);
 };
 
 function createGame (entityManager, inputQueue) {
@@ -542,19 +564,29 @@ var entityCount = 2000
 
   , inputQueue = createInputQueue()
   , inputManager = createInputManager(inputQueue)
+  , player = createPlayer(entityPlane, inputQueue)
 
   , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane)
+  , entityManager = createEntityManager(entities, entityPlane, player)
   , game = createGame(entityManager, inputQueue);
 
 //turn on input listeners
 inputManager.activateKeyUpHandler();
 inputManager.activateKeyDownHandler();
 
-//color background
-bgPlane.fillAll('#123aaa');
+//activate the player
+player.activate({
+  x: 40,
+  y: 40,
+  h: 40,
+  w: 40,
+  color: generateColor()
+});
 
-//create entities 
+//color background
+bgPlane.fillAll(generateColor());
+
+/*
 for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
     x: 0,
@@ -579,11 +611,140 @@ for (var i=0; i<entityCount/2; i++) {
     color: generateColor()
   });
 }
+*/
 
 function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);
 };
 
 game.start();
+
+});
+
+minispade.register('player.js', function() {
+"use strict";
+
+minispade.require('entity.js');
+
+//class inherits from Kane.Entity
+
+Kane.Player = function (drawplane, inputQueue) {
+  if (!drawplane) { throw new Error('no drawplane provided to constructor'); }
+  if (!inputQueue) { throw new Error('no input queue provided to constructor'); }
+
+  this.drawplane = drawplane;
+  this.inputQueue = inputQueue;
+  this.moveSpeed = .1;
+
+  //TODO: possibly refactor to make this a passable dependency??
+  this.keyMap = createKeyMap();
+  setDefaults(this); 
+};
+
+Kane.Player.prototype = Object.create(Kane.Entity.prototype);
+
+Kane.Player.prototype.processInputs = function () {
+  var inputs = this.inputQueue.fetchAllEvents();
+
+  //compare each input to the keymap to extract the desired method name
+  //then execute the method name
+  inputs.forEach(function (input) { 
+    var matchingMethodName = this.keyMap[input.type][input.data.keyCode]; 
+
+    if (matchingMethodName) { 
+      this[matchingMethodName](); 
+    }
+  }, this);
+};
+
+//TODO: THESE ARE FOR STATIC 2d MOTION!  Will not work correctly w/ grav
+Kane.Player.prototype.moveUp = function () {
+  this.dy = -1 * this.moveSpeed;
+};
+
+Kane.Player.prototype.moveDown = function () {
+  this.dy = this.moveSpeed;
+};
+
+Kane.Player.prototype.moveLeft = function () {
+  this.dx = -1 * this.moveSpeed;
+};
+
+Kane.Player.prototype.moveRight = function () {
+  this.dx = this.moveSpeed;
+};
+
+Kane.Player.prototype.cancelMoveUp = function () {
+  this.dy = 0;
+};
+
+Kane.Player.prototype.cancelMoveDown = function () {
+  this.dy = 0;
+};
+
+Kane.Player.prototype.cancelMoveLeft = function () {
+  this.dx = 0;
+};
+
+Kane.Player.prototype.cancelMoveRight = function () {
+  this.dx = 0;
+};
+
+function createKeyMap () {
+  //basic movement
+  return {
+    keyup: {
+      38: 'cancelMoveUp',
+      40: 'cancelMoveDown',
+      37: 'cancelMoveLeft',
+      39: 'cancelMoveRight'
+    },
+    keydown: {
+      38: 'moveUp',
+      40: 'moveDown',
+      37: 'moveLeft',
+      39: 'moveRight'
+    },
+  };
+};
+
+function setDefaults (entity) {
+  //boolean flag to determine if this object is in use already
+  entity.isActive = false;
+  
+  //default color if no image available
+  entity.color = "#11ffbb";
+
+  //position
+  entity.x = 0;
+  entity.y = 0;
+
+  //previous positions
+  entity.lastx = 0;
+  entity.lasty = 0;
+
+  //dimensions
+  entity.w = 0;
+  entity.h = 0;
+
+  //velocity
+  entity.dx = 0;
+  entity.dy = 0;
+
+  //accel
+  entity.ddx = 0;
+  entity.ddy = 0;
+
+  //render order
+  entity.zIndex = 0;
+
+  //identifiers
+  entity.name = "";
+  entity.type = "";
+  
+  //animation info  
+  entity.anims = [];
+  entity.currentAnim = {}
+};
 
 });

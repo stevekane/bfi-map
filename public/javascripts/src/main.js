@@ -4,6 +4,7 @@ require('game.js');
 require('drawplane.js');
 require('entity.js');
 require('entitymanager.js');
+require('player.js');
 require('inputevent.js');
 require('inputqueue.js');
 require('inputmanager.js');
@@ -43,8 +44,12 @@ function createEntities (drawplane, count) {
   return ar;
 };
 
-function createEntityManager (entities, drawplane) {
-  return new Kane.EntityManager(entities, drawplane);
+function createEntityManager (entities, drawplane, player) {
+  return new Kane.EntityManager(entities, drawplane, player);
+};
+
+function createPlayer (drawPlane, inputQueue) {
+  return new Kane.Player(drawPlane, inputQueue);
 };
 
 function createGame (entityManager, inputQueue) {
@@ -59,19 +64,29 @@ var entityCount = 2000
 
   , inputQueue = createInputQueue()
   , inputManager = createInputManager(inputQueue)
+  , player = createPlayer(entityPlane, inputQueue)
 
   , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane)
+  , entityManager = createEntityManager(entities, entityPlane, player)
   , game = createGame(entityManager, inputQueue);
 
 //turn on input listeners
 inputManager.activateKeyUpHandler();
 inputManager.activateKeyDownHandler();
 
-//color background
-bgPlane.fillAll('#123aaa');
+//activate the player
+player.activate({
+  x: 40,
+  y: 40,
+  h: 40,
+  w: 40,
+  color: generateColor()
+});
 
-//create entities 
+//color background
+bgPlane.fillAll(generateColor());
+
+/*
 for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
     x: 0,
@@ -96,6 +111,7 @@ for (var i=0; i<entityCount/2; i++) {
     color: generateColor()
   });
 }
+*/
 
 function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);

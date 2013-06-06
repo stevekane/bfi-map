@@ -14,6 +14,10 @@ window.Test = {
     return new Kane.Entity(drawplane);
   },
 
+  createPlayer: function (drawplane, inputQueue) {
+    return new Kane.Player(drawplane, inputQueue);
+  },
+
   createEntities: function (drawplane, count) {
     var ents = [];
   
@@ -23,12 +27,12 @@ window.Test = {
     return ents;
   },
   
-  createEntityManager: function (entities, drawplane) {
-    return new Kane.EntityManager(entities, drawplane);
+  createEntityManager: function (entities, drawplane, player) {
+    return new Kane.EntityManager(entities, drawplane, player);
   },  
 
-  createInputEvent: function () {
-    return new Kane.InputEvent();
+  createInputEvent: function (type, data) {
+    return new Kane.InputEvent(type, data);
   },
 
   createInputQueue: function () {

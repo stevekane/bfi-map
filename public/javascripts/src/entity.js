@@ -9,9 +9,6 @@ Kane.Entity = function (drawplane) {
   if (!drawplane) { 
     throw new Error('must provide valid drawplane'); 
   }
-  if ("object" !== typeof drawplane) { 
-    throw new Error('drawplane must be object'); 
-  }
 
   //assign id once (no need to clear this)
   this.id = Math.round(Math.random() * 100000);

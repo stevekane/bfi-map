@@ -57,9 +57,17 @@ function searchForMatch (array, matchee) {
 };
 
 function keyUpHandler (e) {
+  //TODO: hack to only prevent for movement keys, should be made more general
+  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
+    e.preventDefault();
+  }
   this.handleInputEvent('keyup', {keyCode: e.keyCode});
 };
 
 function keyDownHandler (e) {
+  //TODO: hack to only prevent for movement keys, should be made more general
+  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
+    e.preventDefault();
+  }
   this.handleInputEvent('keydown', {keyCode: e.keyCode});
 };

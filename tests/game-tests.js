@@ -4,14 +4,15 @@ var assert = chai.assert;
 
 describe('Kane.Game', function () {
   var game
-    , inputQueue
+    , inputQueue = Test.createInputQueue()
     , drawplane = Test.createDrawPlane('test')
     , entities = Test.createEntities(drawplane, 200)
-    , entityManager = Test.createEntityManager(entities, drawplane);
+    , player = Test.createPlayer(drawplane, inputQueue)
+    , entityManager = Test.createEntityManager(entities, drawplane, player);
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
-    inputQueue = Test.createInputQueue();
+    player.activate({});
     game = new Kane.Game(entityManager, inputQueue);
   });
 

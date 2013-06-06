@@ -1,5 +1,5 @@
 var InputQueueInterface = {
-  enqueueEvent: function () {},
+  enqueueEvent: function (ev) {},
   fetchNextEvent: function () {},
   fetchAllEvents: function () {},
   resetQueue: function () {},
