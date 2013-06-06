@@ -2,6 +2,9 @@ require('inputevent.js');
 
 var InputManagerInterface = {
   handleInputEvent: function () {},
+  activateKeyUpHandler: function () {},
+  activateKeyDownHandler: function () {},
+  getActiveHandlers: function () {},
 };
 
 Kane.InputManager = function (inputQueue, domNode) {
@@ -10,13 +13,53 @@ Kane.InputManager = function (inputQueue, domNode) {
   }
   this.inputQueue = inputQueue;
   this.domNode = (domNode) ? domNode : document.body;
+  this.activeHandlers = [];
 };
 
 Kane.InputManager.prototype = Object.create(InputManagerInterface);
 
 //type is a string, data is an object
 Kane.InputManager.prototype.handleInputEvent = function (type, data) {
-  var inputEvent
+  var inputEvent;
   if (!type) { throw new Error('must provide type to handleInputEvent'); }
   if (!data) { throw new Error('must provide data to handleInputEvent'); }
+
+  inputEvent = new Kane.InputEvent(type, data);
+  this.inputQueue.enqueueEvent(inputEvent);
+};
+
+Kane.InputManager.prototype.activateKeyUpHandler = function () {
+  //do nothing is keyUpHandler already active
+  if (searchForMatch(this.activeHandlers, keyUpHandler)) { return; }
+
+  this.activeHandlers.push(keyUpHandler); 
+  this.domNode.addEventListener('keyup', keyUpHandler.bind(this));
+};
+
+Kane.InputManager.prototype.activateKeyDownHandler = function () {
+  //do nothing is keyUpHandler already active
+  if (searchForMatch(this.activeHandlers, keyDownHandler)) { return; }
+
+  this.activeHandlers.push(keyDownHandler); 
+  this.domNode.addEventListener('keydown', keyDownHandler.bind(this));
+};
+
+Kane.InputManager.prototype.getActiveHandlers = function () {
+  return this.activeHandlers;
+};
+
+//helper to search an array for an element and return true if found
+function searchForMatch (array, matchee) {
+  for (var i=0; i<array.length; i++) {
+    if (array[i] === matchee) { return true; }
+  }
+  return false;
+};
+
+function keyUpHandler (e) {
+  this.handleInputEvent('keyup', {keyCode: e.keyCode});
+};
+
+function keyDownHandler (e) {
+  this.handleInputEvent('keydown', {keyCode: e.keyCode});
 };

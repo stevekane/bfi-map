@@ -271,9 +271,11 @@ var GameInterface = {
   stop: function () {}
 };
 
-Kane.Game = function (entityManager) {
-  this.isRunning = false;
+Kane.Game = function (entityManager, inputQueue) {
   this.entityManager = entityManager;
+  this.inputQueue = inputQueue;
+
+  this.isRunning = false;
   this.currentTimeStamp = 0;
   this.previousTimeStamp = 0;
 };
@@ -282,7 +284,12 @@ Kane.Game.prototype = Object.create(GameInterface);
 
 //private
 Kane.Game.prototype._loop = function () {
-  var dT;
+  var dT
+    , inputs = [];
+
+  //TODO TESTING FOR FPS
+  this.fps.begin();
+  this.ms.begin();
 
   //update timestamps
   this.previousTimeStamp = this.currentTimeStamp;
@@ -298,6 +305,16 @@ Kane.Game.prototype._loop = function () {
   //draw all active entities
   this.entityManager.drawActive();
 
+  //test of input queue
+  if (this.inputQueue) {
+    inputs = this.inputQueue.fetchAllEvents();
+    if (0 < inputs.length) { console.log(inputs); }
+  }
+  
+  //TODO TESTING FOR FPS
+  this.fps.end();
+  this.ms.end();
+
   window.requestAnimationFrame(this._loop.bind(this));
 };
 
@@ -306,6 +323,9 @@ Kane.Game.prototype.start = function () {
   this.isRunning = true;
   this.currentTimeStamp = Date.now();
   window.requestAnimationFrame(this._loop.bind(this));
+  //TESTS FOR FPS MEASUREMENT
+  this.fps = createFps();
+  this.ms = createMs();
 };
 
 Kane.Game.prototype.stop = function () {
@@ -313,6 +333,28 @@ Kane.Game.prototype.stop = function () {
   this.previousTimeStamp = 0;
   this.isRunning = false;
 };
+
+//TODO: TESTS FOR FPS MEASUREMENT
+function createFps (x, y) {
+  var fps = new Stats();
+  fps.setMode(0);
+  fps.domElement.style.position = 'absolute';
+  fps.domElement.style.left = 0;
+  fps.domElement.style.top = 0;
+  document.body.appendChild(fps.domElement); 
+  return fps;
+};
+
+function createMs (x, y) {
+  var ms = new Stats();
+  ms.setMode(1);
+  ms.domElement.style.position = 'absolute';
+  ms.domElement.style.left = 0;
+  ms.domElement.style.top = 50;
+  document.body.appendChild(ms.domElement); 
+  return ms;
+};
+
 
 });
 
@@ -332,6 +374,9 @@ minispade.require('inputevent.js');
 
 var InputManagerInterface = {
   handleInputEvent: function () {},
+  activateKeyUpHandler: function () {},
+  activateKeyDownHandler: function () {},
+  getActiveHandlers: function () {},
 };
 
 Kane.InputManager = function (inputQueue, domNode) {
@@ -340,15 +385,55 @@ Kane.InputManager = function (inputQueue, domNode) {
   }
   this.inputQueue = inputQueue;
   this.domNode = (domNode) ? domNode : document.body;
+  this.activeHandlers = [];
 };
 
 Kane.InputManager.prototype = Object.create(InputManagerInterface);
 
 //type is a string, data is an object
 Kane.InputManager.prototype.handleInputEvent = function (type, data) {
-  var inputEvent
+  var inputEvent;
   if (!type) { throw new Error('must provide type to handleInputEvent'); }
   if (!data) { throw new Error('must provide data to handleInputEvent'); }
+
+  inputEvent = new Kane.InputEvent(type, data);
+  this.inputQueue.enqueueEvent(inputEvent);
+};
+
+Kane.InputManager.prototype.activateKeyUpHandler = function () {
+  //do nothing is keyUpHandler already active
+  if (searchForMatch(this.activeHandlers, keyUpHandler)) { return; }
+
+  this.activeHandlers.push(keyUpHandler); 
+  this.domNode.addEventListener('keyup', keyUpHandler.bind(this));
+};
+
+Kane.InputManager.prototype.activateKeyDownHandler = function () {
+  //do nothing is keyUpHandler already active
+  if (searchForMatch(this.activeHandlers, keyDownHandler)) { return; }
+
+  this.activeHandlers.push(keyDownHandler); 
+  this.domNode.addEventListener('keydown', keyDownHandler.bind(this));
+};
+
+Kane.InputManager.prototype.getActiveHandlers = function () {
+  return this.activeHandlers;
+};
+
+//helper to search an array for an element and return true if found
+function searchForMatch (array, matchee) {
+  for (var i=0; i<array.length; i++) {
+    if (array[i] === matchee) { return true; }
+  }
+  return false;
+};
+
+function keyUpHandler (e) {
+  this.handleInputEvent('keyup', {keyCode: e.keyCode});
+};
+
+function keyDownHandler (e) {
+  this.handleInputEvent('keydown', {keyCode: e.keyCode});
 };
 
 });
@@ -422,6 +507,15 @@ function createDrawPlane (canvas) {
   return new Kane.DrawPlane(canvas);
 };
 
+function createInputQueue () {
+  return new Kane.InputQueue();
+};
+
+//note, domNode is NOT a drawplane but the node itself
+function createInputManager (inputQueue, domNode) {
+  return new Kane.InputManager(inputQueue, domNode);
+};
+
 function createEntities (drawplane, count) {
   var ar = [];
 
@@ -436,8 +530,8 @@ function createEntityManager (entities, drawplane) {
   return new Kane.EntityManager(entities, drawplane);
 };
 
-function createGame (entityManager) {
-  return new Kane.Game(entityManager);
+function createGame (entityManager, inputQueue) {
+  return new Kane.Game(entityManager, inputQueue);
 };
 
 var entityCount = 2000 
@@ -445,10 +539,17 @@ var entityCount = 2000
   , bgPlane = createDrawPlane(bgCanvas)
   , entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
-  
+
+  , inputQueue = createInputQueue()
+  , inputManager = createInputManager(inputQueue)
+
   , entities = createEntities(entityPlane, entityCount)
   , entityManager = createEntityManager(entities, entityPlane)
-  , game = createGame(entityManager);
+  , game = createGame(entityManager, inputQueue);
+
+//turn on input listeners
+inputManager.activateKeyUpHandler();
+inputManager.activateKeyDownHandler();
 
 //color background
 bgPlane.fillAll('#123aaa');
@@ -458,9 +559,9 @@ for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
     x: 0,
     y: 480,
-    h: 20,
-    w: 20,
-    dx: Math.random()/10,
+    h: Math.floor(Math.random() * 40),
+    w: Math.floor(Math.random() * 40),
+    dx: Math.random() / 10,
     dy: -1 * Math.random(),
     ddy: .0005,
     color: generateColor()

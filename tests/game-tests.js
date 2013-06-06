@@ -4,18 +4,25 @@ var assert = chai.assert;
 
 describe('Kane.Game', function () {
   var game
+    , inputQueue
     , drawplane = Test.createDrawPlane('test')
     , entities = Test.createEntities(drawplane, 200)
     , entityManager = Test.createEntityManager(entities, drawplane);
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
-    game = new Kane.Game(entityManager);
+    inputQueue = Test.createInputQueue();
+    game = new Kane.Game(entityManager, inputQueue);
   });
 
   it('should create a new object', function () {
     assert.isObject(game); 
   }); 
+  
+  it('should accept optional args entityManager and inputQueue', function () {
+    assert.isDefined(game.entityManager);
+    assert.isDefined(game.inputQueue);
+  })
   
   describe('#start()', function () {
     it('should be a functiuon', function () {

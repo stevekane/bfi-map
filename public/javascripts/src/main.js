@@ -24,6 +24,15 @@ function createDrawPlane (canvas) {
   return new Kane.DrawPlane(canvas);
 };
 
+function createInputQueue () {
+  return new Kane.InputQueue();
+};
+
+//note, domNode is NOT a drawplane but the node itself
+function createInputManager (inputQueue, domNode) {
+  return new Kane.InputManager(inputQueue, domNode);
+};
+
 function createEntities (drawplane, count) {
   var ar = [];
 
@@ -38,8 +47,8 @@ function createEntityManager (entities, drawplane) {
   return new Kane.EntityManager(entities, drawplane);
 };
 
-function createGame (entityManager) {
-  return new Kane.Game(entityManager);
+function createGame (entityManager, inputQueue) {
+  return new Kane.Game(entityManager, inputQueue);
 };
 
 var entityCount = 2000 
@@ -47,10 +56,17 @@ var entityCount = 2000
   , bgPlane = createDrawPlane(bgCanvas)
   , entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
-  
+
+  , inputQueue = createInputQueue()
+  , inputManager = createInputManager(inputQueue)
+
   , entities = createEntities(entityPlane, entityCount)
   , entityManager = createEntityManager(entities, entityPlane)
-  , game = createGame(entityManager);
+  , game = createGame(entityManager, inputQueue);
+
+//turn on input listeners
+inputManager.activateKeyUpHandler();
+inputManager.activateKeyDownHandler();
 
 //color background
 bgPlane.fillAll('#123aaa');
@@ -60,9 +76,9 @@ for (var i=0; i<entityCount/2; i++) {
   entityManager.activateFromStore({
     x: 0,
     y: 480,
-    h: 20,
-    w: 20,
-    dx: Math.random()/10,
+    h: Math.floor(Math.random() * 40),
+    w: Math.floor(Math.random() * 40),
+    dx: Math.random() / 10,
     dy: -1 * Math.random(),
     ddy: .0005,
     color: generateColor()

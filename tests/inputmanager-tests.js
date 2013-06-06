@@ -64,4 +64,52 @@ describe('Kane.InputManager', function () {
     });
   });
 
+  describe('#activateKeyUpHandler()', function () {
+    it('should be a function', function () {
+      assert.isFunction(im.activateKeyUpHandler);
+    });
+
+    it('should add an keyup event handler to the domNode', function () {
+      im.activateKeyUpHandler();
+      assert.equal(im.getActiveHandlers().length, 1);
+    }); 
+
+    it('should not add duplicate handlers', function () {
+      im.activateKeyUpHandler();
+      im.activateKeyUpHandler();
+     
+      //if this fails, more than 1 handler was added 
+      assert.equal(im.getActiveHandlers().length, 1);
+    });
+  });
+
+  describe('#activateKeyDownHandler()', function () {
+    it('should be a function', function () {
+      assert.isFunction(im.activateKeyDownHandler);
+    });
+
+    it('should add an keyup event handler to the domNode', function () {
+      im.activateKeyDownHandler();
+      assert.equal(im.getActiveHandlers().length, 1);
+    }); 
+
+    it('should not add duplicate handlers', function () {
+      im.activateKeyDownHandler();
+      im.activateKeyDownHandler();
+     
+      //if this fails, more than 1 handler was added 
+      assert.equal(im.getActiveHandlers().length, 1);
+    });
+  });
+
+  describe('#getActiveHandlers()', function () {
+    it('should be a function', function () {
+      assert.isFunction(im.getActiveHandlers);
+    });
+    
+    it('should return an array of active handlers', function () {
+      var handlers = im.getActiveHandlers();
+      assert.isArray(handlers);
+    });
+  });
 });
