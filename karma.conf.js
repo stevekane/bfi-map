@@ -6,6 +6,7 @@ files = [
   {pattern: 'public/javascripts/libs/chai.js', include: true},
   {pattern: 'public/javascripts/libs/minispade.js', include: true},
   {pattern: 'public/javascripts/libs/stats.min.js', include: true},
+  {pattern: 'public/javascripts/libs/underscore.js', include: true},
   {pattern: 'public/dist/client.js', include: true},
   {pattern: 'tests/test-classes.js', include: true},
   {pattern: 'tests/**/*.js', include: true}

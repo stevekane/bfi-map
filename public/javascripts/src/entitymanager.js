@@ -3,19 +3,15 @@ var EntityManagerInterface = {
   deactivate: function (entity) {},
   updateActive: function (dT) {},
   drawActive: function () {},
-  updatePlayer: function (dT) {},
-  drawPlayer: function () {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities, drawplane, player) {
+Kane.EntityManager = function (entities, drawplane) {
   if (!entities) { throw new Error('must provide array of entities'); }
   if (!drawplane) { throw new Error('must provide drawplane'); }
-  if (!player) { throw new Error('must provide player'); }
   
   this.store = entities;
   this.drawplane = drawplane;
-  this.player = player;
   this.active = [];
 };
 
@@ -37,6 +33,7 @@ Kane.EntityManager.prototype.activateFromStore = function (settings) {
 
 Kane.EntityManager.prototype.deactivate = function (entity) {
   var activeEnt;
+
   if (!entity) { throw new Error('no entity provided to deactivate'); } 
 
   activeEnt = this.active.filter(function (ent) { return entity === ent })[0]; 
@@ -65,16 +62,6 @@ Kane.EntityManager.prototype.drawActive = function () {
   });
 };
 
-Kane.EntityManager.prototype.updatePlayer = function (dT) {
-  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
-
-  this.player.processInputs();
-  this.player.update(dT);
-};
-
-Kane.EntityManager.prototype.drawPlayer = function () {
-  this.player.draw();
-};
 
 function removeElement (element, array) {
   array.splice(array.indexOf(element), 1);

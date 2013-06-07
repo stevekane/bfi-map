@@ -197,19 +197,15 @@ var EntityManagerInterface = {
   deactivate: function (entity) {},
   updateActive: function (dT) {},
   drawActive: function () {},
-  updatePlayer: function (dT) {},
-  drawPlayer: function () {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities, drawplane, player) {
+Kane.EntityManager = function (entities, drawplane) {
   if (!entities) { throw new Error('must provide array of entities'); }
   if (!drawplane) { throw new Error('must provide drawplane'); }
-  if (!player) { throw new Error('must provide player'); }
   
   this.store = entities;
   this.drawplane = drawplane;
-  this.player = player;
   this.active = [];
 };
 
@@ -231,6 +227,7 @@ Kane.EntityManager.prototype.activateFromStore = function (settings) {
 
 Kane.EntityManager.prototype.deactivate = function (entity) {
   var activeEnt;
+
   if (!entity) { throw new Error('no entity provided to deactivate'); } 
 
   activeEnt = this.active.filter(function (ent) { return entity === ent })[0]; 
@@ -259,16 +256,6 @@ Kane.EntityManager.prototype.drawActive = function () {
   });
 };
 
-Kane.EntityManager.prototype.updatePlayer = function (dT) {
-  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
-
-  this.player.processInputs();
-  this.player.update(dT);
-};
-
-Kane.EntityManager.prototype.drawPlayer = function () {
-  this.player.draw();
-};
 
 function removeElement (element, array) {
   array.splice(array.indexOf(element), 1);
@@ -289,10 +276,9 @@ var GameInterface = {
   stop: function () {}
 };
 
-Kane.Game = function (entityManager, inputQueue) {
-  this.entityManager = entityManager;
-  this.inputQueue = inputQueue;
-  
+Kane.Game = function (settings) {
+  _.extend(this, settings);  
+
   //a scenes object
   this.scenes = {};
   this.currentScene = null;
@@ -304,14 +290,19 @@ Kane.Game = function (entityManager, inputQueue) {
 
 Kane.Game.prototype = Object.create(GameInterface); 
 
+/*
+TODO: consider making this a function and binding 
+this to ensure it's 'private'
+*/
 //private
 Kane.Game.prototype._loop = function () {
   var dT
     , inputs = [];
 
+  if (!this.isRunning) { return; }
+
   //TODO TESTING FOR FPS
   this.fps.begin();
-  this.ms.begin();
 
   //update timestamps
   this.previousTimeStamp = this.currentTimeStamp;
@@ -320,18 +311,8 @@ Kane.Game.prototype._loop = function () {
   //calculate deltaT
   dT = this.currentTimeStamp - this.previousTimeStamp;
     
-  if (!this.isRunning) { return; }
-
-  //update all entity positions
-  this.entityManager.updateActive(dT);
-  this.entityManager.updatePlayer(dT);
-  //draw all active entities
-  this.entityManager.drawActive();
-  this.entityManager.drawPlayer();
-
   //TODO TESTING FOR FPS
   this.fps.end();
-  this.ms.end();
 
   window.requestAnimationFrame(this._loop.bind(this));
 };
@@ -385,7 +366,6 @@ Kane.Game.prototype.start = function () {
   window.requestAnimationFrame(this._loop.bind(this));
   //TESTS FOR FPS MEASUREMENT
   this.fps = createFps();
-  this.ms = createMs();
 };
 
 Kane.Game.prototype.stop = function () {
@@ -403,16 +383,6 @@ function createFps (x, y) {
   fps.domElement.style.top = 0;
   document.body.appendChild(fps.domElement); 
   return fps;
-};
-
-function createMs (x, y) {
-  var ms = new Stats();
-  ms.setMode(1);
-  ms.domElement.style.position = 'absolute';
-  ms.domElement.style.left = 0;
-  ms.domElement.style.top = 50;
-  document.body.appendChild(ms.domElement); 
-  return ms;
 };
 
 
@@ -552,6 +522,7 @@ minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
 minispade.require('game.js');
+minispade.require('scene.js');
 minispade.require('drawplane.js');
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
@@ -603,72 +574,66 @@ function createPlayer (drawPlane, inputQueue) {
   return new Kane.Player(drawPlane, inputQueue);
 };
 
+function createScene (name, settingsHash) {
+  return new Kane.Scene(name, settingsHash);
+};
+
 function createGame (entityManager, inputQueue) {
   return new Kane.Game(entityManager, inputQueue);
 };
 
-var entityCount = 2000 
-  , bgCanvas = createCanvas(640, 480, 'gameboard')
-  , bgPlane = createDrawPlane(bgCanvas)
-  , entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = createDrawPlane(entityCanvas)
+//global background canvas object
+var bgCanvas = createCanvas(640, 480, 'gameboard')
+  , bgPlane = createDrawPlane(bgCanvas);
 
-  , inputQueue = createInputQueue()
-  , inputManager = createInputManager(inputQueue)
-  , player = createPlayer(entityPlane, inputQueue)
+//color background
+bgPlane.fillAll(generateColor());
 
-  , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane, player)
-  , game = createGame(entityManager, inputQueue);
+//Setup a basic inputManager and inputQueue
+var inputQueue = createInputQueue()
+  , inputManager = createInputManager(inputQueue);
 
 //turn on input listeners
 inputManager.activateKeyUpHandler();
 inputManager.activateKeyDownHandler();
 
-//activate the player
-player.activate({
-  x: 40,
-  y: 40,
-  h: 40,
-  w: 40,
-  color: generateColor()
+/*
+Construction of specific scene
+*/
+//setup entity set for this scene
+var entityCanvas = createCanvas(640, 480, 'entities')
+  , entityPlane = createDrawPlane(entityCanvas);
+
+var entityCount = 20000
+  , entities = createEntities(entityPlane, entityCount)
+  , entityManager = createEntityManager(entities, entityPlane)
+  , game = createGame();
+
+//pass in our default input Queue and our entityManager
+var ingame = new Kane.Scene('ingame', {
+  inputQueue: inputQueue,
+  entityManager: entityManager 
 });
 
-//color background
-bgPlane.fillAll(generateColor());
+//configure the game object before starting it
+game.addScene(ingame);
+game.setCurrentScene('ingame');
 
-/*
-for (var i=0; i<entityCount/2; i++) {
-  entityManager.activateFromStore({
-    x: 0,
-    y: 480,
-    h: Math.floor(Math.random() * 40),
-    w: Math.floor(Math.random() * 40),
-    dx: Math.random() / 10,
-    dy: -1 * Math.random(),
-    ddy: .0005,
-    color: generateColor()
-  });
-}
-for (var i=0; i<entityCount/2; i++) {
-  entityManager.activateFromStore({
-    x: 640,
-    y: 480,
-    h: 20,
-    w: 20,
-    dx: -Math.random()/10,
-    dy: -1 * Math.random(),
-    ddy: .0005,
-    color: generateColor()
-  });
-}
-*/
+//just a quick hack to show the scene name
+var div = document.createElement('div');
+
+div.id = 'scenename';
+div.style.position = "absolute";
+div.style.left = 100;
+div.textContent = game.getCurrentScene().name;
+document.body.appendChild(div);
+
+game.start();
 
 function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);
 };
 
-game.start();
 
 });
 
@@ -796,6 +761,65 @@ function setDefaults (entity) {
   //animation info  
   entity.anims = [];
   entity.currentAnim = {}
+};
+
+});
+
+minispade.register('scene.js', function() {
+"use strict";
+/*
+update and draw generally should be left alone.  they both expose hooks
+for calling onUpdate and onDraw which may be defined however you desire
+
+onEnter and onExit may be defined to do w/e you desire and they will be called
+by the game object that owns this scene on scene transitions 
+
+processInput is a method you can define and hook up if desired.  generally
+speaking, your scene should have an inputQueue passed into its constructor
+if you are intending to process input directly on the scene itself
+*/
+var SceneInterface = {
+  onEnter: function () {},
+  onExit: function () {},
+  onDraw: function () {},
+  onUpdate: function (dT) {},
+  processInput: function () {},
+  update: function (dT) {},
+  draw: function () {},
+};
+
+/*
+note, if the settings provided include a name it will be overwritten
+by the provided name 
+*/
+Kane.Scene = function (name, settings) {
+  //apply settings object to this scene
+  _.extend(this, settings);
+
+  this.name = name;
+
+  //this will be toggled by the game that owns this scene
+  this.isActive = false;
+};
+
+Kane.Scene.prototype = Object.create(SceneInterface);
+
+Kane.Scene.prototype.update = function (dT) {
+  if (!dT) { throw new Error('no dT provided to update'); }
+
+  if (this.entityManager) { 
+    this.entityManager.updateActive(dT);  
+  } 
+
+  this.onUpdate(dT);
+};
+
+Kane.Scene.prototype.draw = function () {
+  if (this.entityManager) {
+    this.entityManager.drawActive();
+  }
+
+  this.onDraw();
 };
 
 });

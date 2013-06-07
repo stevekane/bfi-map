@@ -1,6 +1,7 @@
 window.Kane = {};
 
 require('game.js');
+require('scene.js');
 require('drawplane.js');
 require('entity.js');
 require('entitymanager.js');
@@ -52,69 +53,63 @@ function createPlayer (drawPlane, inputQueue) {
   return new Kane.Player(drawPlane, inputQueue);
 };
 
+function createScene (name, settingsHash) {
+  return new Kane.Scene(name, settingsHash);
+};
+
 function createGame (entityManager, inputQueue) {
   return new Kane.Game(entityManager, inputQueue);
 };
 
-var entityCount = 2000 
-  , bgCanvas = createCanvas(640, 480, 'gameboard')
-  , bgPlane = createDrawPlane(bgCanvas)
-  , entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = createDrawPlane(entityCanvas)
+//global background canvas object
+var bgCanvas = createCanvas(640, 480, 'gameboard')
+  , bgPlane = createDrawPlane(bgCanvas);
 
-  , inputQueue = createInputQueue()
-  , inputManager = createInputManager(inputQueue)
-  , player = createPlayer(entityPlane, inputQueue)
+//color background
+bgPlane.fillAll(generateColor());
 
-  , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane, player)
-  , game = createGame(entityManager, inputQueue);
+//Setup a basic inputManager and inputQueue
+var inputQueue = createInputQueue()
+  , inputManager = createInputManager(inputQueue);
 
 //turn on input listeners
 inputManager.activateKeyUpHandler();
 inputManager.activateKeyDownHandler();
 
-//activate the player
-player.activate({
-  x: 40,
-  y: 40,
-  h: 40,
-  w: 40,
-  color: generateColor()
+/*
+Construction of specific scene
+*/
+//setup entity set for this scene
+var entityCanvas = createCanvas(640, 480, 'entities')
+  , entityPlane = createDrawPlane(entityCanvas);
+
+var entityCount = 20000
+  , entities = createEntities(entityPlane, entityCount)
+  , entityManager = createEntityManager(entities, entityPlane)
+  , game = createGame();
+
+//pass in our default input Queue and our entityManager
+var ingame = new Kane.Scene('ingame', {
+  inputQueue: inputQueue,
+  entityManager: entityManager 
 });
 
-//color background
-bgPlane.fillAll(generateColor());
+//configure the game object before starting it
+game.addScene(ingame);
+game.setCurrentScene('ingame');
 
-/*
-for (var i=0; i<entityCount/2; i++) {
-  entityManager.activateFromStore({
-    x: 0,
-    y: 480,
-    h: Math.floor(Math.random() * 40),
-    w: Math.floor(Math.random() * 40),
-    dx: Math.random() / 10,
-    dy: -1 * Math.random(),
-    ddy: .0005,
-    color: generateColor()
-  });
-}
-for (var i=0; i<entityCount/2; i++) {
-  entityManager.activateFromStore({
-    x: 640,
-    y: 480,
-    h: 20,
-    w: 20,
-    dx: -Math.random()/10,
-    dy: -1 * Math.random(),
-    ddy: .0005,
-    color: generateColor()
-  });
-}
-*/
+//just a quick hack to show the scene name
+var div = document.createElement('div');
+
+div.id = 'scenename';
+div.style.position = "absolute";
+div.style.left = 100;
+div.textContent = game.getCurrentScene().name;
+document.body.appendChild(div);
+
+game.start();
 
 function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);
 };
 
-game.start();

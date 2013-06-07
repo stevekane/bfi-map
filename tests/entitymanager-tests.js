@@ -6,12 +6,10 @@ describe('Kane.EntityManager', function () {
 
   var drawplane = Test.createDrawPlane('testplane')
     , entities = Test.createEntities(drawplane, 50)
-    , iq = Test.createInputQueue()
-    , player = Test.createPlayer(drawplane, iq)
     , em;
 
   beforeEach(function () {
-    em = new Kane.EntityManager(entities, drawplane, player);
+    em = new Kane.EntityManager(entities, drawplane);
   });
 
   it('should define a store of entities with the passed entities', function () {
@@ -27,25 +25,22 @@ describe('Kane.EntityManager', function () {
     assert.isArray(em.active);
   });
 
-  it('should throw if entities, drawplane, player not provided to constructor', function () {
+  it('should throw if entities, drawplane, not provided to constructor', function () {
     assert.throws(function () {
       em = new Kane.EntityManager();
     });
     assert.throws(function () {
       em = new Kane.EntityManager(entities);
     });
-    assert.throws(function () {
-      em = new Kane.EntityManager(entities, drawplane);
-    });
     assert.doesNotThrow(function () {
-      em = new Kane.EntityManager(entities, drawplane, player);
+      em = new Kane.EntityManager(entities, drawplane);
     }); 
   });
   
   describe('#activateFromStore()', function () {
 
     beforeEach(function () {
-      em = Test.createEntityManager(entities, drawplane, player);
+      em = Test.createEntityManager(entities, drawplane);
     });
 
     it('should be a function', function () {
@@ -173,30 +168,6 @@ describe('Kane.EntityManager', function () {
   describe('#drawActive()', function () {
     it('should be a function', function () {
       assert.isFunction(em.drawActive);
-    });  
-  });
-
-  describe('#updatePlayer()', function () {
-    it('should be a function', function () {
-      assert.isFunction(em.updatePlayer);
-    });  
-    
-    it('should throw if not provided a dT argument', function () {
-      var dT = 1000;
-
-      assert.throws(function () {
-        em.updatePlayer();
-      });
-
-      assert.doesNotThrow(function () {
-        em.updatePlayer(dT);
-      });
-    });
-  });
-
-  describe('#drawPlayer()', function () {
-    it('should be a function', function () {
-      assert.isFunction(em.drawPlayer);
     });  
   });
 });

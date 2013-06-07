@@ -3,28 +3,17 @@ minispade.require('main.js');
 var assert = chai.assert;
 
 describe('Kane.Game', function () {
-  var game
-    , inputQueue = Test.createInputQueue()
-    , drawplane = Test.createDrawPlane('test')
-    , entities = Test.createEntities(drawplane, 200)
-    , player = Test.createPlayer(drawplane, inputQueue)
-    , entityManager = Test.createEntityManager(entities, drawplane, player);
+  var game;
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
-    player.activate({});
-    game = new Kane.Game(entityManager, inputQueue);
+    game = new Kane.Game();
   });
 
   it('should create a new object', function () {
     assert.isObject(game); 
   }); 
   
-  it('should accept optional args entityManager and inputQueue', function () {
-    assert.isDefined(game.entityManager);
-    assert.isDefined(game.inputQueue);
-  })
-
   describe('#addScene()', function () {
     it('should be a function', function () {
       assert.isFunction(game.addScene); 
@@ -169,7 +158,7 @@ describe('Kane.Game', function () {
   });
 
   describe('#start()', function () {
-    it('should be a functiuon', function () {
+    it('should be a function', function () {
       assert.isFunction(game.start);
     });
 
