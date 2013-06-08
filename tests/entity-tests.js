@@ -55,6 +55,13 @@ describe('Kane.Entity', function () {
     });
   });
 
+  describe('#beforeUpate()', function () {
+    it('is fired before core of updating (calculating physics)', function () {});
+    it('should be a function', function () {
+      assert.isFunction(en.beforeUpdate); 
+    });
+  });
+  
   describe("#update()", function () {
     //in ms 
     var dT = 100 
@@ -112,9 +119,30 @@ describe('Kane.Entity', function () {
 
   });
 
+  describe('#afterUpdate()', function () {
+    it('is fired after of updating (calculating physics)', function () {});
+    it('should be a function', function () {
+      assert.isFunction(en.afterUpdate); 
+    });
+  });
+
+  describe('#beforeDraw()', function () {
+    it('is fired before core of drawing', function () {});
+    it('should be a function', function () {
+      assert.isFunction(en.beforeDraw); 
+    });
+  });
+
   describe('#draw()', function () {
     it('should be a function', function () {
       assert.isFunction(en.draw); 
     });
   });    
+
+  describe('#afterDraw()', function () {
+    it('is fired after drawing', function () {});
+    it('should be a function', function () {
+      assert.isFunction(en.afterDraw);
+    });
+  });
 });

@@ -1,8 +1,12 @@
 var EntityInterface = {
   kill: function () {},
   isDead: function () {},
+  beforeUpdate: function (dT) {},
   update: function (dT) {}, 
+  afterUpdate: function (dT) {},
+  beforeDraw: function () {},
   draw: function () {},
+  afterDraw: function () {},
   
   /*
   here we expose required properties of entities that are not
@@ -55,18 +59,30 @@ Kane.Entity.prototype.isDead = function () {
   return this._isDead;
 };
 
+Kane.Entity.prototype.beforeUpdate = function (dT) {};
+
 Kane.Entity.prototype.update = function (dT) {
   var potentialY;
 
   if (undefined == dT) { throw new Error('delta time not provided'); }
   
+  //call our beforeUpdate hook to allow custom behavior
+  this.beforeUpdate(dT);
+
   //update positions after checking for 0
   this.x = updatePosition(dT, this.dx, this.x);
   this.y = updatePosition(dT, this.dy, this.y);
 
   this.dx = updateVelocity(dT, this.ddx, this.dx);
   this.dy = updateVelocity(dT, this.ddy, this.dy);
+
+  //call our afterUpdate hook to allow custom behavior
+  this.afterUpdate(dT);
 };
+
+Kane.Entity.prototype.afterUpdate = function (dT) {};
+
+Kane.Entity.prototype.beforeDraw = function () {};
 
 Kane.Entity.prototype.draw = function () {
   if (!this.image) {
@@ -81,6 +97,8 @@ Kane.Entity.prototype.draw = function () {
     //this.drawplane.drawImage
   }
 };
+
+Kane.Entity.prototype.afterDraw = function () {};
 
 function updatePosition(dT, v, oldPos) {
   return oldPos + dT * v;

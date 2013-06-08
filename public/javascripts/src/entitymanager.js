@@ -26,6 +26,11 @@ functionality from Array
 */
 _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
+/*
+define our prototype methods here as per usual
+*/
+
+//override this if you wish to declare a method for generating IDs
 Kane.EntityManager.prototype.generateUniqueId = function () {
   var id;
 
@@ -44,7 +49,7 @@ Kane.EntityManager.prototype.generateUniqueId = function () {
   return id;
 };
 
-//define our prototype methods here as per usual
+//create new entity and return it
 Kane.EntityManager.prototype.spawn = function (constructor, args) {
   if (!constructor) { throw new Error('no constructor provided'); }
 
