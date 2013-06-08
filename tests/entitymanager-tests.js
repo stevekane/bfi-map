@@ -25,11 +25,11 @@ describe('Kane.EntityManager', function () {
     });
   });
 
-  describe('#getUniqueId()', function () {
+  describe('#generateUniqueId()', function () {
     it('should return a unique id', function () {
       assert.notEqual(
-        em.getUniqueId(),
-        em.getUniqueId()
+        em.generateUniqueId(),
+        em.generateUniqueId()
       );
     });
   });
@@ -43,12 +43,14 @@ describe('Kane.EntityManager', function () {
       var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
 
       assert.isObject(ent);
+      //TODO: probably should access this via getter
       assert.equal(drawplane, ent.drawplane);
       assert.instanceOf(ent, Kane.Entity);
     });
 
     it('should assign itself as a value called manager to the newly created entity', function () {
       var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
+      //TODO: probably should access this via getter
       assert.equal(ent.manager, em);
     });
 
@@ -169,19 +171,16 @@ describe('Kane.EntityManager', function () {
     });
   
     it('should return all entities of a specified type', function () {
-      var enemies
-        , type = 'enemy';
+      var enemies;
 
       em.spawn(Kane.Entity, {drawplane: drawplane, type: 'friend'});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'enemy'});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'enemy'});
 
-      enemies = em.findByType(type);
+      enemies = em.findByType('enemy');
       
       enemies.forEach(function (enemy) {
-        assert.equal(enemy.type, type);
+        assert.equal(enemy.type, 'enemy');
       });
     });
   });
@@ -198,16 +197,15 @@ describe('Kane.EntityManager', function () {
     });
   
     it('should return all entities of a specified name', function () {
-      var bobby 
-        , name = 'bobby';
+      var bobbys;
 
-      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'notbobby'});
-      em.spawn(Kane.Entity, {drawplane: drawplane, name: name});
+      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'bobby'});
+      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'teddy'});
 
-      bobby = em.findByName(name);
+      bobbys = em.findByName('bobby');
       
-      bobby.forEach(function (enemy) {
-        assert.equal(enemy.name, name);
+      bobbys.forEach(function (enemy) {
+        assert.equal(enemy.name, 'bobby');
       });
     });
   });

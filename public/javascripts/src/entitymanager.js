@@ -1,5 +1,5 @@
 var EntityManagerInterface = {
-  getUniqueId: function () {},
+  generateUniqueId: function () {},
   spawn: function (constructor, args) {},
   removeDead: function () {},
   sortBy: function (propName, ascending) {},
@@ -26,7 +26,7 @@ functionality from Array
 */
 _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
-Kane.EntityManager.prototype.getUniqueId = function () {
+Kane.EntityManager.prototype.generateUniqueId = function () {
   var id;
 
   //setup a counter variable to iterate each time this is called
@@ -54,7 +54,7 @@ Kane.EntityManager.prototype.spawn = function (constructor, args) {
   entity.manager = this;
 
   //each entity has a unique id
-  entity.id = this.getUniqueId();
+  entity.id = this.generateUniqueId();
 
   //push the new entity onto the manager using array method
   this.push(entity); 
