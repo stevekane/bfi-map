@@ -28,6 +28,7 @@ _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
 Kane.EntityManager.prototype.getUniqueId = function () {
   var id;
+
   //setup a counter variable to iterate each time this is called
   if (!this.idCounter) {
     this.idCounter = 0;
@@ -53,10 +54,7 @@ Kane.EntityManager.prototype.spawn = function (constructor, args) {
   entity.manager = this;
 
   //each entity has a unique id
-  entity.id = this.idCounter;
-
-  //iterate the idCounter to preserve unique id for each created ent
-  this.idCounter = this.getUniqueId();
+  entity.id = this.getUniqueId();
 
   //push the new entity onto the manager using array method
   this.push(entity); 

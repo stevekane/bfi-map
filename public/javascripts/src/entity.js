@@ -1,4 +1,10 @@
 var EntityInterface = {
+  setType: function (type) {},
+  getType: function () {},
+  setName: function (name) {},
+  getName: function () {},
+  setId: function () {},
+  getId: function () {},
   kill: function () {},
   isDead: function () {},
   update: function (dT) {}, 
@@ -14,6 +20,36 @@ Kane.Entity = function (argsHash) {
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
+
+//getter/setter for type
+Kane.Entity.prototype.setType = function (type) {
+  if (!type) { throw new Error('no type provided'); }
+  this.type = type;
+};
+
+Kane.Entity.prototype.getType = function () {
+  return this.type;
+};
+
+//getter/setter for name
+Kane.Entity.prototype.setName = function (name) {
+  if (!name) { throw new Error('no name provided'); }
+  this.name = name;
+};
+
+Kane.Entity.prototype.getName = function () {
+  return this.name;
+};
+
+//getter/setter for id
+Kane.Entity.prototype.setId = function (id) {
+  if (!id) { throw new Error('no id provided'); }
+  this.id = id;
+};
+
+Kane.Entity.prototype.getId = function () {
+  return this.id;
+};
 
 Kane.Entity.prototype.kill = function () {
   this._isDead = true;
