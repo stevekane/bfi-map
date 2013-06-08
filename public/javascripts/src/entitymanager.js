@@ -8,7 +8,10 @@ var EntityManagerInterface = {
   listEntities: function () {},
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
-  applyForAll: function (methodName, argArray) {}
+  applyForAll: function (methodName, argArray) {},
+
+  //define mandatory interface attribute
+  drawplane: null 
 };
 
 //requires array of entities
@@ -106,6 +109,10 @@ Kane.EntityManager.prototype.updateAll = function (dT) {
 };
 
 Kane.EntityManager.prototype.drawAll = function () {
+  //clear the drawplane
+  this.drawplane.clearAll();
+
+  //call draw for each entity
   this.callForAll('draw'); 
 };
 

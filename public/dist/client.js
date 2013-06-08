@@ -189,7 +189,10 @@ var EntityManagerInterface = {
   listEntities: function () {},
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
-  applyForAll: function (methodName, argArray) {}
+  applyForAll: function (methodName, argArray) {},
+
+  //define mandatory interface attribute
+  drawplane: null 
 };
 
 //requires array of entities
@@ -287,6 +290,10 @@ Kane.EntityManager.prototype.updateAll = function (dT) {
 };
 
 Kane.EntityManager.prototype.drawAll = function () {
+  //clear the drawplane
+  this.drawplane.clearAll();
+
+  //call draw for each entity
   this.callForAll('draw'); 
 };
 
@@ -384,6 +391,8 @@ Kane.Game.prototype._loop = function () {
 
   //calculate deltaT
   dT = this.currentTimeStamp - this.previousTimeStamp;
+
+  this.getCurrentScene().update(dT);
     
   //TODO TESTING FOR FPS
   this.fps.end();
@@ -686,6 +695,28 @@ var ingame = new Kane.Scene('ingame', {
   entityManager: entityManager 
 });
 
+//setup inputHandling for ingame
+ingame.processInput = function () {
+  var events = this.inputQueue.fetchAllEvents();
+  
+  events.forEach(function (event) {
+    this.entityManager.spawn(
+      Kane.Entity,
+      {
+        drawplane: entityPlane,
+        x: Math.floor(Math.random() * 640),
+        y: Math.floor(Math.random() * 480),
+        dx: Math.random(),
+        dy: -1 * Math.random(),
+        w: 40,
+        h: 40,
+        ddy: .001,
+        color: generateColor()
+      }
+    );
+  }, this); 
+};
+
 //configure the game object before starting it
 game.addScene(ingame);
 game.setCurrentScene('ingame');
@@ -850,13 +881,16 @@ speaking, your scene should have an inputQueue passed into its constructor
 if you are intending to process input directly on the scene itself
 */
 var SceneInterface = {
+  update: function (dT) {},
+  draw: function () {},
   onEnter: function () {},
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
   processInput: function () {},
-  update: function (dT) {},
-  draw: function () {},
+
+  //list of required attributes
+  name: ""
 };
 
 /*
@@ -878,8 +912,12 @@ Kane.Scene.prototype = Object.create(SceneInterface);
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { throw new Error('no dT provided to update'); }
 
+  //process inputs hook
+  this.processInput();
+
   if (this.entityManager) { 
-    this.entityManager.updateActive(dT);  
+    this.entityManager.updateAll(dT);  
+    this.entityManager.drawAll();
   } 
 
   this.onUpdate(dT);
@@ -892,5 +930,8 @@ Kane.Scene.prototype.draw = function () {
 
   this.onDraw();
 };
+
+//define what your scene should do to process input
+Kane.Scene.prototype.processInput = function () {};
 
 });

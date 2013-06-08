@@ -91,6 +91,28 @@ var ingame = new Kane.Scene('ingame', {
   entityManager: entityManager 
 });
 
+//setup inputHandling for ingame
+ingame.processInput = function () {
+  var events = this.inputQueue.fetchAllEvents();
+  
+  events.forEach(function (event) {
+    this.entityManager.spawn(
+      Kane.Entity,
+      {
+        drawplane: entityPlane,
+        x: Math.floor(Math.random() * 640),
+        y: Math.floor(Math.random() * 480),
+        dx: Math.random(),
+        dy: -1 * Math.random(),
+        w: 40,
+        h: 40,
+        ddy: .001,
+        color: generateColor()
+      }
+    );
+  }, this); 
+};
+
 //configure the game object before starting it
 game.addScene(ingame);
 game.setCurrentScene('ingame');

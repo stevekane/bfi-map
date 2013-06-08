@@ -10,13 +10,16 @@ speaking, your scene should have an inputQueue passed into its constructor
 if you are intending to process input directly on the scene itself
 */
 var SceneInterface = {
+  update: function (dT) {},
+  draw: function () {},
   onEnter: function () {},
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
   processInput: function () {},
-  update: function (dT) {},
-  draw: function () {},
+
+  //list of required attributes
+  name: ""
 };
 
 /*
@@ -38,8 +41,12 @@ Kane.Scene.prototype = Object.create(SceneInterface);
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { throw new Error('no dT provided to update'); }
 
+  //process inputs hook
+  this.processInput();
+
   if (this.entityManager) { 
-    this.entityManager.updateActive(dT);  
+    this.entityManager.updateAll(dT);  
+    this.entityManager.drawAll();
   } 
 
   this.onUpdate(dT);
@@ -52,3 +59,6 @@ Kane.Scene.prototype.draw = function () {
 
   this.onDraw();
 };
+
+//define what your scene should do to process input
+Kane.Scene.prototype.processInput = function () {};

@@ -42,6 +42,8 @@ Kane.Game.prototype._loop = function () {
 
   //calculate deltaT
   dT = this.currentTimeStamp - this.previousTimeStamp;
+
+  this.getCurrentScene().update(dT);
     
   //TODO TESTING FOR FPS
   this.fps.end();
