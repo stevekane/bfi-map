@@ -3,171 +3,189 @@ minispade.require('main.js');
 var assert = chai.assert;
 
 describe('Kane.EntityManager', function () {
-
-  var drawplane = Test.createDrawPlane('testplane')
-    , entities = Test.createEntities(drawplane, 50)
-    , em;
-
+  var em
+    , drawplane = {};
+  
   beforeEach(function () {
-    em = new Kane.EntityManager(entities, drawplane);
+
+    em = new Kane.EntityManager(drawplane);
   });
 
-  it('should define a store of entities with the passed entities', function () {
-    assert.isDefined(em.store);
-    assert.isArray(em.store);
-    em.store.forEach(function (ent) {
-      assert.isFalse(ent.isActive); 
-    }); 
-  });
+  it('should be an object', function () {
+    assert.isObject(em);
+  }); 
 
-  it('should define an array called active', function () {
-    assert.isDefined(em.active);
-    assert.isArray(em.active);
-  });
-
-  it('should throw if entities, drawplane, not provided to constructor', function () {
+  it('should throw if no drawplane is provided to constructor', function () {
     assert.throws(function () {
       em = new Kane.EntityManager();
     });
-    assert.throws(function () {
-      em = new Kane.EntityManager(entities);
-    });
+
     assert.doesNotThrow(function () {
-      em = new Kane.EntityManager(entities, drawplane);
-    }); 
-  });
-  
-  describe('#activateFromStore()', function () {
-
-    beforeEach(function () {
-      em = Test.createEntityManager(entities, drawplane);
-    });
-
-    it('should be a function', function () {
-      assert.isFunction(em.activateFromStore);
-    });
-
-    it('should throw if the store is empty', function () {
-      em.store = [];
-      assert.throws(function () {
-        em.activateFromStore();
-      });
-    });
-
-    it('should throw if no settings hash provided', function () {
-      assert.throws(function () {
-        em.activateFromStore();
-      });
-    });
-
-    it('should move first element of store onto active array', function () {
-      var targetEnt = em.store[0]
-        , newActiveEnt;
-
-      em.activateFromStore({});
-      newActiveEnt = em.active[0];
-
-      assert.equal(
-        targetEnt,
-        newActiveEnt,
-        "first element from store moved to active"
-      ); 
-    });
-      
-    it('should set isActive to true', function () {
-      var newActiveEnt;
-  
-      em.activateFromStore({});
-      newActiveEnt = em.active[0];     
-      
-      assert.isTrue(newActiveEnt.isActive);
-    });
-
-    it('should set valid settings on entity from provided settings hash', function () {
-      var newActiveEnt
-        , x = 10
-        , y = 10
-        , type = 'testEnt';
-  
-      em.activateFromStore({
-        x: x,
-        y: y,
-        type: type 
-      });
-      newActiveEnt = em.active[0];     
-      
-      assert.equal(newActiveEnt.x, x);
-      assert.equal(newActiveEnt.y, y);
-      assert.equal(newActiveEnt.type, type);
-    });
-  });
-  
-  describe('#deactivate()', function () {
-    it('should be a function', function () {
-      assert.isFunction(em.deactivate);
-    }); 
-
-    it('should throw if no entity provided', function () {
-      assert.throws(function () {
-        em.deactivate();
-      });
-    });
-  
-    it('should throw if entity does not exist in active array', function () {
-      var badEnt = Test.createEntity(drawplane)
-        , goodEnt;
-
-      em.activateFromStore({});
-      goodEnt = em.active[0];
-
-      assert.throws(function () {
-        em.deactivate(badEnt);
-      });
-
-      assert.doesNotThrow(function () {
-        em.deactivate(goodEnt);
-      });
-    });
-
-    it('should move the targetted entity back to the store', function () {
-      var activeEnt 
-        , entReturnedToStore;
-
-      em.activateFromStore({});
-      activeEnt = em.active[0];
-
-      em.deactivate(activeEnt);
-      entReturnedToStore = em.store[0];
-
-      assert.equal(
-        activeEnt,
-        entReturnedToStore,
-        "activeEnt returned to store"
-      );
+      em = new Kane.EntityManager(drawplane);
     });
   });
 
-  describe('#updateActive()', function () {
+  describe('#spawn()', function () {
     it('should be a function', function () {
-      assert.isFunction(em.updateActive);
-    });  
+      assert.isFunction(em.spawn);
+    });
+
+    it('should create a new entity with provided constructor/settings object', function () {
+      var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
+
+      assert.isObject(ent);
+      assert.equal(drawplane, ent.drawplane);
+      assert.instanceOf(ent, Kane.Entity);
+    });
     
-    it('should throw if not provided a dT argument', function () {
-      var dT = 1000;
-
+    it('should throw if not provided a constructor', function () {
       assert.throws(function () {
-        em.updateActive();
+        em.spawn();
       });
+    });
+  });
+  
+  describe('#removeDead()', function () {
+    it('be a function', function () {
+      assert.isFunction(em.removeDead);
+    });
 
+    it('should return a list of all dead entities', function () {
+      var deadEnt1 = em.spawn(Kane.Entity, {drawplane: drawplane})
+        , deadEnt2 = em.spawn(Kane.Entity, {drawplane: drawplane})
+        , deadEnts
+        , remainingEnts;
+
+      deadEnt1.kill();
+      deadEnt2.kill();
+
+      deadEnts = em.removeDead();
+      remainingEnts = em.listEntities();
+
+      assert.lengthOf(deadEnts, 2);
+      assert.lengthOf(remainingEnts, 0);
+    });
+  });
+
+  describe('#updateAll()', function () {
+    it('should be a function', function () {
+      var dT = 100;
+
+      assert.isFunction(em.updateAll);
       assert.doesNotThrow(function () {
-        em.updateActive(dT);
+        em.updateAll(dT);
       });
     });
   });
 
-  describe('#drawActive()', function () {
+  describe('#drawAll()', function () {
     it('should be a function', function () {
-      assert.isFunction(em.drawActive);
-    });  
+      assert.isFunction(em.drawAll);
+
+      assert.doesNotThrow(function () {
+        em.drawAll();
+      });
+    });
+  });
+
+  describe('#listEntities()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.listEntities);
+    });
+
+    it('should return an array of entities', function () {
+      var newEnt = em.spawn(Kane.Entity, {drawplane: drawplane})
+        , ents = em.listEntities();
+  
+      assert.isObject(ents);
+      assert.equal(newEnt, ents[0]);
+    });
+  });
+
+  describe('#findByType()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.findByType);
+    });
+
+    it('should throw if no type is provided', function () {
+      assert.throws(function () {
+        em.findByType();
+      });
+    });
+  
+    it('should return all entities of a specified type', function () {
+      var enemies
+        , type = 'enemy';
+
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'friend'});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
+      em.spawn(Kane.Entity, {drawplane: drawplane, type: type});
+
+      enemies = em.findByType(type);
+      
+      enemies.forEach(function (enemy) {
+        assert.equal(enemy.type, type);
+      });
+    });
+  });
+
+  describe('#findByName()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.findByName);
+    });
+
+    it('should throw if no name is provided', function () {
+      assert.throws(function () {
+        em.findByName();
+      });
+    });
+  
+    it('should return all entities of a specified name', function () {
+      var bobby 
+        , name = 'bobby';
+
+      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'notbobby'});
+      em.spawn(Kane.Entity, {drawplane: drawplane, name: name});
+
+      bobby = em.findByName(name);
+      
+      bobby.forEach(function (enemy) {
+        assert.equal(enemy.name, name);
+      });
+    });
+  });
+
+  describe('#callForAll()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.callForAll);
+    });
+    
+    it('should throw if not provided a methodName', function () {
+      assert.throws(function () {
+        em.callForAll();
+      });
+      
+      assert.doesNotThrow(function () {
+        em.callForAll('update');
+      });
+    });
+  });
+
+  describe('#applyForAll()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.applyForAll);
+    });
+    
+    it('should throw if not provided a methodName', function () {
+      assert.throws(function () {
+        em.applyForAll();
+      });
+      
+      assert.doesNotThrow(function () {
+        em.applyForAll('update');
+      });
+    });
   });
 });

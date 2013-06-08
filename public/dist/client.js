@@ -66,48 +66,28 @@ Kane.DrawPlane.prototype.clearAll = function () {
 minispade.register('entity.js', function() {
 "use strict";
 var EntityInterface = {
-  activate: function (settings) {},
-  deactivate: function () {},
+  kill: function () {},
+  isDead: function () {},
   update: function (dT) {}, 
   draw: function () {},
 };
 
-Kane.Entity = function (drawplane) {
-  if (!drawplane) { 
+Kane.Entity = function (argsHash) {
+  if (!argsHash.drawplane) { 
     throw new Error('must provide valid drawplane'); 
   }
 
-  //assign id once (no need to clear this)
-  this.id = Math.round(Math.random() * 100000);
-
-  //rendering surface for entity entity
-  this.drawplane = drawplane;
-  
-  setDefaults(this); 
+  _.extend(this, getDefaults(), argsHash);
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
 
-Kane.Entity.prototype.activate = function (settings) {
-  if (!settings) { 
-    throw new Error('activate requires a hash of settings'); 
-  }
-  
-  //check if keys in hash are valid
-  for (var key in settings) {
-    if(!this.hasOwnProperty(key)) {
-      throw new Error('invalid key provided in activate settings'); 
-    }
-    
-    //assign each setting to the entity
-    this[key] = settings[key];
-  }
-  this.isActive = true;
+Kane.Entity.prototype.kill = function () {
+  this._isDead = true;
 };
 
-Kane.Entity.prototype.deactivate = function () {
-  this.isActive = false; 
-  setDefaults(this);
+Kane.Entity.prototype.isDead = function () {
+  return this._isDead;
 };
 
 Kane.Entity.prototype.update = function (dT) {
@@ -124,10 +104,6 @@ Kane.Entity.prototype.update = function (dT) {
 };
 
 Kane.Entity.prototype.draw = function () {
-  if (false == this.isActive) { 
-    throw new Error('cannot draw an inactive entity'); 
-  }
-
   if (!this.image) {
     this.drawplane.drawRect(
       this.color, 
@@ -149,43 +125,48 @@ function updateVelocity(dT, a, oldVel) {
   return oldVel + dT * a;
 }; 
 
-function setDefaults (entity) {
-  //boolean flag to determine if this object is in use already
-  entity.isActive = false;
-  
-  //default color if no image available
-  entity.color = "#11ffbb";
+function getDefaults () {
 
-  //position
-  entity.x = 0;
-  entity.y = 0;
+  return {
+    //killing an entity will set this to true
+    _isDead: false,
 
-  //previous positions
-  entity.lastx = 0;
-  entity.lasty = 0;
+    //default color if no image available
+    color: "#11ffbb",
 
-  //dimensions
-  entity.w = 0;
-  entity.h = 0;
+    //position
+    x: 0,
+    y: 0,
 
-  //velocity
-  entity.dx = 0;
-  entity.dy = 0;
+    //previous positions
+    lastx: 0,
+    lasty: 0,
 
-  //accel
-  entity.ddx = 0;
-  entity.ddy = 0;
+    //dimensions
+    w: 0,
+    h: 0,
 
-  //render order
-  entity.zIndex = 0;
+    //velocity
+    dx: 0,
+    dy: 0,
 
-  //identifiers
-  entity.name = "";
-  entity.type = "";
-  
-  //animation info  
-  entity.anims = [];
-  entity.currentAnim = {}
+    //accel
+    ddx: 0,
+    ddy: 0,
+
+    //render order
+    zIndex: 0,
+
+    id: 0,
+
+    //identifiers
+    name: "",
+    type: "",
+    
+    //animation info  
+    anims: [],
+    currentAnim: {}
+  };
 };
 
 });
@@ -193,74 +174,127 @@ function setDefaults (entity) {
 minispade.register('entitymanager.js', function() {
 "use strict";
 var EntityManagerInterface = {
-  activateFromStore: function (settings) {},
-  deactivate: function (entity) {},
-  updateActive: function (dT) {},
-  drawActive: function () {},
+  spawn: function (constructor, args) {},
+  removeDead: function () {},
+  updateAll: function (dT) {},
+  drawAll: function () {},
+  listEntities: function () {},
+  findByType: function (type) {},
+  callForAll: function (methodName, args) {},
+  applyForAll: function (methodName, argArray) {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities, drawplane) {
-  if (!entities) { throw new Error('must provide array of entities'); }
+Kane.EntityManager = function (drawplane) {
   if (!drawplane) { throw new Error('must provide drawplane'); }
   
-  this.store = entities;
+  //this will be iterated everytime an entity is created
+  //to give it a unique id
+  this.idCounter = 0;
+
   this.drawplane = drawplane;
-  this.active = [];
 };
 
-Kane.EntityManager.prototype = Object.create(EntityManagerInterface);
+Kane.EntityManager.prototype = new Array;
 
-Kane.EntityManager.prototype.activateFromStore = function (settings) {
-  var storeEntity;
-  if (!settings) { throw new Error('no settings hash provided!'); }
-  if (0 === this.store.length) { throw new Error('store is empty!'); }
+/*
+different than "normal" syntax here is used to specifically state our intention
+to add our interface methods onto the prototype we have defined which inherits core
+functionality from Array
+*/
+_.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
-  storeEntity = this.store.shift();
+//define our prototype methods here as per usual
+Kane.EntityManager.prototype.spawn = function (constructor, args) {
+  if (!constructor) { throw new Error('no constructor provided'); }
 
-  //set this entity's active flag
-  storeEntity.activate(settings);
+  var entity = new constructor(args);
 
-  //add store entity to active array
-  this.active.unshift(storeEntity);
+  //entity has reference to its manager
+  entity.manager = this;
+
+  //each entity has a unique id
+  entity.id = this.idCounter;
+
+  //iterate the idCounter to preserve unique id for each created ent
+  this.idCounter = this.idCounter + 1;
+
+  //push the new entity onto the manager using array method
+  this.push(entity); 
+
+  //return the newly created entity
+  return entity;
 };
 
-Kane.EntityManager.prototype.deactivate = function (entity) {
-  var activeEnt;
+Kane.EntityManager.prototype.removeDead = function () {
+  var deadEnts = []; 
 
-  if (!entity) { throw new Error('no entity provided to deactivate'); } 
-
-  activeEnt = this.active.filter(function (ent) { return entity === ent })[0]; 
-  if (!activeEnt) { throw new Error('entity not found in active!'); }
-  
-  //weird method to target this element and remove it
-  removeElement(activeEnt, this.active);  
-
-  //call entity's deactivate method
-  activeEnt.deactivate();
-  this.store.unshift(activeEnt);
+  for (var i=0, len=this.length; i<len; i++) {
+    if (this[i].isDead()) {
+      //push this onto the array of deadEnts to return
+      deadEnts.push(this[i]);
+      //remove from "this"
+      this.splice(i--, 1); 
+      //shrink the length variable
+      len--;
+    }
+  }
+  return deadEnts;
 };
 
-Kane.EntityManager.prototype.updateActive = function (dT) {
-  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
+Kane.EntityManager.prototype.updateAll = function (dT) {
+  this.callForAll('update', dT);
+};
 
-  this.active.forEach(function (entity) { 
-    entity.update(dT); 
+Kane.EntityManager.prototype.drawAll = function () {
+  this.callForAll('draw'); 
+};
+
+Kane.EntityManager.prototype.listEntities = function () {
+  return this;
+};
+
+Kane.EntityManager.prototype.findByType = function (type) {
+  if (!type) { throw new Error('no type provided'); }
+
+  return this.filter(function (ent) {
+    return (type === ent.type);
   });
 };
 
-Kane.EntityManager.prototype.drawActive = function () {
-  this.drawplane.clearAll();
-  this.active.forEach(function (entity) { 
-    entity.draw(); 
+Kane.EntityManager.prototype.findByName = function (name) {
+  if (!name) { throw new Error('no name provided'); }
+
+  return this.filter(function (ent) {
+    return (name === ent.name);
   });
 };
 
+/*
+additional arguments may be passed when calling this.
+they will be passed to each object
+*/
+Kane.EntityManager.prototype.callForAll = function (methodName) {
+  var args = Array.prototype.slice.call(arguments, 1);
 
-function removeElement (element, array) {
-  array.splice(array.indexOf(element), 1);
+  if (!methodName) { throw new Error('no methodName provided'); }
+
+  this.forEach(function (entity) {
+    if (entity[methodName]) {
+      entity[methodName].apply(entity, args);
+    }
+  });
 };
 
+Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
+  if (!methodName) { throw new Error('no methodName provided'); }
+
+  this.forEach(function (entity) {
+    if (entity[methodName]) {
+      entity[methodName].apply(entity, argsArray);
+    }
+  });
+};
 
 });
 
@@ -566,8 +600,8 @@ function createEntities (drawplane, count) {
   return ar;
 };
 
-function createEntityManager (entities, drawplane, player) {
-  return new Kane.EntityManager(entities, drawplane, player);
+function createEntityManager (drawplane) {
+  return new Kane.EntityManager(drawplane);
 };
 
 function createPlayer (drawPlane, inputQueue) {
@@ -602,11 +636,8 @@ Construction of specific scene
 */
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = createDrawPlane(entityCanvas);
-
-var entityCount = 20000
-  , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane)
+  , entityPlane = createDrawPlane(entityCanvas)
+  , entityManager = createEntityManager(entityPlane)
   , game = createGame();
 
 //pass in our default input Queue and our entityManager

@@ -45,8 +45,8 @@ function createEntities (drawplane, count) {
   return ar;
 };
 
-function createEntityManager (entities, drawplane, player) {
-  return new Kane.EntityManager(entities, drawplane, player);
+function createEntityManager (drawplane) {
+  return new Kane.EntityManager(drawplane);
 };
 
 function createPlayer (drawPlane, inputQueue) {
@@ -81,11 +81,8 @@ Construction of specific scene
 */
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = createDrawPlane(entityCanvas);
-
-var entityCount = 20000
-  , entities = createEntities(entityPlane, entityCount)
-  , entityManager = createEntityManager(entities, entityPlane)
+  , entityPlane = createDrawPlane(entityCanvas)
+  , entityManager = createEntityManager(entityPlane)
   , game = createGame();
 
 //pass in our default input Queue and our entityManager

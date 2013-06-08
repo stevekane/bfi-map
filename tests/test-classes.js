@@ -10,25 +10,25 @@ window.Test = {
     return new Kane.DrawPlane(domNode);
   }, 
 
-  createEntity: function (drawplane) {
-    return new Kane.Entity(drawplane);
+  createEntity: function (args) {
+    return new Kane.Entity(args);
   },
 
   createPlayer: function (drawplane, inputQueue) {
     return new Kane.Player(drawplane, inputQueue);
   },
 
-  createEntities: function (drawplane, count) {
+  createEntities: function (args, count) {
     var ents = [];
   
     for (var i=0; i<count; i++) {
-      ents.push(this.createEntity(drawplane)); 
+      ents.push(this.createEntity(args)); 
     }
     return ents;
   },
   
-  createEntityManager: function (entities, drawplane, player) {
-    return new Kane.EntityManager(entities, drawplane, player);
+  createEntityManager: function (drawplane) {
+    return new Kane.EntityManager(drawplane);
   },  
 
   createInputEvent: function (type, data) {

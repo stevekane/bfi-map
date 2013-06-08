@@ -1,69 +1,122 @@
 var EntityManagerInterface = {
-  activateFromStore: function (settings) {},
-  deactivate: function (entity) {},
-  updateActive: function (dT) {},
-  drawActive: function () {},
+  spawn: function (constructor, args) {},
+  removeDead: function () {},
+  updateAll: function (dT) {},
+  drawAll: function () {},
+  listEntities: function () {},
+  findByType: function (type) {},
+  callForAll: function (methodName, args) {},
+  applyForAll: function (methodName, argArray) {}
 };
 
 //requires array of entities
-Kane.EntityManager = function (entities, drawplane) {
-  if (!entities) { throw new Error('must provide array of entities'); }
+Kane.EntityManager = function (drawplane) {
   if (!drawplane) { throw new Error('must provide drawplane'); }
   
-  this.store = entities;
+  //this will be iterated everytime an entity is created
+  //to give it a unique id
+  this.idCounter = 0;
+
   this.drawplane = drawplane;
-  this.active = [];
 };
 
-Kane.EntityManager.prototype = Object.create(EntityManagerInterface);
+Kane.EntityManager.prototype = new Array;
 
-Kane.EntityManager.prototype.activateFromStore = function (settings) {
-  var storeEntity;
-  if (!settings) { throw new Error('no settings hash provided!'); }
-  if (0 === this.store.length) { throw new Error('store is empty!'); }
+/*
+different than "normal" syntax here is used to specifically state our intention
+to add our interface methods onto the prototype we have defined which inherits core
+functionality from Array
+*/
+_.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
-  storeEntity = this.store.shift();
+//define our prototype methods here as per usual
+Kane.EntityManager.prototype.spawn = function (constructor, args) {
+  if (!constructor) { throw new Error('no constructor provided'); }
 
-  //set this entity's active flag
-  storeEntity.activate(settings);
+  var entity = new constructor(args);
 
-  //add store entity to active array
-  this.active.unshift(storeEntity);
+  //entity has reference to its manager
+  entity.manager = this;
+
+  //each entity has a unique id
+  entity.id = this.idCounter;
+
+  //iterate the idCounter to preserve unique id for each created ent
+  this.idCounter = this.idCounter + 1;
+
+  //push the new entity onto the manager using array method
+  this.push(entity); 
+
+  //return the newly created entity
+  return entity;
 };
 
-Kane.EntityManager.prototype.deactivate = function (entity) {
-  var activeEnt;
+Kane.EntityManager.prototype.removeDead = function () {
+  var deadEnts = []; 
 
-  if (!entity) { throw new Error('no entity provided to deactivate'); } 
-
-  activeEnt = this.active.filter(function (ent) { return entity === ent })[0]; 
-  if (!activeEnt) { throw new Error('entity not found in active!'); }
-  
-  //weird method to target this element and remove it
-  removeElement(activeEnt, this.active);  
-
-  //call entity's deactivate method
-  activeEnt.deactivate();
-  this.store.unshift(activeEnt);
+  for (var i=0, len=this.length; i<len; i++) {
+    if (this[i].isDead()) {
+      //push this onto the array of deadEnts to return
+      deadEnts.push(this[i]);
+      //remove from "this"
+      this.splice(i--, 1); 
+      //shrink the length variable
+      len--;
+    }
+  }
+  return deadEnts;
 };
 
-Kane.EntityManager.prototype.updateActive = function (dT) {
-  if (undefined == dT) { throw new Error('no dT provided to updateActive'); }
+Kane.EntityManager.prototype.updateAll = function (dT) {
+  this.callForAll('update', dT);
+};
 
-  this.active.forEach(function (entity) { 
-    entity.update(dT); 
+Kane.EntityManager.prototype.drawAll = function () {
+  this.callForAll('draw'); 
+};
+
+Kane.EntityManager.prototype.listEntities = function () {
+  return this;
+};
+
+Kane.EntityManager.prototype.findByType = function (type) {
+  if (!type) { throw new Error('no type provided'); }
+
+  return this.filter(function (ent) {
+    return (type === ent.type);
   });
 };
 
-Kane.EntityManager.prototype.drawActive = function () {
-  this.drawplane.clearAll();
-  this.active.forEach(function (entity) { 
-    entity.draw(); 
+Kane.EntityManager.prototype.findByName = function (name) {
+  if (!name) { throw new Error('no name provided'); }
+
+  return this.filter(function (ent) {
+    return (name === ent.name);
   });
 };
 
+/*
+additional arguments may be passed when calling this.
+they will be passed to each object
+*/
+Kane.EntityManager.prototype.callForAll = function (methodName) {
+  var args = Array.prototype.slice.call(arguments, 1);
 
-function removeElement (element, array) {
-  array.splice(array.indexOf(element), 1);
+  if (!methodName) { throw new Error('no methodName provided'); }
+
+  this.forEach(function (entity) {
+    if (entity[methodName]) {
+      entity[methodName].apply(entity, args);
+    }
+  });
 };
 
+Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
+  if (!methodName) { throw new Error('no methodName provided'); }
+
+  this.forEach(function (entity) {
+    if (entity[methodName]) {
+      entity[methodName].apply(entity, argsArray);
+    }
+  });
+};

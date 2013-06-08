@@ -1,46 +1,26 @@
 var EntityInterface = {
-  activate: function (settings) {},
-  deactivate: function () {},
+  kill: function () {},
+  isDead: function () {},
   update: function (dT) {}, 
   draw: function () {},
 };
 
-Kane.Entity = function (drawplane) {
-  if (!drawplane) { 
+Kane.Entity = function (argsHash) {
+  if (!argsHash.drawplane) { 
     throw new Error('must provide valid drawplane'); 
   }
 
-  //assign id once (no need to clear this)
-  this.id = Math.round(Math.random() * 100000);
-
-  //rendering surface for entity entity
-  this.drawplane = drawplane;
-  
-  setDefaults(this); 
+  _.extend(this, getDefaults(), argsHash);
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
 
-Kane.Entity.prototype.activate = function (settings) {
-  if (!settings) { 
-    throw new Error('activate requires a hash of settings'); 
-  }
-  
-  //check if keys in hash are valid
-  for (var key in settings) {
-    if(!this.hasOwnProperty(key)) {
-      throw new Error('invalid key provided in activate settings'); 
-    }
-    
-    //assign each setting to the entity
-    this[key] = settings[key];
-  }
-  this.isActive = true;
+Kane.Entity.prototype.kill = function () {
+  this._isDead = true;
 };
 
-Kane.Entity.prototype.deactivate = function () {
-  this.isActive = false; 
-  setDefaults(this);
+Kane.Entity.prototype.isDead = function () {
+  return this._isDead;
 };
 
 Kane.Entity.prototype.update = function (dT) {
@@ -57,10 +37,6 @@ Kane.Entity.prototype.update = function (dT) {
 };
 
 Kane.Entity.prototype.draw = function () {
-  if (false == this.isActive) { 
-    throw new Error('cannot draw an inactive entity'); 
-  }
-
   if (!this.image) {
     this.drawplane.drawRect(
       this.color, 
@@ -82,41 +58,46 @@ function updateVelocity(dT, a, oldVel) {
   return oldVel + dT * a;
 }; 
 
-function setDefaults (entity) {
-  //boolean flag to determine if this object is in use already
-  entity.isActive = false;
-  
-  //default color if no image available
-  entity.color = "#11ffbb";
+function getDefaults () {
 
-  //position
-  entity.x = 0;
-  entity.y = 0;
+  return {
+    //killing an entity will set this to true
+    _isDead: false,
 
-  //previous positions
-  entity.lastx = 0;
-  entity.lasty = 0;
+    //default color if no image available
+    color: "#11ffbb",
 
-  //dimensions
-  entity.w = 0;
-  entity.h = 0;
+    //position
+    x: 0,
+    y: 0,
 
-  //velocity
-  entity.dx = 0;
-  entity.dy = 0;
+    //previous positions
+    lastx: 0,
+    lasty: 0,
 
-  //accel
-  entity.ddx = 0;
-  entity.ddy = 0;
+    //dimensions
+    w: 0,
+    h: 0,
 
-  //render order
-  entity.zIndex = 0;
+    //velocity
+    dx: 0,
+    dy: 0,
 
-  //identifiers
-  entity.name = "";
-  entity.type = "";
-  
-  //animation info  
-  entity.anims = [];
-  entity.currentAnim = {}
+    //accel
+    ddx: 0,
+    ddy: 0,
+
+    //render order
+    zIndex: 0,
+
+    id: 0,
+
+    //identifiers
+    name: "",
+    type: "",
+    
+    //animation info  
+    anims: [],
+    currentAnim: {}
+  };
 };
