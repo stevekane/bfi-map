@@ -25,6 +25,15 @@ describe('Kane.EntityManager', function () {
     });
   });
 
+  describe('#getUniqueId()', function () {
+    it('should return a unique id', function () {
+      assert.notEqual(
+        em.getUniqueId(),
+        em.getUniqueId()
+      );
+    });
+  });
+
   describe('#spawn()', function () {
     it('should be a function', function () {
       assert.isFunction(em.spawn);
@@ -37,7 +46,12 @@ describe('Kane.EntityManager', function () {
       assert.equal(drawplane, ent.drawplane);
       assert.instanceOf(ent, Kane.Entity);
     });
-    
+
+    it('should assign itself as a value called manager to the newly created entity', function () {
+      var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
+      assert.equal(ent.manager, em);
+    });
+
     it('should throw if not provided a constructor', function () {
       assert.throws(function () {
         em.spawn();
@@ -64,6 +78,47 @@ describe('Kane.EntityManager', function () {
 
       assert.lengthOf(deadEnts, 2);
       assert.lengthOf(remainingEnts, 0);
+    });
+  });
+
+  describe('#sortBy()', function () {
+    it('should be a function', function () {
+      assert.isFunction(em.sortBy);
+    });
+
+    it('should throw if propName, ascending not provided', function () {
+      assert.throws(function () {
+        em.sortBy();
+      });
+      assert.doesNotThrow(function () {
+        em.sortBy('zIndex', true);
+      });
+    });
+
+    it('should sort the entities by the specified property', function () {
+      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 1});
+      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 2});
+      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 0});
+
+      em.sortBy('zIndex', true);
+      
+      //kind of a cheesy way to check this...
+      em.listEntities().forEach(function (ent, index, em) {
+        assert.equal(
+          ent.zIndex,
+          index
+        ); 
+      });
+
+      em.sortBy('zIndex', false);
+
+      //super brittle way to check the sort was successful...
+      em.listEntities().forEach(function (ent, index, em) {
+        assert.equal(
+          ent.zIndex,
+          em.length - index - 1
+        ); 
+      });
     });
   });
 

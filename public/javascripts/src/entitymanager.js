@@ -1,6 +1,8 @@
 var EntityManagerInterface = {
+  getUniqueId: function () {},
   spawn: function (constructor, args) {},
   removeDead: function () {},
+  sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
   drawAll: function () {},
   listEntities: function () {},
@@ -12,11 +14,6 @@ var EntityManagerInterface = {
 //requires array of entities
 Kane.EntityManager = function (drawplane) {
   if (!drawplane) { throw new Error('must provide drawplane'); }
-  
-  //this will be iterated everytime an entity is created
-  //to give it a unique id
-  this.idCounter = 0;
-
   this.drawplane = drawplane;
 };
 
@@ -28,6 +25,23 @@ to add our interface methods onto the prototype we have defined which inherits c
 functionality from Array
 */
 _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
+
+Kane.EntityManager.prototype.getUniqueId = function () {
+  var id;
+  //setup a counter variable to iterate each time this is called
+  if (!this.idCounter) {
+    this.idCounter = 0;
+  }
+  
+  //capture this id value
+  id = this.idCounter;
+  
+  //iterate the idCounter var to preserver uniqueness
+  this.idCounter++;
+
+  //return the id
+  return id;
+};
 
 //define our prototype methods here as per usual
 Kane.EntityManager.prototype.spawn = function (constructor, args) {
@@ -42,7 +56,7 @@ Kane.EntityManager.prototype.spawn = function (constructor, args) {
   entity.id = this.idCounter;
 
   //iterate the idCounter to preserve unique id for each created ent
-  this.idCounter = this.idCounter + 1;
+  this.idCounter = this.getUniqueId();
 
   //push the new entity onto the manager using array method
   this.push(entity); 
@@ -51,6 +65,7 @@ Kane.EntityManager.prototype.spawn = function (constructor, args) {
   return entity;
 };
 
+//loop over all entities, removing dead ones and then return them
 Kane.EntityManager.prototype.removeDead = function () {
   var deadEnts = []; 
 
@@ -65,6 +80,22 @@ Kane.EntityManager.prototype.removeDead = function () {
     }
   }
   return deadEnts;
+};
+
+//sort this by specified propName (optional ascending boolean)
+Kane.EntityManager.prototype.sortBy = function (propName, ascending) {
+  if (!propName) {
+    throw new Error('must provide numerical propertyName to sort by'); 
+  }
+
+  //this insane sorting syntax is courtesy of javascript...
+  this.sort(function (a, b) {
+    if (ascending) {
+      return (a[propName] | 0) - (b[propName] | 0);
+    } else {
+      return (b[propName] | 0) - (a[propName] | 0);
+    }
+  });
 };
 
 Kane.EntityManager.prototype.updateAll = function (dT) {
