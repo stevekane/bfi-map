@@ -88,6 +88,13 @@ describe('Kane.InputWizard', function () {
       iw.attachToDomNode();
       assert.equal(iw.domNodes[0], document.body);
     });
+
+    it('should throw if the provided domNode is already attached', function () {
+      iw.attachToDomNode(document.body);
+      assert.throws(function () {
+        iw.attachToDomNode(document.body);
+      });
+    });
   });
 
   describe('#removeFromDomNode()', function () {
