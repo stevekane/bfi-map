@@ -762,6 +762,9 @@ Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
 
 Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
   if (!domNode) { throw new Error('no domNode provided'); }
+  if (!_.contains(this.domNodes, domNode)) {
+    throw new Error('provided domNode is not in array of attached domNodes');
+  }
 
   domNode.addEventListener('keyup', this.keyupHandler);
   domNode.addEventListener('keydown', this.keydownHandler);
@@ -772,6 +775,9 @@ Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
 
 Kane.InputWizard.prototype.deactivateKeyboardForDomNode = function (domNode) {
   if (!domNode) { throw new Error('no domNode provided'); }
+  if (!_.contains(this.domNodes, domNode)) {
+    throw new Error('provided domNode is not in array of attached domNodes');
+  }
   
   //here we are removing the 'bound' versions of these handlers
   domNode.removeEventListener('keyup', this.keyupHandler);
@@ -784,8 +790,6 @@ Kane.InputWizard.prototype.deactivateKeyboardForDomNode = function (domNode) {
 
 function keyupHandler (e) {
   var keyName = keyboardMapping[e.keyCode];
-
-  console.log('fart');
 
   //no keyName found for this key
   if (!keyName) { return; }

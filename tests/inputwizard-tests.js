@@ -126,10 +126,21 @@ describe('Kane.InputWizard', function () {
       assert.isFunction(iw.activateKeyboardForDomNode);
     });
 
-    it('should throw if no domNode is provided', function () {
+    it('should throw if no domNode is provided ', function () {
       assert.throws(function () {
         iw.activateKeyboardForDomNode();
       });  
+    });
+
+    it('should throw if provided domNode isnt in domNodes', function () {
+      assert.throws(function () {
+        iw.activateKeyboardForDomNode(document.body);
+      });  
+
+      iw.attachToDomNode(document.body);
+      assert.doesNotThrow(function () {
+        iw.activateKeyboardForDomNode(document.body);
+      });
     });
   });
 
@@ -142,6 +153,17 @@ describe('Kane.InputWizard', function () {
       assert.throws(function () {
         iw.deactivateKeyboardForDomNode();
       });  
+    });
+
+    it('should throw if provided domNode isnt in domNodes', function () {
+      assert.throws(function () {
+        iw.deactivateKeyboardForDomNode(document.body);
+      });  
+
+      iw.attachToDomNode(document.body);
+      assert.doesNotThrow(function () {
+        iw.deactivateKeyboardForDomNode(document.body);
+      });
     });
   });
 });
