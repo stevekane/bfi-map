@@ -4,10 +4,6 @@ for calling onUpdate and onDraw which may be defined however you desire
 
 onEnter and onExit may be defined to do w/e you desire and they will be called
 by the game object that owns this scene on scene transitions 
-
-processInput is a method you can define and hook up if desired.  generally
-speaking, your scene should have an inputQueue passed into its constructor
-if you are intending to process input directly on the scene itself
 */
 var SceneInterface = {
   update: function (dT) {},
@@ -16,8 +12,7 @@ var SceneInterface = {
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  processInput: function () {},
-
+  
   //list of required attributes
   name: ""
 };
@@ -41,9 +36,6 @@ Kane.Scene.prototype = Object.create(SceneInterface);
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { throw new Error('no dT provided to update'); }
 
-  //process inputs hook
-  this.processInput();
-
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  
     this.entityManager.drawAll();
@@ -60,5 +52,7 @@ Kane.Scene.prototype.draw = function () {
   this.onDraw();
 };
 
-//define what your scene should do to process input
-Kane.Scene.prototype.processInput = function () {};
+Kane.Scene.prototype.onEnter = function () {};
+Kane.Scene.prototype.onExit = function () {};
+Kane.Scene.prototype.onUpdate = function (dT) {};
+Kane.Scene.prototype.onDraw = function () {};

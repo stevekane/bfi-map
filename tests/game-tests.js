@@ -7,6 +7,8 @@ describe('Kane.Game', function () {
     , scene = {
         name: 'testScene',
         update: function (dT) {}, 
+        onEnter: function () {},
+        onExit: function () {},
       }
     , clock = {
         start: function () {},
@@ -128,7 +130,12 @@ describe('Kane.Game', function () {
       var sceneName = "testScene"
         , currentScene; 
 
-      game.addScene({name: sceneName});
+      game.addScene({
+        name: sceneName,
+        update: function (dT) {}, 
+        onEnter: function () {}, 
+        onExit: function () {}, 
+      });
       game.setCurrentScene(sceneName);
       currentScene = game.getCurrentScene(); 
   
@@ -155,6 +162,9 @@ describe('Kane.Game', function () {
     it('should be a function', function () {
       assert.isFunction(game.setCurrentScene);
     });
+
+    it('should call the previous scenes onExit', function () {});
+    it('should call the new scenes onEnter', function () {});
 
     it('should throw if no string name is provided', function (){
       assert.throws(function () {

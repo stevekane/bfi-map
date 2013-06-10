@@ -61,10 +61,4 @@ describe('Kane.Scene', function () {
       assert.isFunction(s.onUpdate);
     });
   });
-
-  describe('#processInput()', function () {
-    it('should be a function', function () {
-      assert.isFunction(s.processInput);
-    });
-  });
 });

@@ -493,23 +493,38 @@ Kane.Game.prototype.getScenes = function () {
 };
 
 Kane.Game.prototype.getCurrentScene = function () {
-  if (!this.currentScene) { throw new Error('no currentScene defined!'); }
+  if (!this.currentScene) { 
+    throw new Error('no currentScene defined!'); 
+  }
   return this.currentScene;
 };
 
 Kane.Game.prototype.setCurrentScene = function (name) {
-  var matchingScene;
+  var matchingScene
+    , oldScene;
 
-  if (!name) { throw new Error('scene name not provided!'); } 
+  if (!name) { 
+    throw new Error('scene name not provided!'); 
+  } 
 
   //if the scene does not exist in list of scenes, throw
   matchingScene = this.scenes[name];
   if (!matchingScene) { 
     throw new Error('scene by that name does not exist'); 
-  } else {
-    this.currentScene = matchingScene;
-  } 
-  
+  }
+    
+  //capture the previous Scene
+  oldScene = this.currentScene;
+
+  //call old scene's onExit hook
+  if (oldScene) { 
+    oldScene.onExit.call(oldScene) 
+  };
+
+  //call new scene's onEnter hook
+  matchingScene.onEnter.call(matchingScene);
+   
+  this.currentScene = matchingScene;
 };
 
 //public
@@ -704,9 +719,11 @@ Kane.InputWizard = function (settings) {
   this.subscribers = [];
   this.domNodes = [];
 
-  //we create instances of these functions that have a bound 
-  //"this" value in order to correctly apply/remove them from
-  //event-emitting domNodes
+  /*
+  we create instances of these functions that have a bound 
+  "this" value in order to correctly apply/remove them from
+  event-emitting domNodes
+  */
   this.keyupHandler = keyupHandler.bind(this);
   this.keydownHandler = keydownHandler.bind(this);
 
@@ -715,7 +732,9 @@ Kane.InputWizard = function (settings) {
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);
 
 Kane.InputWizard.prototype.addSubscriber = function (subscriber) {
-  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+  if ("object" !== typeof subscriber) { 
+    throw new Error('no subscriber provided'); 
+  }
 
   this.subscribers.push(subscriber);
   
@@ -724,7 +743,10 @@ Kane.InputWizard.prototype.addSubscriber = function (subscriber) {
 };
 
 Kane.InputWizard.prototype.removeSubscriber = function (subscriber) {
-  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+  if ("object" !== typeof subscriber) { 
+    throw new Error('no subscriber provided'); 
+  }
+
   if (!_.contains(this.subscribers, subscriber)) {
     throw new Error('subscriber provided is not a in the list of subscribers!');
   }
@@ -750,7 +772,9 @@ Kane.InputWizard.prototype.attachToDomNode = function (domNode) {
 
 Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
   //we throw so that we dont silently fail to remove 
-  if (!domNode) { throw new Error('no domnode provided'); } 
+  if (!domNode) { 
+    throw new Error('no domnode provided'); 
+  } 
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('domNode provided not in the list of domNodes');
@@ -766,7 +790,9 @@ Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
 };
 
 Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
-  if (!domNode) { throw new Error('no domNode provided'); }
+  if (!domNode) { 
+    throw new Error('no domNode provided'); 
+  }
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('provided domNode is not in array of attached domNodes');
@@ -780,7 +806,9 @@ Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
 };
 
 Kane.InputWizard.prototype.deactivateKeyboardForDomNode = function (domNode) {
-  if (!domNode) { throw new Error('no domNode provided'); }
+  if (!domNode) { 
+    throw new Error('no domNode provided'); 
+  }
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('provided domNode is not in array of attached domNodes');
@@ -937,98 +965,81 @@ function createCanvas (w, h, name) {
   return document.getElementById(name);
 };
 
-function createDrawPlane (canvas) {
-  return new Kane.DrawPlane(canvas);
-};
-
-function createInputQueue () {
-  return new Kane.InputQueue();
-};
-
-//note, domNode is NOT a drawplane but the node itself
-function createInputManager (inputQueue, domNode) {
-  return new Kane.InputManager(inputQueue, domNode);
-};
-
-function createEntities (drawplane, count) {
-  var ar = [];
-
-  for (var i=0; i<count; i++) {
-    ar.push(new Kane.Entity(drawplane)); 
-  }
-  
-  return ar;
-};
-
-function createEntityManager (drawplane) {
-  return new Kane.EntityManager(drawplane);
-};
-
-function createPlayer (drawPlane, inputQueue) {
-  return new Kane.Player(drawPlane, inputQueue);
-};
-
-function createScene (name, settingsHash) {
-  return new Kane.Scene(name, settingsHash);
-};
-
-function createGame () {
-  return new Kane.Game();
-};
-
-/*
-
 //global background canvas object
 var bgCanvas = createCanvas(640, 480, 'gameboard')
-  , bgPlane = createDrawPlane(bgCanvas);
+  , bgPlane = new Kane.DrawPlane(bgCanvas);
 
 //color background
 bgPlane.fillAll(generateColor());
 
-//Setup a basic inputManager and inputQueue
-var inputQueue = createInputQueue()
-  , inputManager = createInputManager(inputQueue);
-
-//turn on input listeners
-inputManager.activateKeyUpHandler();
-inputManager.activateKeyDownHandler();
+//input wizard configuration
+//we will add our subscriber from the scene instance
+var inputWizard = new Kane.InputWizard();
+inputWizard.attachToDomNode(document.body)
+           .activateKeyboardForDomNode(document.body);
 
 //Construction of specific scene
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = createDrawPlane(entityCanvas)
-  , entityManager = createEntityManager(entityPlane)
+  , entityPlane = new Kane.DrawPlane(entityCanvas)
+  , entityManager = new Kane.EntityManager(entityPlane)
   , clock = new Kane.Clock()
   , game = new Kane.Game({
     clock: clock
   });
 
-//pass in our default input Queue and our entityManager
+//pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene('ingame', {
-  inputQueue: inputQueue,
+  inputWizard: inputWizard, 
   entityManager: entityManager 
 });
 
+//subscribe our scene to the inputWizard
+ingame.inputWizard.addSubscriber(ingame);
+
+//hacky mapping of keyname to dx/dy values
+ingame.keynameVelocityMapping = {
+  left: {
+    dx: -1,
+    dy: 0 
+  },
+  right: {
+    dx: 1,
+    dy: 0 
+  },
+  up: {
+    dx: 0,
+    dy: -1
+  },
+  down: {
+    dx: 0,
+    dy: 1 
+  },
+};
+
 //setup inputHandling for ingame
-ingame.processInput = function () {
-  var events = this.inputQueue.fetchAllEvents();
-  
-  events.forEach(function (event) {
+ingame.keyup = function (keyName) {
+  var mapping = this.keynameVelocityMapping[keyName];
+
+  if (mapping) {
+    var dx = mapping.dx * Math.random()
+      , dy = mapping.dy * Math.random();
+ 
     this.entityManager.spawn(
-      Kane.Entity,
+      Kane.Entity, 
       {
         drawplane: entityPlane,
-        x: Math.floor(Math.random() * 640),
-        y: Math.floor(Math.random() * 480),
-        dx: Math.random(),
-        dy: -1 * Math.random(),
+        x: 300,
+        y: 240,
+        dx: dx,
+        dy: dy,
         w: 40,
         h: 40,
         ddy: .001,
         color: generateColor()
       }
     );
-  }, this); 
+  }
 };
 
 //configure the game object before starting it
@@ -1049,8 +1060,6 @@ game.start();
 function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);
 };
-
-*/
 
 });
 
@@ -1190,10 +1199,6 @@ for calling onUpdate and onDraw which may be defined however you desire
 
 onEnter and onExit may be defined to do w/e you desire and they will be called
 by the game object that owns this scene on scene transitions 
-
-processInput is a method you can define and hook up if desired.  generally
-speaking, your scene should have an inputQueue passed into its constructor
-if you are intending to process input directly on the scene itself
 */
 var SceneInterface = {
   update: function (dT) {},
@@ -1202,8 +1207,7 @@ var SceneInterface = {
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  processInput: function () {},
-
+  
   //list of required attributes
   name: ""
 };
@@ -1227,9 +1231,6 @@ Kane.Scene.prototype = Object.create(SceneInterface);
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { throw new Error('no dT provided to update'); }
 
-  //process inputs hook
-  this.processInput();
-
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  
     this.entityManager.drawAll();
@@ -1246,7 +1247,9 @@ Kane.Scene.prototype.draw = function () {
   this.onDraw();
 };
 
-//define what your scene should do to process input
-Kane.Scene.prototype.processInput = function () {};
+Kane.Scene.prototype.onEnter = function () {};
+Kane.Scene.prototype.onExit = function () {};
+Kane.Scene.prototype.onUpdate = function (dT) {};
+Kane.Scene.prototype.onDraw = function () {};
 
 });

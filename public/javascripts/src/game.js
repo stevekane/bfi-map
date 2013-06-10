@@ -79,23 +79,38 @@ Kane.Game.prototype.getScenes = function () {
 };
 
 Kane.Game.prototype.getCurrentScene = function () {
-  if (!this.currentScene) { throw new Error('no currentScene defined!'); }
+  if (!this.currentScene) { 
+    throw new Error('no currentScene defined!'); 
+  }
   return this.currentScene;
 };
 
 Kane.Game.prototype.setCurrentScene = function (name) {
-  var matchingScene;
+  var matchingScene
+    , oldScene;
 
-  if (!name) { throw new Error('scene name not provided!'); } 
+  if (!name) { 
+    throw new Error('scene name not provided!'); 
+  } 
 
   //if the scene does not exist in list of scenes, throw
   matchingScene = this.scenes[name];
   if (!matchingScene) { 
     throw new Error('scene by that name does not exist'); 
-  } else {
-    this.currentScene = matchingScene;
-  } 
-  
+  }
+    
+  //capture the previous Scene
+  oldScene = this.currentScene;
+
+  //call old scene's onExit hook
+  if (oldScene) { 
+    oldScene.onExit.call(oldScene) 
+  };
+
+  //call new scene's onEnter hook
+  matchingScene.onEnter.call(matchingScene);
+   
+  this.currentScene = matchingScene;
 };
 
 //public

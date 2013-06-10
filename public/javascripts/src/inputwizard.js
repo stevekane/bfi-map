@@ -23,9 +23,11 @@ Kane.InputWizard = function (settings) {
   this.subscribers = [];
   this.domNodes = [];
 
-  //we create instances of these functions that have a bound 
-  //"this" value in order to correctly apply/remove them from
-  //event-emitting domNodes
+  /*
+  we create instances of these functions that have a bound 
+  "this" value in order to correctly apply/remove them from
+  event-emitting domNodes
+  */
   this.keyupHandler = keyupHandler.bind(this);
   this.keydownHandler = keydownHandler.bind(this);
 
@@ -34,7 +36,9 @@ Kane.InputWizard = function (settings) {
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);
 
 Kane.InputWizard.prototype.addSubscriber = function (subscriber) {
-  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+  if ("object" !== typeof subscriber) { 
+    throw new Error('no subscriber provided'); 
+  }
 
   this.subscribers.push(subscriber);
   
@@ -43,7 +47,10 @@ Kane.InputWizard.prototype.addSubscriber = function (subscriber) {
 };
 
 Kane.InputWizard.prototype.removeSubscriber = function (subscriber) {
-  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+  if ("object" !== typeof subscriber) { 
+    throw new Error('no subscriber provided'); 
+  }
+
   if (!_.contains(this.subscribers, subscriber)) {
     throw new Error('subscriber provided is not a in the list of subscribers!');
   }
@@ -69,7 +76,9 @@ Kane.InputWizard.prototype.attachToDomNode = function (domNode) {
 
 Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
   //we throw so that we dont silently fail to remove 
-  if (!domNode) { throw new Error('no domnode provided'); } 
+  if (!domNode) { 
+    throw new Error('no domnode provided'); 
+  } 
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('domNode provided not in the list of domNodes');
@@ -85,7 +94,9 @@ Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
 };
 
 Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
-  if (!domNode) { throw new Error('no domNode provided'); }
+  if (!domNode) { 
+    throw new Error('no domNode provided'); 
+  }
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('provided domNode is not in array of attached domNodes');
@@ -99,7 +110,9 @@ Kane.InputWizard.prototype.activateKeyboardForDomNode = function (domNode) {
 };
 
 Kane.InputWizard.prototype.deactivateKeyboardForDomNode = function (domNode) {
-  if (!domNode) { throw new Error('no domNode provided'); }
+  if (!domNode) { 
+    throw new Error('no domNode provided'); 
+  }
 
   if (!_.contains(this.domNodes, domNode)) {
     throw new Error('provided domNode is not in array of attached domNodes');
