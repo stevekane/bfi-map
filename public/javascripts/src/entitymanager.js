@@ -11,7 +11,7 @@ var EntityManagerInterface = {
   applyForAll: function (methodName, argArray) {},
 
   //define mandatory interface attribute
-  drawplane: null 
+  drawplane: {}
 };
 
 //requires array of entities

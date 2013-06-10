@@ -16,3 +16,13 @@ hand-written and is designed as a test of javascript game-coding skills.  The pr
 ##Phase 1
 1. Construct game object with requisite methods and attributes.
 2. Construct run-loop that can be started, stopped, and implement a global game-state for menus, gameplay, warmup, and score screens.
+
+##Phase 2
+1. Construct asset loading w/ custom event behavior 
+2. seperate engine components from game components in order to develop the engine seperate from the game
+3. buid animation system for entitys
+
+##Phase 3 
+1. Build collision system for entities
+2. Build world concept to include collision maps, entity spawn locations, etc
+

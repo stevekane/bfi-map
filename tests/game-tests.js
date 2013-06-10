@@ -3,11 +3,17 @@ minispade.require('main.js');
 var assert = chai.assert;
 
 describe('Kane.Game', function () {
-  var game;
+  var game
+    , scene = {
+        name: 'testScene',
+        update: function (dT) {}, 
+      };
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
     game = new Kane.Game();
+    game.addScene(scene);
+    game.setCurrentScene('testScene');
   });
 
   it('should create a new object', function () {
@@ -127,6 +133,9 @@ describe('Kane.Game', function () {
     });
     
     it('should throw if there is no current scene defined', function () {
+      game = new Kane.Game();
+      game.addScene(scene);
+
       assert.throws(function () {
         game.getCurrentScene();
       });

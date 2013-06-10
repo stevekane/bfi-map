@@ -4,7 +4,9 @@ var assert = chai.assert;
 
 describe('Kane.EntityManager', function () {
   var em
-    , drawplane = {};
+    , drawplane = {
+        clearAll: function () {}
+      };
   
   beforeEach(function () {
 
