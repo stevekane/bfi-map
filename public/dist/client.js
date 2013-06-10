@@ -994,8 +994,17 @@ var ingame = new Kane.Scene('ingame', {
   entityManager: entityManager 
 });
 
-//subscribe our scene to the inputWizard
-ingame.inputWizard.addSubscriber(ingame);
+//define onEnter hook to subscribe to inputWizard
+ingame.onEnter = function () {
+  console.log('ingame entered!');
+  this.inputWizard.addSubscriber(this);
+};
+
+//define onExit hook to un-subscribe to inputWizard
+ingame.onExit = function () {
+  console.log('ingame exited!');
+  this.inputWizard.removeSubscriber(this);
+};
 
 //hacky mapping of keyname to dx/dy values
 ingame.keynameVelocityMapping = {
