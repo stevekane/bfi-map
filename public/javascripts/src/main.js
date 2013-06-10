@@ -63,6 +63,8 @@ function createGame () {
   return new Kane.Game();
 };
 
+/*
+
 //global background canvas object
 var bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = createDrawPlane(bgCanvas);
@@ -78,9 +80,7 @@ var inputQueue = createInputQueue()
 inputManager.activateKeyUpHandler();
 inputManager.activateKeyDownHandler();
 
-/*
-Construction of specific scene
-*/
+//Construction of specific scene
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
@@ -137,3 +137,4 @@ function generateColor () {
   return "#" + Math.random().toString(16).slice(2, 8);
 };
 
+*/
