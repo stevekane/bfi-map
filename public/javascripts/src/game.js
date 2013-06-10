@@ -5,10 +5,17 @@ var GameInterface = {
   getCurrentScene: function () {},
   setCurrentScene: function (name) {},
   start: function () {},
-  stop: function () {}
+  stop: function () {},
+
+  //required public api attribtues
+  isRunning: false
 };
 
 Kane.Game = function (settings) {
+  if (!settings.clock) { 
+    throw new Error('no clock provided to game'); 
+  }
+
   _.extend(this, settings);  
 
   //a scenes object
@@ -16,8 +23,6 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
-  this.currentTimeStamp = 0;
-  this.previousTimeStamp = 0;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -41,7 +46,7 @@ Kane.Game.prototype._loop = function () {
   this.currentTimeStamp = Date.now();
 
   //calculate deltaT
-  dT = this.currentTimeStamp - this.previousTimeStamp;
+  dT = this.clock.getTimeDelta();
 
   this.getCurrentScene().update(dT);
     
@@ -95,17 +100,23 @@ Kane.Game.prototype.setCurrentScene = function (name) {
 
 //public
 Kane.Game.prototype.start = function () {
+  if (!this.currentScene) { 
+    throw new Error('must have a currentScene to start!') 
+  }
   this.isRunning = true;
-  this.currentTimeStamp = Date.now();
+  
+  //start the clock
+  this.clock.start();
+
   window.requestAnimationFrame(this._loop.bind(this));
   //TESTS FOR FPS MEASUREMENT
   this.fps = createFps();
 };
 
 Kane.Game.prototype.stop = function () {
-  this.currentTimeStamp = 0;
-  this.previousTimeStamp = 0;
   this.isRunning = false;
+
+  this.clock.stop();
 };
 
 //TODO: TESTS FOR FPS MEASUREMENT

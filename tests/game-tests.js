@@ -7,11 +7,18 @@ describe('Kane.Game', function () {
     , scene = {
         name: 'testScene',
         update: function (dT) {}, 
-      };
+      }
+    , clock = {
+        start: function () {},
+        stop: function () {},
+        getTimeDelta: function () {},
+      }; 
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
-    game = new Kane.Game();
+    game = new Kane.Game({
+      clock: clock 
+    });
     game.addScene(scene);
     game.setCurrentScene('testScene');
   });
@@ -133,7 +140,9 @@ describe('Kane.Game', function () {
     });
     
     it('should throw if there is no current scene defined', function () {
-      game = new Kane.Game();
+      game = new Kane.Game({
+        clock: clock
+      });
       game.addScene(scene);
 
       assert.throws(function () {
@@ -162,8 +171,6 @@ describe('Kane.Game', function () {
         game.setCurrentScene('notValidScene');    
       });
     });
-
-    
   });
 
   describe('#start()', function () {
@@ -171,14 +178,16 @@ describe('Kane.Game', function () {
       assert.isFunction(game.start);
     });
 
+    it('should throw if there is no active current Scene', function () {
+      assert.throws(function () {
+        game = new Kane.Game();
+        game.start();
+      });
+    });
+
     it('should start the loop running', function () {
       game.start();
       assert.isTrue(game.isRunning);
-    });
-    
-    it('should set the currentTimeStamp', function () {
-      game.start();
-      assert.notEqual(0, game.currentTimestamp);
     });
   });
 
@@ -190,12 +199,6 @@ describe('Kane.Game', function () {
     it('should stop the loop running', function () {
       game.stop();
       assert.isFalse(game.isRunning);
-    });
-
-    it('should reset timeStamps to 0', function () {
-      game.stop();
-      assert.equal(0, game.currentTimeStamp);
-      assert.equal(0, game.previousTimeStamp);
     });
   });
 });

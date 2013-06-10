@@ -1,5 +1,6 @@
 window.Kane = {};
 
+require('clock.js');
 require('game.js');
 require('scene.js');
 require('drawplane.js');
@@ -9,6 +10,7 @@ require('player.js');
 require('inputevent.js');
 require('inputqueue.js');
 require('inputmanager.js');
+require('inputwizard.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -57,8 +59,8 @@ function createScene (name, settingsHash) {
   return new Kane.Scene(name, settingsHash);
 };
 
-function createGame (entityManager, inputQueue) {
-  return new Kane.Game(entityManager, inputQueue);
+function createGame () {
+  return new Kane.Game();
 };
 
 //global background canvas object
@@ -83,7 +85,10 @@ Construction of specific scene
 var entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
   , entityManager = createEntityManager(entityPlane)
-  , game = createGame();
+  , clock = new Kane.Clock()
+  , game = new Kane.Game({
+    clock: clock
+  });
 
 //pass in our default input Queue and our entityManager
 var ingame = new Kane.Scene('ingame', {

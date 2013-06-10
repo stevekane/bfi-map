@@ -1,3 +1,68 @@
+minispade.register('clock.js', function() {
+"use strict";
+var ClockInterface = {
+  start: function () {},
+  stop: function () {},
+  getTimeDelta: function () {},
+
+  //public interface attributes
+  isRecording: false,
+  startTime: null,
+  stopTime: null,
+};
+
+Kane.Clock = function () {
+  this.timeStamp= null;
+  this.startTime = null;
+  this.stopTime = null;
+  this.isRecording = false;
+};
+
+Kane.Clock.prototype = Object.create(ClockInterface);
+
+Kane.Clock.prototype.start = function () {
+  var timeStamp = Date.now();
+  
+  //set the start time
+  this.startTime = timeStamp;
+
+  //set the current timeStamp
+  this.timeStamp = timeStamp;
+
+  //set recording to true
+  this.isRecording = true;
+  
+  return timeStamp; 
+};
+
+Kane.Clock.prototype.stop = function () {
+  //reset the timeStamp
+  this.timeStamp= null;
+  
+  //record stopTime
+  this.stopTime = Date.now();
+    
+  this.isRecording = false;
+
+  return this.stopTime;
+};
+
+Kane.Clock.prototype.getTimeDelta = function () {
+  var timeStamp = Date.now()
+    , dT = timeStamp - this.timeStamp;
+
+  if (!this.isRecording) { 
+    throw new Error('clock is not currently running'); 
+  }
+   
+  //update the timeStamp stored value for use in next call
+  this.timeStamp = timeStamp;
+  
+  return dT;
+};
+
+});
+
 minispade.register('drawplane.js', function() {
 "use strict";
 var DrawPlaneInterface = {
@@ -354,10 +419,17 @@ var GameInterface = {
   getCurrentScene: function () {},
   setCurrentScene: function (name) {},
   start: function () {},
-  stop: function () {}
+  stop: function () {},
+
+  //required public api attribtues
+  isRunning: false
 };
 
 Kane.Game = function (settings) {
+  if (!settings.clock) { 
+    throw new Error('no clock provided to game'); 
+  }
+
   _.extend(this, settings);  
 
   //a scenes object
@@ -365,8 +437,6 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
-  this.currentTimeStamp = 0;
-  this.previousTimeStamp = 0;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -390,7 +460,7 @@ Kane.Game.prototype._loop = function () {
   this.currentTimeStamp = Date.now();
 
   //calculate deltaT
-  dT = this.currentTimeStamp - this.previousTimeStamp;
+  dT = this.clock.getTimeDelta();
 
   this.getCurrentScene().update(dT);
     
@@ -444,17 +514,23 @@ Kane.Game.prototype.setCurrentScene = function (name) {
 
 //public
 Kane.Game.prototype.start = function () {
+  if (!this.currentScene) { 
+    throw new Error('must have a currentScene to start!') 
+  }
   this.isRunning = true;
-  this.currentTimeStamp = Date.now();
+  
+  //start the clock
+  this.clock.start();
+
   window.requestAnimationFrame(this._loop.bind(this));
   //TESTS FOR FPS MEASUREMENT
   this.fps = createFps();
 };
 
 Kane.Game.prototype.stop = function () {
-  this.currentTimeStamp = 0;
-  this.previousTimeStamp = 0;
   this.isRunning = false;
+
+  this.clock.stop();
 };
 
 //TODO: TESTS FOR FPS MEASUREMENT
@@ -601,9 +677,83 @@ Kane.InputQueue.prototype.resetQueue = function () {
 
 });
 
+minispade.register('inputwizard.js', function() {
+"use strict";
+/*
+this object is responsible for listening to keyboard events
+and passing the information on to its subscribers after some
+processing
+*/
+
+var InputWizardInterface = {
+  addSubscriber: function (subscriber) {},  
+  removeSubscriber: function (subscriber) {},  
+  attachToDomNode: function (domNode) {},  
+  removeFromDomNode: function (domNode) {},  
+
+  //public interface attributes
+  subscribers: [],
+  domNodes: [],
+};
+
+Kane.InputWizard = function (settings) {
+  _.extend(this, settings);
+
+  this.subscribers = [];
+  this.domNodes = [];
+};
+
+Kane.InputWizard.prototype = Object.create(InputWizardInterface);
+
+Kane.InputWizard.prototype.addSubscriber = function (subscriber) {
+  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+
+  this.subscribers.push(subscriber);
+  
+  //useful for chaining
+  return this;
+};
+
+Kane.InputWizard.prototype.removeSubscriber = function (subscriber) {
+  if ("object" !== typeof subscriber) { throw new Error('no subscriber provided'); }
+  if (!_.contains(this.subscribers, subscriber)) {
+    throw new Error('subscriber provided is not a in the list of subscribers!');
+  }
+
+  this.subscribers = _.without(this.subscribers, subscriber);
+
+  //useful for chaining
+  return this;
+};
+
+Kane.InputWizard.prototype.attachToDomNode = function (domNode) {
+  //if no domNode provided, set domNode to document body
+  domNode = (domNode) ? domNode : document.body;
+  this.domNodes.push(domNode);
+
+  //useful for chaining
+  return this;
+};
+
+Kane.InputWizard.prototype.removeFromDomNode = function (domNode) {
+  //we throw so that we dont silently fail to remove 
+  if (!domNode) { throw new Error('no domnode provided'); } 
+  if (!_.contains(this.domNodes, domNode)) {
+    throw new Error('domNode provided not in the list of domNodes');
+  } 
+  
+  this.domNodes = _.without(this.domNodes, domNode);
+
+  //useful for chaining
+  return this;
+};
+
+});
+
 minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
+minispade.require('clock.js');
 minispade.require('game.js');
 minispade.require('scene.js');
 minispade.require('drawplane.js');
@@ -613,6 +763,7 @@ minispade.require('player.js');
 minispade.require('inputevent.js');
 minispade.require('inputqueue.js');
 minispade.require('inputmanager.js');
+minispade.require('inputwizard.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -661,8 +812,8 @@ function createScene (name, settingsHash) {
   return new Kane.Scene(name, settingsHash);
 };
 
-function createGame (entityManager, inputQueue) {
-  return new Kane.Game(entityManager, inputQueue);
+function createGame () {
+  return new Kane.Game();
 };
 
 //global background canvas object
@@ -687,7 +838,10 @@ Construction of specific scene
 var entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = createDrawPlane(entityCanvas)
   , entityManager = createEntityManager(entityPlane)
-  , game = createGame();
+  , clock = new Kane.Clock()
+  , game = new Kane.Game({
+    clock: clock
+  });
 
 //pass in our default input Queue and our entityManager
 var ingame = new Kane.Scene('ingame', {
