@@ -7,7 +7,7 @@ describe('Kane.Entity', function () {
     , drawplane = Test.createDrawPlane('tests');
   
   beforeEach(function () {
-    en = Test.createEntity({drawplane: drawplane});
+    en = new Kane.Entity({drawplane: drawplane});
   });
 
   it('should return an object', function () {

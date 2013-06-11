@@ -16,7 +16,9 @@ var EntityManagerInterface = {
 
 //requires array of entities
 Kane.EntityManager = function (drawplane) {
-  if (!drawplane) { throw new Error('must provide drawplane'); }
+  if (!drawplane) { 
+    throw new Error('must provide drawplane'); 
+  }
   this.drawplane = drawplane;
 };
 
@@ -54,7 +56,9 @@ Kane.EntityManager.prototype.generateUniqueId = function () {
 
 //create new entity and return it
 Kane.EntityManager.prototype.spawn = function (constructor, args) {
-  if (!constructor) { throw new Error('no constructor provided'); }
+  if (!constructor) { 
+    throw new Error('no constructor provided'); 
+  }
 
   var entity = new constructor(args);
 
@@ -121,17 +125,21 @@ Kane.EntityManager.prototype.listEntities = function () {
 };
 
 Kane.EntityManager.prototype.findByType = function (type) {
-  if (!type) { throw new Error('no type provided'); }
+  if (!type) { 
+    throw new Error('no type provided'); 
+  }
 
-  return this.filter(function (ent) {
+  return _(this).filter(function (ent) {
     return (type === ent.type);
   });
 };
 
 Kane.EntityManager.prototype.findByName = function (name) {
-  if (!name) { throw new Error('no name provided'); }
+  if (!name) { 
+    throw new Error('no name provided'); 
+  }
 
-  return this.filter(function (ent) {
+  return _(this).filter(function (ent) {
     return (name === ent.name);
   });
 };
@@ -143,9 +151,11 @@ they will be passed to each object
 Kane.EntityManager.prototype.callForAll = function (methodName) {
   var args = Array.prototype.slice.call(arguments, 1);
 
-  if (!methodName) { throw new Error('no methodName provided'); }
+  if (!methodName) { 
+    throw new Error('no methodName provided'); 
+  }
 
-  this.forEach(function (entity) {
+  _(this).each(function (entity) {
     if (entity[methodName]) {
       entity[methodName].apply(entity, args);
     }
@@ -153,9 +163,12 @@ Kane.EntityManager.prototype.callForAll = function (methodName) {
 };
 
 Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
-  if (!methodName) { throw new Error('no methodName provided'); }
+  if (!methodName) { 
+    throw new Error('no methodName provided'); 
+  }
 
-  this.forEach(function (entity) {
+  
+  _(this).each(function (entity) {
     if (entity[methodName]) {
       entity[methodName].apply(entity, argsArray);
     }

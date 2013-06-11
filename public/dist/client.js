@@ -73,7 +73,9 @@ var DrawPlaneInterface = {
 };
 
 Kane.DrawPlane = function (board) {
-  if (!board) { throw new Error('must provide canvas domnode'); }
+  if (!board) { 
+    throw new Error('must provide canvas domnode'); 
+  }
 
   this.board = board;
   this.ctx = board.getContext('2d');
@@ -118,7 +120,9 @@ Kane.DrawPlane.prototype.drawImage = function ( image,
                                                 x, y, w, h) {
   var isValidImage = image instanceof Image;
 
-  if (!isValidImage) { throw new Error('not a valid image!'); }
+  if (!isValidImage) { 
+    throw new Error('not a valid image!'); 
+  }
   this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
 };
 
@@ -196,7 +200,9 @@ Kane.Entity.prototype.beforeUpdate = function (dT) {};
 Kane.Entity.prototype.update = function (dT) {
   var potentialY;
 
-  if (undefined == dT) { throw new Error('delta time not provided'); }
+  if (undefined == dT) { 
+    throw new Error('delta time not provided'); 
+  }
   
   //call our beforeUpdate hook to allow custom behavior
   this.beforeUpdate(dT);
@@ -220,8 +226,9 @@ Kane.Entity.prototype.draw = function () {
   if (!this.image) {
     this.drawplane.drawRect(
       this.color, 
-      Math.floor(this.x),
-      Math.floor(this.y), 
+      //x and y are rounded to avoid drawing on fractional pixels
+      Math.round(this.x),
+      Math.round(this.y), 
       this.w, 
       this.h
     );
@@ -262,7 +269,9 @@ var EntityManagerInterface = {
 
 //requires array of entities
 Kane.EntityManager = function (drawplane) {
-  if (!drawplane) { throw new Error('must provide drawplane'); }
+  if (!drawplane) { 
+    throw new Error('must provide drawplane'); 
+  }
   this.drawplane = drawplane;
 };
 
@@ -300,7 +309,9 @@ Kane.EntityManager.prototype.generateUniqueId = function () {
 
 //create new entity and return it
 Kane.EntityManager.prototype.spawn = function (constructor, args) {
-  if (!constructor) { throw new Error('no constructor provided'); }
+  if (!constructor) { 
+    throw new Error('no constructor provided'); 
+  }
 
   var entity = new constructor(args);
 
@@ -367,17 +378,21 @@ Kane.EntityManager.prototype.listEntities = function () {
 };
 
 Kane.EntityManager.prototype.findByType = function (type) {
-  if (!type) { throw new Error('no type provided'); }
+  if (!type) { 
+    throw new Error('no type provided'); 
+  }
 
-  return this.filter(function (ent) {
+  return _(this).filter(function (ent) {
     return (type === ent.type);
   });
 };
 
 Kane.EntityManager.prototype.findByName = function (name) {
-  if (!name) { throw new Error('no name provided'); }
+  if (!name) { 
+    throw new Error('no name provided'); 
+  }
 
-  return this.filter(function (ent) {
+  return _(this).filter(function (ent) {
     return (name === ent.name);
   });
 };
@@ -389,9 +404,11 @@ they will be passed to each object
 Kane.EntityManager.prototype.callForAll = function (methodName) {
   var args = Array.prototype.slice.call(arguments, 1);
 
-  if (!methodName) { throw new Error('no methodName provided'); }
+  if (!methodName) { 
+    throw new Error('no methodName provided'); 
+  }
 
-  this.forEach(function (entity) {
+  _(this).each(function (entity) {
     if (entity[methodName]) {
       entity[methodName].apply(entity, args);
     }
@@ -399,9 +416,12 @@ Kane.EntityManager.prototype.callForAll = function (methodName) {
 };
 
 Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
-  if (!methodName) { throw new Error('no methodName provided'); }
+  if (!methodName) { 
+    throw new Error('no methodName provided'); 
+  }
 
-  this.forEach(function (entity) {
+  
+  _(this).each(function (entity) {
     if (entity[methodName]) {
       entity[methodName].apply(entity, argsArray);
     }

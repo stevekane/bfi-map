@@ -6,7 +6,9 @@ var DrawPlaneInterface = {
 };
 
 Kane.DrawPlane = function (board) {
-  if (!board) { throw new Error('must provide canvas domnode'); }
+  if (!board) { 
+    throw new Error('must provide canvas domnode'); 
+  }
 
   this.board = board;
   this.ctx = board.getContext('2d');
@@ -51,7 +53,9 @@ Kane.DrawPlane.prototype.drawImage = function ( image,
                                                 x, y, w, h) {
   var isValidImage = image instanceof Image;
 
-  if (!isValidImage) { throw new Error('not a valid image!'); }
+  if (!isValidImage) { 
+    throw new Error('not a valid image!'); 
+  }
   this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
 };
 

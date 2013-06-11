@@ -45,7 +45,6 @@ describe('Kane.EntityManager', function () {
       var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
 
       assert.isObject(ent);
-      //TODO: probably should access this via getter
       assert.equal(drawplane, ent.drawplane);
       assert.instanceOf(ent, Kane.Entity);
     });

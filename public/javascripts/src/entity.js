@@ -64,7 +64,9 @@ Kane.Entity.prototype.beforeUpdate = function (dT) {};
 Kane.Entity.prototype.update = function (dT) {
   var potentialY;
 
-  if (undefined == dT) { throw new Error('delta time not provided'); }
+  if (undefined == dT) { 
+    throw new Error('delta time not provided'); 
+  }
   
   //call our beforeUpdate hook to allow custom behavior
   this.beforeUpdate(dT);
@@ -88,8 +90,9 @@ Kane.Entity.prototype.draw = function () {
   if (!this.image) {
     this.drawplane.drawRect(
       this.color, 
-      Math.floor(this.x),
-      Math.floor(this.y), 
+      //x and y are rounded to avoid drawing on fractional pixels
+      Math.round(this.x),
+      Math.round(this.y), 
       this.w, 
       this.h
     );
