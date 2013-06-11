@@ -30,35 +30,6 @@ Kane.Game = function (settings) {
 
 Kane.Game.prototype = Object.create(GameInterface); 
 
-/*
-TODO: consider making this a function and binding 
-this to ensure it's 'private'
-*/
-//private
-Kane.Game.prototype._loop = function () {
-  var dT
-    , inputs = [];
-
-  if (!this.isRunning) { return; }
-
-  //TODO TESTING FOR FPS
-  this.fps.begin();
-
-  //update timestamps
-  this.previousTimeStamp = this.currentTimeStamp;
-  this.currentTimeStamp = Date.now();
-
-  //calculate deltaT
-  dT = this.clock.getTimeDelta();
-
-  this.getCurrentScene().update(dT);
-    
-  //TODO TESTING FOR FPS
-  this.fps.end();
-
-  window.requestAnimationFrame(this._loop.bind(this));
-};
-
 Kane.Game.prototype.addScene = function (scene) {
   if (!scene) { 
     throw new Error('no scene provided'); 
@@ -144,25 +115,34 @@ Kane.Game.prototype.start = function () {
   //start the clock
   this.clock.start();
 
-  window.requestAnimationFrame(this._loop.bind(this));
-  //TESTS FOR FPS MEASUREMENT
-  this.fps = createFps();
+  //call update at fixed interval
+  window.setInterval(update.bind(this), this.interval || 25);
+
+  //start the draw method firing on every render
+  window.requestAnimationFrame(draw.bind(this));
 };
 
 Kane.Game.prototype.stop = function () {
   this.isRunning = false;
-
   this.clock.stop();
 };
 
-//TODO: TESTS FOR FPS MEASUREMENT
-function createFps (x, y) {
-  var fps = new Stats();
-  fps.setMode(0);
-  fps.domElement.style.position = 'absolute';
-  fps.domElement.style.left = 0;
-  fps.domElement.style.top = 0;
-  document.body.appendChild(fps.domElement); 
-  return fps;
+
+//increment game logic
+function update () {
+  if (!this.isRunning) { return; }
+
+  var dT = this.clock.getTimeDelta();
+  _(this.scenes).each(function (element) {
+    element.update(dT)
+  }, this);
+};
+
+//draw method called on requestAnimationFrame
+function draw () {
+  if (!this.isRunning) { return; }
+
+  this.getCurrentScene().draw();
+  window.requestAnimationFrame(draw.bind(this));
 };
 

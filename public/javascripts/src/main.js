@@ -6,10 +6,6 @@ require('scene.js');
 require('drawplane.js');
 require('entity.js');
 require('entitymanager.js');
-require('player.js');
-require('inputevent.js');
-require('inputqueue.js');
-require('inputmanager.js');
 require('inputwizard.js');
 
 function createCanvas (w, h, name) {

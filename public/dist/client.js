@@ -444,35 +444,6 @@ Kane.Game = function (settings) {
 
 Kane.Game.prototype = Object.create(GameInterface); 
 
-/*
-TODO: consider making this a function and binding 
-this to ensure it's 'private'
-*/
-//private
-Kane.Game.prototype._loop = function () {
-  var dT
-    , inputs = [];
-
-  if (!this.isRunning) { return; }
-
-  //TODO TESTING FOR FPS
-  this.fps.begin();
-
-  //update timestamps
-  this.previousTimeStamp = this.currentTimeStamp;
-  this.currentTimeStamp = Date.now();
-
-  //calculate deltaT
-  dT = this.clock.getTimeDelta();
-
-  this.getCurrentScene().update(dT);
-    
-  //TODO TESTING FOR FPS
-  this.fps.end();
-
-  window.requestAnimationFrame(this._loop.bind(this));
-};
-
 Kane.Game.prototype.addScene = function (scene) {
   if (!scene) { 
     throw new Error('no scene provided'); 
@@ -558,158 +529,37 @@ Kane.Game.prototype.start = function () {
   //start the clock
   this.clock.start();
 
-  window.requestAnimationFrame(this._loop.bind(this));
-  //TESTS FOR FPS MEASUREMENT
-  this.fps = createFps();
+  //call update at fixed interval
+  window.setInterval(update.bind(this), this.interval || 25);
+
+  //start the draw method firing on every render
+  window.requestAnimationFrame(draw.bind(this));
 };
 
 Kane.Game.prototype.stop = function () {
   this.isRunning = false;
-
   this.clock.stop();
 };
 
-//TODO: TESTS FOR FPS MEASUREMENT
-function createFps (x, y) {
-  var fps = new Stats();
-  fps.setMode(0);
-  fps.domElement.style.position = 'absolute';
-  fps.domElement.style.left = 0;
-  fps.domElement.style.top = 0;
-  document.body.appendChild(fps.domElement); 
-  return fps;
+
+//increment game logic
+function update () {
+  if (!this.isRunning) { return; }
+
+  var dT = this.clock.getTimeDelta();
+  _(this.scenes).each(function (element) {
+    element.update(dT)
+  }, this);
 };
 
+//draw method called on requestAnimationFrame
+function draw () {
+  if (!this.isRunning) { return; }
 
-});
-
-minispade.register('inputevent.js', function() {
-"use strict";
-Kane.InputEvent = function (type, data) {
-  this.type = type;
-  this.data = data;  
+  this.getCurrentScene().draw();
+  window.requestAnimationFrame(draw.bind(this));
 };
 
-});
-
-minispade.register('inputmanager.js', function() {
-"use strict";
-
-minispade.require('inputevent.js');
-
-var InputManagerInterface = {
-  handleInputEvent: function () {},
-  activateKeyUpHandler: function () {},
-  activateKeyDownHandler: function () {},
-  getActiveHandlers: function () {},
-};
-
-Kane.InputManager = function (inputQueue, domNode) {
-  if (!inputQueue) { 
-    throw new Error('no inputQueue provided to constructor'); 
-  }
-  this.inputQueue = inputQueue;
-  this.domNode = (domNode) ? domNode : document.body;
-  this.activeHandlers = [];
-};
-
-Kane.InputManager.prototype = Object.create(InputManagerInterface);
-
-//type is a string, data is an object
-Kane.InputManager.prototype.handleInputEvent = function (type, data) {
-  var inputEvent;
-  if (!type) { throw new Error('must provide type to handleInputEvent'); }
-  if (!data) { throw new Error('must provide data to handleInputEvent'); }
-
-  inputEvent = new Kane.InputEvent(type, data);
-  this.inputQueue.enqueueEvent(inputEvent);
-};
-
-Kane.InputManager.prototype.activateKeyUpHandler = function () {
-  //do nothing is keyUpHandler already active
-  if (searchForMatch(this.activeHandlers, keyUpHandler)) { return; }
-
-  this.activeHandlers.push(keyUpHandler); 
-  this.domNode.addEventListener('keyup', keyUpHandler.bind(this));
-};
-
-Kane.InputManager.prototype.activateKeyDownHandler = function () {
-  //do nothing is keyUpHandler already active
-  if (searchForMatch(this.activeHandlers, keyDownHandler)) { return; }
-
-  this.activeHandlers.push(keyDownHandler); 
-  this.domNode.addEventListener('keydown', keyDownHandler.bind(this));
-};
-
-Kane.InputManager.prototype.getActiveHandlers = function () {
-  return this.activeHandlers;
-};
-
-//helper to search an array for an element and return true if found
-function searchForMatch (array, matchee) {
-  for (var i=0; i<array.length; i++) {
-    if (array[i] === matchee) { return true; }
-  }
-  return false;
-};
-
-function keyUpHandler (e) {
-  //TODO: hack to only prevent for movement keys, should be made more general
-  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
-    e.preventDefault();
-  }
-  this.handleInputEvent('keyup', {keyCode: e.keyCode});
-};
-
-function keyDownHandler (e) {
-  //TODO: hack to only prevent for movement keys, should be made more general
-  if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode ===40) {
-    e.preventDefault();
-  }
-  this.handleInputEvent('keydown', {keyCode: e.keyCode});
-};
-
-});
-
-minispade.register('inputqueue.js', function() {
-"use strict";
-var InputQueueInterface = {
-  enqueueEvent: function (ev) {},
-  fetchNextEvent: function () {},
-  fetchAllEvents: function () {},
-  resetQueue: function () {},
-};
-
-Kane.InputQueue = function () {
-  this.eventQueue = [];
-};
-
-Kane.InputQueue.prototype = Object.create(InputQueueInterface);
-
-//pushes events onto tail of the queue
-Kane.InputQueue.prototype.enqueueEvent = function (ev) {
-  this.eventQueue.push(ev);
-};
-
-//shifts events from head of the queue
-Kane.InputQueue.prototype.fetchNextEvent = function () {
-  if (0 === this.eventQueue.length) { return null; }
-  return this.eventQueue.shift(); 
-};
-
-//returns the eventQueue array and resets it
-Kane.InputQueue.prototype.fetchAllEvents = function () {
-  var events = [];
-
-  events = this.eventQueue;
-  this.resetQueue();
-  return events; 
-};
-
-//This does NOT return the queue, just resets it
-Kane.InputQueue.prototype.resetQueue = function () {
-  this.eventQueue = [];
-};
 
 });
 
@@ -968,10 +818,6 @@ minispade.require('scene.js');
 minispade.require('drawplane.js');
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
-minispade.require('player.js');
-minispade.require('inputevent.js');
-minispade.require('inputqueue.js');
-minispade.require('inputmanager.js');
 minispade.require('inputwizard.js');
 
 function createCanvas (w, h, name) {
@@ -1128,134 +974,6 @@ function generateColor () {
 
 });
 
-minispade.register('player.js', function() {
-"use strict";
-
-minispade.require('entity.js');
-
-//class inherits from Kane.Entity
-
-Kane.Player = function (drawplane, inputQueue) {
-  if (!drawplane) { throw new Error('no drawplane provided to constructor'); }
-  if (!inputQueue) { throw new Error('no input queue provided to constructor'); }
-
-  this.drawplane = drawplane;
-  this.inputQueue = inputQueue;
-  this.moveSpeed = .1;
-
-  //TODO: possibly refactor to make this a passable dependency??
-  this.keyMap = createKeyMap();
-  setDefaults(this); 
-};
-
-Kane.Player.prototype = Object.create(Kane.Entity.prototype);
-
-Kane.Player.prototype.processInputs = function () {
-  var inputs = this.inputQueue.fetchAllEvents();
-
-  //compare each input to the keymap to extract the desired method name
-  //then execute the method name
-  inputs.forEach(function (input) { 
-    var matchingMethodName = this.keyMap[input.type][input.data.keyCode]; 
-
-    if (matchingMethodName) { 
-      this[matchingMethodName](); 
-    }
-  }, this);
-};
-
-//TODO: THESE ARE FOR STATIC 2d MOTION!  Will not work correctly w/ grav
-Kane.Player.prototype.moveUp = function () {
-  this.dy = -1 * this.moveSpeed;
-};
-
-Kane.Player.prototype.moveDown = function () {
-  this.dy = this.moveSpeed;
-};
-
-Kane.Player.prototype.moveLeft = function () {
-  this.dx = -1 * this.moveSpeed;
-};
-
-Kane.Player.prototype.moveRight = function () {
-  this.dx = this.moveSpeed;
-};
-
-Kane.Player.prototype.cancelMoveUp = function () {
-  this.dy = 0;
-};
-
-Kane.Player.prototype.cancelMoveDown = function () {
-  this.dy = 0;
-};
-
-Kane.Player.prototype.cancelMoveLeft = function () {
-  this.dx = 0;
-};
-
-Kane.Player.prototype.cancelMoveRight = function () {
-  this.dx = 0;
-};
-
-function createKeyMap () {
-  //basic movement
-  return {
-    keyup: {
-      38: 'cancelMoveUp',
-      40: 'cancelMoveDown',
-      37: 'cancelMoveLeft',
-      39: 'cancelMoveRight'
-    },
-    keydown: {
-      38: 'moveUp',
-      40: 'moveDown',
-      37: 'moveLeft',
-      39: 'moveRight'
-    },
-  };
-};
-
-function setDefaults (entity) {
-  //boolean flag to determine if this object is in use already
-  entity.isActive = false;
-  
-  //default color if no image available
-  entity.color = "#11ffbb";
-
-  //position
-  entity.x = 0;
-  entity.y = 0;
-
-  //previous positions
-  entity.lastx = 0;
-  entity.lasty = 0;
-
-  //dimensions
-  entity.w = 0;
-  entity.h = 0;
-
-  //velocity
-  entity.dx = 0;
-  entity.dy = 0;
-
-  //accel
-  entity.ddx = 0;
-  entity.ddy = 0;
-
-  //render order
-  entity.zIndex = 0;
-
-  //identifiers
-  entity.name = "";
-  entity.type = "";
-  
-  //animation info  
-  entity.anims = [];
-  entity.currentAnim = {}
-};
-
-});
-
 minispade.register('scene.js', function() {
 "use strict";
 /*
@@ -1300,7 +1018,6 @@ Kane.Scene.prototype.update = function (dT) {
 
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  
-    this.entityManager.drawAll();
   } 
 
   this.onUpdate(dT);
@@ -1308,7 +1025,7 @@ Kane.Scene.prototype.update = function (dT) {
 
 Kane.Scene.prototype.draw = function () {
   if (this.entityManager) {
-    this.entityManager.drawActive();
+    this.entityManager.drawAll();
   }
 
   this.onDraw();

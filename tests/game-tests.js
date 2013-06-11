@@ -7,6 +7,7 @@ describe('Kane.Game', function () {
     , scene = {
         name: 'testScene',
         update: function (dT) {}, 
+        draw: function () {}, 
         onEnter: function () {},
         onExit: function () {},
       }
@@ -146,6 +147,7 @@ describe('Kane.Game', function () {
       game.addScene({
         name: sceneName,
         update: function (dT) {}, 
+        draw: function () {}, 
         onEnter: function () {}, 
         onExit: function () {}, 
       });

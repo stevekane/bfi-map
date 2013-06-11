@@ -40,7 +40,6 @@ Kane.Scene.prototype.update = function (dT) {
 
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  
-    this.entityManager.drawAll();
   } 
 
   this.onUpdate(dT);
@@ -48,7 +47,7 @@ Kane.Scene.prototype.update = function (dT) {
 
 Kane.Scene.prototype.draw = function () {
   if (this.entityManager) {
-    this.entityManager.drawActive();
+    this.entityManager.drawAll();
   }
 
   this.onDraw();
