@@ -12,7 +12,7 @@ var EntityManagerInterface = {
   applyForAll: function (methodName, argArray) {},
 
   //define mandatory interface attribute
-  drawplane: {}
+  drawplane: {},
 };
 
 //requires array of entities
@@ -27,8 +27,8 @@ Kane.EntityManager.prototype = new Array;
 
 /*
 different than "normal" syntax here is used to specifically state our intention
-to add our interface methods onto the prototype we have defined which inherits core
-functionality from Array
+to add our interface methods onto the prototype we have defined which 
+inherits core functionality from Array
 */
 _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
@@ -130,7 +130,8 @@ Kane.EntityManager.prototype.drawAll = function () {
 };
 
 Kane.EntityManager.prototype.findCollisions = function () {
-  var collisions = [];
+  var collisions = []
+    , colliders = [];
 
   function checkCollision (sub, tar) {
     
@@ -150,8 +151,13 @@ Kane.EntityManager.prototype.findCollisions = function () {
     );
   };
 
-  //iterate through all entities
-  _(this).each(function (subjectEnt, index, entities) {
+  function doesCollide (ent) {
+    return ent.doesCollide;
+  };
+
+  //iterate through all colliding entities
+  colliders = _(this).filter(doesCollide); 
+  _(colliders).each(function (subjectEnt, index, entities) {
 
     //compare subjectEnt to all entities (discarding self)
     _(entities).each(function (targetEnt) {

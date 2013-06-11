@@ -150,6 +150,8 @@ var EntityInterface = {
   dependencies.  This makes us able to guarantee that these
   properties exist w/o needing explicit getters/setters for each
   */
+  doesCollide: true,
+  
   id: 0,
   name: "",
   type: "",
@@ -183,6 +185,8 @@ Kane.Entity = function (argsHash) {
   }
   
   this._isDead = false;
+  this.doesCollide = true;
+
   _.extend(this, argsHash);
 };
 
@@ -272,7 +276,7 @@ var EntityManagerInterface = {
   applyForAll: function (methodName, argArray) {},
 
   //define mandatory interface attribute
-  drawplane: {}
+  drawplane: {},
 };
 
 //requires array of entities
@@ -287,8 +291,8 @@ Kane.EntityManager.prototype = new Array;
 
 /*
 different than "normal" syntax here is used to specifically state our intention
-to add our interface methods onto the prototype we have defined which inherits core
-functionality from Array
+to add our interface methods onto the prototype we have defined which 
+inherits core functionality from Array
 */
 _.extend(Kane.EntityManager.prototype, EntityManagerInterface);
 
@@ -390,7 +394,8 @@ Kane.EntityManager.prototype.drawAll = function () {
 };
 
 Kane.EntityManager.prototype.findCollisions = function () {
-  var collisions = [];
+  var collisions = []
+    , colliders = [];
 
   function checkCollision (sub, tar) {
     
@@ -410,8 +415,13 @@ Kane.EntityManager.prototype.findCollisions = function () {
     );
   };
 
-  //iterate through all entities
-  _(this).each(function (subjectEnt, index, entities) {
+  function doesCollide (ent) {
+    return ent.doesCollide;
+  };
+
+  //iterate through all colliding entities
+  colliders = _(this).filter(doesCollide); 
+  _(colliders).each(function (subjectEnt, index, entities) {
 
     //compare subjectEnt to all entities (discarding self)
     _(entities).each(function (targetEnt) {
@@ -999,7 +1009,7 @@ ingame.keyup = function (keyName) {
         w: 40,
         h: 40,
         ddy: .001,
-        color: generateColor(),
+        color: '#1356ab',
         killtimer: Date.now() + 2000,
 
         //introduce afterupdate method to check if we should kill
@@ -1017,15 +1027,16 @@ ingame.keyup = function (keyName) {
             this.manager.spawn(
               Kane.Entity, 
               {
+                doesCollide: false,
                 drawplane: entityPlane,
                 x: this.x,
                 y: this.y,
                 dx: Math.random() * (this.dx + target.dx),
-                dy: Math.random() * -1,
+                dy: Math.random() * (this.dy + target.dy),
                 w: 8,
                 h: 8,
                 ddy: .001,
-                color: generateColor(),
+                color: "#bb0000",
                 killtimer: Date.now() + 500,
 
                 //introduce afterupdate method to check if we should kill

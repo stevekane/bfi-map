@@ -109,7 +109,7 @@ ingame.keyup = function (keyName) {
         w: 40,
         h: 40,
         ddy: .001,
-        color: generateColor(),
+        color: '#1356ab',
         killtimer: Date.now() + 2000,
 
         //introduce afterupdate method to check if we should kill
@@ -127,15 +127,16 @@ ingame.keyup = function (keyName) {
             this.manager.spawn(
               Kane.Entity, 
               {
+                doesCollide: false,
                 drawplane: entityPlane,
                 x: this.x,
                 y: this.y,
                 dx: Math.random() * (this.dx + target.dx),
-                dy: Math.random() * -1,
+                dy: Math.random() * (this.dy + target.dy),
                 w: 8,
                 h: 8,
                 ddy: .001,
-                color: generateColor(),
+                color: "#bb0000",
                 killtimer: Date.now() + 500,
 
                 //introduce afterupdate method to check if we should kill

@@ -14,6 +14,8 @@ var EntityInterface = {
   dependencies.  This makes us able to guarantee that these
   properties exist w/o needing explicit getters/setters for each
   */
+  doesCollide: true,
+  
   id: 0,
   name: "",
   type: "",
@@ -47,6 +49,8 @@ Kane.Entity = function (argsHash) {
   }
   
   this._isDead = false;
+  this.doesCollide = true;
+
   _.extend(this, argsHash);
 };
 
