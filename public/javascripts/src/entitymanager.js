@@ -110,7 +110,15 @@ Kane.EntityManager.prototype.sortBy = function (propName, ascending) {
 };
 
 Kane.EntityManager.prototype.updateAll = function (dT) {
+  var collisions;
+
   this.callForAll('update', dT);
+
+  //send out notification of collisions
+  collisions = this.findCollisions();
+  _(collisions).each(function (collision) {
+    collision.subject.collide.call(collision.subject, collision.target);
+  }); 
 };
 
 Kane.EntityManager.prototype.drawAll = function () {

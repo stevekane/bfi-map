@@ -102,14 +102,52 @@ ingame.keyup = function (keyName) {
       Kane.Entity, 
       {
         drawplane: entityPlane,
-        x: 300,
-        y: 240,
+        x: Math.round(Math.random() * 640),
+        y: Math.round(Math.random() * 480),
         dx: dx,
         dy: dy,
-        w: Math.floor(Math.random() * 40),
-        h: Math.floor(Math.random() * 40),
+        w: 40,
+        h: 40,
         ddy: .001,
-        color: generateColor()
+        color: generateColor(),
+        killtimer: Date.now() + 2000,
+
+        //introduce afterupdate method to check if we should kill
+        afterUpdate: function (dT) {
+          if (Date.now() > this.killtimer) {
+            this.kill();   
+          }
+        },
+
+        collide: function (target) {
+          this.kill();
+          target.kill();
+          
+          for (var i=0; i<20; i++) {
+            this.manager.spawn(
+              Kane.Entity, 
+              {
+                drawplane: entityPlane,
+                x: this.x,
+                y: this.y,
+                dx: Math.random() * (this.dx + target.dx),
+                dy: Math.random() * -1,
+                w: 8,
+                h: 8,
+                ddy: .001,
+                color: generateColor(),
+                killtimer: Date.now() + 500,
+
+                //introduce afterupdate method to check if we should kill
+                afterUpdate: function (dT) {
+                  if (Date.now() > this.killtimer) {
+                    this.kill();   
+                  }
+                },
+              }
+            ); 
+          }
+        }
       }
     );
   }

@@ -39,6 +39,7 @@ Kane.Scene.prototype.update = function (dT) {
   }
 
   if (this.entityManager) { 
+    this.entityManager.removeDead();
     this.entityManager.updateAll(dT);  
   } 
 
