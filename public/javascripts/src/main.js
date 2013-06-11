@@ -2,6 +2,7 @@ window.Kane = {};
 
 require('clock.js');
 require('game.js');
+require('world.js');
 require('scene.js');
 require('drawplane.js');
 require('entity.js');

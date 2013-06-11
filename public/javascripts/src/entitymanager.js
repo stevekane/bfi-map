@@ -5,6 +5,7 @@ var EntityManagerInterface = {
   sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
   drawAll: function () {},
+  findCollisions: function () {},
   listEntities: function () {},
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
@@ -118,6 +119,48 @@ Kane.EntityManager.prototype.drawAll = function () {
 
   //call draw for each entity
   this.callForAll('draw'); 
+};
+
+Kane.EntityManager.prototype.findCollisions = function () {
+  var collisions = [];
+
+  function checkCollision (sub, tar) {
+    
+    //don't collide with self
+    if (sub === tar) { 
+      return false; 
+    }
+
+    /*
+    to clearly visualize this visit
+    silentmatt.com/rectangle-intersection/
+    */ 
+    return ( (sub.x < (tar.x + tar.w)) && 
+             ((sub.x + sub.w) > tar.x) &&
+             (sub.y < (tar.y + tar.h)) &&
+             ((sub.y + sub.h) > tar.y) 
+    );
+  };
+
+  //iterate through all entities
+  _(this).each(function (subjectEnt, index, entities) {
+
+    //compare subjectEnt to all entities (discarding self)
+    _(entities).each(function (targetEnt) {
+
+      //perform collision detection here       
+      if (checkCollision(subjectEnt, targetEnt)) {
+
+        //if a collision is detected, push this object onto collisions array
+        collisions.push({
+          subject: subjectEnt, 
+          target: targetEnt
+        });
+      }      
+    });
+  });
+
+  return collisions; 
 };
 
 Kane.EntityManager.prototype.listEntities = function () {

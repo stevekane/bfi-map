@@ -7,6 +7,7 @@ var EntityInterface = {
   beforeDraw: function () {},
   draw: function () {},
   afterDraw: function () {},
+  collide: function (target) {},
   
   /*
   here we expose required properties of entities that are not
@@ -102,6 +103,12 @@ Kane.Entity.prototype.draw = function () {
 };
 
 Kane.Entity.prototype.afterDraw = function () {};
+
+Kane.Entity.prototype.collide = function (target) {
+  if (!target) {
+    throw new Error('no target provided');
+  }
+};
 
 function updatePosition(dT, v, oldPos) {
   return oldPos + dT * v;

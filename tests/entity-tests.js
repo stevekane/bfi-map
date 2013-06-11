@@ -145,4 +145,15 @@ describe('Kane.Entity', function () {
       assert.isFunction(en.afterDraw);
     });
   });
+
+  describe("#collide()", function () {
+    it('should be a function', function () {
+      assert.isFunction(en.collide);
+    });
+    it('should throw if no target is provided', function () {
+      assert.throws(function () {
+        en.collide();
+      });
+    });
+  });
 });

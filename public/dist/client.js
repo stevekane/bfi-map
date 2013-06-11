@@ -143,6 +143,7 @@ var EntityInterface = {
   beforeDraw: function () {},
   draw: function () {},
   afterDraw: function () {},
+  collide: function (target) {},
   
   /*
   here we expose required properties of entities that are not
@@ -239,6 +240,12 @@ Kane.Entity.prototype.draw = function () {
 
 Kane.Entity.prototype.afterDraw = function () {};
 
+Kane.Entity.prototype.collide = function (target) {
+  if (!target) {
+    throw new Error('no target provided');
+  }
+};
+
 function updatePosition(dT, v, oldPos) {
   return oldPos + dT * v;
 };
@@ -258,6 +265,7 @@ var EntityManagerInterface = {
   sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
   drawAll: function () {},
+  findCollisions: function () {},
   listEntities: function () {},
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
@@ -371,6 +379,48 @@ Kane.EntityManager.prototype.drawAll = function () {
 
   //call draw for each entity
   this.callForAll('draw'); 
+};
+
+Kane.EntityManager.prototype.findCollisions = function () {
+  var collisions = [];
+
+  function checkCollision (sub, tar) {
+    
+    //don't collide with self
+    if (sub === tar) { 
+      return false; 
+    }
+
+    /*
+    to clearly visualize this visit
+    silentmatt.com/rectangle-intersection/
+    */ 
+    return ( (sub.x < (tar.x + tar.w)) && 
+             ((sub.x + sub.w) > tar.x) &&
+             (sub.y < (tar.y + tar.h)) &&
+             ((sub.y + sub.h) > tar.y) 
+    );
+  };
+
+  //iterate through all entities
+  _(this).each(function (subjectEnt, index, entities) {
+
+    //compare subjectEnt to all entities (discarding self)
+    _(entities).each(function (targetEnt) {
+
+      //perform collision detection here       
+      if (checkCollision(subjectEnt, targetEnt)) {
+
+        //if a collision is detected, push this object onto collisions array
+        collisions.push({
+          subject: subjectEnt, 
+          target: targetEnt
+        });
+      }      
+    });
+  });
+
+  return collisions; 
 };
 
 Kane.EntityManager.prototype.listEntities = function () {
@@ -834,6 +884,7 @@ minispade.register('main.js', function() {
 window.Kane = {};
 minispade.require('clock.js');
 minispade.require('game.js');
+minispade.require('world.js');
 minispade.require('scene.js');
 minispade.require('drawplane.js');
 minispade.require('entity.js');
@@ -1055,5 +1106,18 @@ Kane.Scene.prototype.onEnter = function () {};
 Kane.Scene.prototype.onExit = function () {};
 Kane.Scene.prototype.onUpdate = function (dT) {};
 Kane.Scene.prototype.onDraw = function () {};
+
+});
+
+minispade.register('world.js', function() {
+"use strict";
+var WorldInterface = {};
+
+Kane.World = function (settings) {
+  _.extend(this, settings);
+};
+
+Kane.World.prototype = Object.create(WorldInterface);
+
 
 });

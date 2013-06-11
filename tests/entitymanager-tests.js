@@ -146,6 +146,50 @@ describe('Kane.EntityManager', function () {
     });
   });
 
+  
+  describe("#findCollisions()", function () {
+    it('should be a function', function () {
+      assert.isFunction(em.findCollisions);
+    });
+    it('should return array of collision maps', function () {
+      var noOverlap = {
+        x: 0,
+        y: 20,
+        h: 20,
+        w: 20,
+        drawplane: {}
+      },  overlap1 = {
+        x: 5,
+        y: 5,
+        h: 5,
+        w: 5,
+        drawplane: {}
+      },  overlap2 = {
+        x: 5,
+        y: 5,
+        h: 2,
+        w: 2,
+        drawplane: {}
+      }
+        , collisions;
+
+      //add three entities, 2 of whom should overlap
+      em.spawn(Kane.Entity, noOverlap);
+      em.spawn(Kane.Entity, overlap1);
+      em.spawn(Kane.Entity, overlap2);
+
+      collisions = em.findCollisions(); 
+
+      assert.isArray(collisions);
+      assert.lengthOf(collisions, 2);
+      //check that subject/target are all valid entities
+      assert.instanceOf(collisions[0].subject, Kane.Entity);
+      assert.instanceOf(collisions[0].target, Kane.Entity);
+      assert.instanceOf(collisions[1].subject, Kane.Entity);
+      assert.instanceOf(collisions[1].target, Kane.Entity);
+    });
+  });
+
   describe('#listEntities()', function () {
     it('should be a function', function () {
       assert.isFunction(em.listEntities);
