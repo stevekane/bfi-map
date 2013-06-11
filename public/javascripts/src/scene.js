@@ -34,7 +34,9 @@ Kane.Scene = function (name, settings) {
 Kane.Scene.prototype = Object.create(SceneInterface);
 
 Kane.Scene.prototype.update = function (dT) {
-  if (!dT) { throw new Error('no dT provided to update'); }
+  if (!dT) { 
+    throw new Error('no dT provided to update'); 
+  }
 
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  

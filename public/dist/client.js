@@ -422,7 +422,9 @@ var GameInterface = {
   stop: function () {},
 
   //required public api attribtues
-  isRunning: false
+  isRunning: false,
+  //reference to game object that owns this scene
+  game: null
 };
 
 Kane.Game = function (settings) {
@@ -437,6 +439,7 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
+  this.game = null;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -471,18 +474,36 @@ Kane.Game.prototype._loop = function () {
 };
 
 Kane.Game.prototype.addScene = function (scene) {
-  if (!scene) { throw new Error('no scene provided'); } 
-  if (!scene.name) { throw new Error('scene must have a name!'); }
+  if (!scene) { 
+    throw new Error('no scene provided'); 
+  } 
+  if (!scene.name) { 
+    throw new Error('scene must have a name!'); 
+  }
+
+  /*
+  we need to add a reference to the game object onto this scene
+  this is used by scenes to make calls to "setCurrentScene" and other
+  scene related methods on the game object
+  */
+  scene.game = this; 
 
   this.scenes[scene.name] = scene;
 };
 
 Kane.Game.prototype.removeScene = function (name) {
   var targetScene;
-  if (!name) { throw new Error('no name provided'); }
+
+  if (!name) { 
+    throw new Error('no name provided'); 
+  }
   
   targetScene = this.scenes[name];
-  if (!targetScene) { throw new Error('no scene by that name found'); }
+
+  if (!targetScene) { 
+    throw new Error('no scene by that name found'); 
+  }
+
   delete this.scenes[name]; 
 
   return targetScene; 
@@ -989,10 +1010,13 @@ var entityCanvas = createCanvas(640, 480, 'entities')
   });
 
 //pass in our inputWizard and our entityManager
-var ingame = new Kane.Scene('ingame', {
-  inputWizard: inputWizard, 
-  entityManager: entityManager 
-});
+var ingame = new Kane.Scene(
+  'ingame', 
+  {
+    inputWizard: inputWizard, 
+    entityManager: entityManager
+  }
+);
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -1030,6 +1054,11 @@ ingame.keynameVelocityMapping = {
 ingame.keyup = function (keyName) {
   var mapping = this.keynameVelocityMapping[keyName];
 
+  //add a check for the escape key
+  if ('escape' === keyName) {
+    this.game.setCurrentScene('inmenu');
+  }
+
   if (mapping) {
     var dx = mapping.dx * Math.random()
       , dy = mapping.dy * Math.random();
@@ -1042,8 +1071,8 @@ ingame.keyup = function (keyName) {
         y: 240,
         dx: dx,
         dy: dy,
-        w: 40,
-        h: 40,
+        w: Math.floor(Math.random() * 40),
+        h: Math.floor(Math.random() * 40),
         ddy: .001,
         color: generateColor()
       }
@@ -1051,8 +1080,35 @@ ingame.keyup = function (keyName) {
   }
 };
 
+//pass in our inputWizard and our entityManager
+var inmenu = new Kane.Scene(
+  'inmenu', 
+  {
+    inputWizard: inputWizard, 
+  }
+);
+
+//define onEnter hook to subscribe to inputWizard
+inmenu.onEnter = function () {
+  console.log('inmenu entered!');
+  this.inputWizard.addSubscriber(this);
+};
+
+//define onExit hook to un-subscribe to inputWizard
+inmenu.onExit = function () {
+  console.log('inmenu exited!');
+  this.inputWizard.removeSubscriber(this);
+};
+
+inmenu.keyup = function (keyName) {
+  if ('escape' === keyName) {
+    this.game.setCurrentScene('ingame');
+  }
+};
+
 //configure the game object before starting it
 game.addScene(ingame);
+game.addScene(inmenu);
 game.setCurrentScene('ingame');
 
 //just a quick hack to show the scene name
@@ -1238,7 +1294,9 @@ Kane.Scene = function (name, settings) {
 Kane.Scene.prototype = Object.create(SceneInterface);
 
 Kane.Scene.prototype.update = function (dT) {
-  if (!dT) { throw new Error('no dT provided to update'); }
+  if (!dT) { 
+    throw new Error('no dT provided to update'); 
+  }
 
   if (this.entityManager) { 
     this.entityManager.updateAll(dT);  

@@ -48,10 +48,13 @@ var entityCanvas = createCanvas(640, 480, 'entities')
   });
 
 //pass in our inputWizard and our entityManager
-var ingame = new Kane.Scene('ingame', {
-  inputWizard: inputWizard, 
-  entityManager: entityManager 
-});
+var ingame = new Kane.Scene(
+  'ingame', 
+  {
+    inputWizard: inputWizard, 
+    entityManager: entityManager
+  }
+);
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -89,6 +92,11 @@ ingame.keynameVelocityMapping = {
 ingame.keyup = function (keyName) {
   var mapping = this.keynameVelocityMapping[keyName];
 
+  //add a check for the escape key
+  if ('escape' === keyName) {
+    this.game.setCurrentScene('inmenu');
+  }
+
   if (mapping) {
     var dx = mapping.dx * Math.random()
       , dy = mapping.dy * Math.random();
@@ -101,8 +109,8 @@ ingame.keyup = function (keyName) {
         y: 240,
         dx: dx,
         dy: dy,
-        w: 40,
-        h: 40,
+        w: Math.floor(Math.random() * 40),
+        h: Math.floor(Math.random() * 40),
         ddy: .001,
         color: generateColor()
       }
@@ -110,8 +118,35 @@ ingame.keyup = function (keyName) {
   }
 };
 
+//pass in our inputWizard and our entityManager
+var inmenu = new Kane.Scene(
+  'inmenu', 
+  {
+    inputWizard: inputWizard, 
+  }
+);
+
+//define onEnter hook to subscribe to inputWizard
+inmenu.onEnter = function () {
+  console.log('inmenu entered!');
+  this.inputWizard.addSubscriber(this);
+};
+
+//define onExit hook to un-subscribe to inputWizard
+inmenu.onExit = function () {
+  console.log('inmenu exited!');
+  this.inputWizard.removeSubscriber(this);
+};
+
+inmenu.keyup = function (keyName) {
+  if ('escape' === keyName) {
+    this.game.setCurrentScene('ingame');
+  }
+};
+
 //configure the game object before starting it
 game.addScene(ingame);
+game.addScene(inmenu);
 game.setCurrentScene('ingame');
 
 //just a quick hack to show the scene name

@@ -8,7 +8,9 @@ var GameInterface = {
   stop: function () {},
 
   //required public api attribtues
-  isRunning: false
+  isRunning: false,
+  //reference to game object that owns this scene
+  game: null
 };
 
 Kane.Game = function (settings) {
@@ -23,6 +25,7 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
+  this.game = null;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -57,18 +60,36 @@ Kane.Game.prototype._loop = function () {
 };
 
 Kane.Game.prototype.addScene = function (scene) {
-  if (!scene) { throw new Error('no scene provided'); } 
-  if (!scene.name) { throw new Error('scene must have a name!'); }
+  if (!scene) { 
+    throw new Error('no scene provided'); 
+  } 
+  if (!scene.name) { 
+    throw new Error('scene must have a name!'); 
+  }
+
+  /*
+  we need to add a reference to the game object onto this scene
+  this is used by scenes to make calls to "setCurrentScene" and other
+  scene related methods on the game object
+  */
+  scene.game = this; 
 
   this.scenes[scene.name] = scene;
 };
 
 Kane.Game.prototype.removeScene = function (name) {
   var targetScene;
-  if (!name) { throw new Error('no name provided'); }
+
+  if (!name) { 
+    throw new Error('no name provided'); 
+  }
   
   targetScene = this.scenes[name];
-  if (!targetScene) { throw new Error('no scene by that name found'); }
+
+  if (!targetScene) { 
+    throw new Error('no scene by that name found'); 
+  }
+
   delete this.scenes[name]; 
 
   return targetScene; 

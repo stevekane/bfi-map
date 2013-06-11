@@ -54,12 +54,25 @@ describe('Kane.Game', function () {
         , targetScene;
 
       assert.isObject(game.getScenes());
-      game.addScene({name: sceneName});
+      game.addScene({
+        name: sceneName
+      });
       
       scenes = game.getScenes();
       targetScene = scenes[sceneName];
   
       assert.isObject(targetScene);
+    });
+
+    it('should add the game as a reference on the scene', function () {
+      var sceneName = 'testScene'
+        , scene = {
+            name: sceneName
+        };
+
+      game.addScene(scene);
+      
+      assert.equal(game, scene.game);
     });
   });
 
