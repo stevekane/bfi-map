@@ -179,15 +179,12 @@ var EntityInterface = {
   ddy: 0,
 };
 
-Kane.Entity = function (argsHash) {
-  if (!argsHash.drawplane) { 
-    throw new Error('must provide valid drawplane'); 
-  }
+Kane.Entity = function (settings) {
   
   this._isDead = false;
   this.doesCollide = true;
 
-  _.extend(this, argsHash);
+  _.extend(this, settings);
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
@@ -229,7 +226,7 @@ Kane.Entity.prototype.beforeDraw = function () {};
 
 Kane.Entity.prototype.draw = function () {
   if (!this.image) {
-    this.drawplane.drawRect(
+    this.manager.drawplane.drawRect(
       this.color, 
       //x and y are rounded to avoid drawing on fractional pixels
       Math.round(this.x),
@@ -945,11 +942,38 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
+//BACON STATS SETUP
+entityManager.baconLength = new Bacon.Bus();
+entityManager.baconCollisions = new Bacon.Bus();
+
 //pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene({
   name: 'ingame',
   inputWizard: inputWizard, 
   entityManager: entityManager
+});
+
+//BACON STAT PUSHING BEHAVIOR
+ingame.onUpdate = function (dT) {
+  var emLen = this.entityManager.length
+    , collisions = this.entityManager.findCollisions();
+
+  this.entityManager.baconLength.push(emLen);
+  this.entityManager.baconCollisions.push(collisions.length);
+};
+
+//Assign bacon stat streams to behaviors that render in the DOM
+var entCount = document.getElementById('entityCount')
+  , colCount = document.getElementById('collisionCount');
+
+entityManager.baconLength.onValue(function (val) {
+  entCount.textContent = val;  
+});
+
+entityManager.baconCollisions.onValue(function (val) {
+  colCount.textContent = colCount.textContent ? 
+                         parseInt(colCount.textContent) + val : 
+                         val;
 });
 
 //define onEnter hook to subscribe to inputWizard
@@ -1000,7 +1024,6 @@ ingame.keyup = function (keyName) {
     this.entityManager.spawn(
       Kane.Entity, 
       {
-        drawplane: entityPlane,
         x: Math.round(Math.random() * 640),
         y: Math.round(Math.random() * 480),
         dx: dx,
@@ -1027,7 +1050,6 @@ ingame.keyup = function (keyName) {
               Kane.Entity, 
               {
                 doesCollide: false,
-                drawplane: entityPlane,
                 x: this.x,
                 y: this.y,
                 dx: Math.random() * (this.dx + target.dx),
@@ -1077,19 +1099,11 @@ inmenu.keyup = function (keyName) {
   }
 };
 
+
 //configure the game object before starting it
 game.addScene(ingame);
 game.addScene(inmenu);
 game.setCurrentScene('ingame');
-
-//just a quick hack to show the scene name
-var div = document.createElement('div');
-
-div.id = 'scenename';
-div.style.position = "absolute";
-div.style.left = 100;
-div.textContent = game.getCurrentScene().name;
-document.body.appendChild(div);
 
 game.start();
 

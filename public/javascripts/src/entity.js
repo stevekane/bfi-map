@@ -43,15 +43,12 @@ var EntityInterface = {
   ddy: 0,
 };
 
-Kane.Entity = function (argsHash) {
-  if (!argsHash.drawplane) { 
-    throw new Error('must provide valid drawplane'); 
-  }
+Kane.Entity = function (settings) {
   
   this._isDead = false;
   this.doesCollide = true;
 
-  _.extend(this, argsHash);
+  _.extend(this, settings);
 };
 
 Kane.Entity.prototype = Object.create(EntityInterface);
@@ -93,7 +90,7 @@ Kane.Entity.prototype.beforeDraw = function () {};
 
 Kane.Entity.prototype.draw = function () {
   if (!this.image) {
-    this.drawplane.drawRect(
+    this.manager.drawplane.drawRect(
       this.color, 
       //x and y are rounded to avoid drawing on fractional pixels
       Math.round(this.x),

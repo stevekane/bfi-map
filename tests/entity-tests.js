@@ -14,14 +14,6 @@ describe('Kane.Entity', function () {
     assert.isObject(en);
   });
 
-  it('should throw if not provided a drawplane object', function () {
-    var badEntity;
-
-    assert.throws(function () {
-      badEntity = new Kane.Entity();
-    });
-  });
-
   //Id
   it('should define name, type, and id', function () {
     assert.isString(en.name);
