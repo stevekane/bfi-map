@@ -15,20 +15,20 @@ var SceneInterface = {
   
   //list of required attributes
   name: ""
+  
 };
 
 /*
 note, if the settings provided include a name it will be overwritten
 by the provided name 
 */
-Kane.Scene = function (name, settings) {
+Kane.Scene = function (settings) {
+  if (!settings.name) {
+    throw new Error('no name provided in settings hash');
+  }
+
   //apply settings object to this scene
   _.extend(this, settings);
-
-  this.name = name;
-
-  //this will be toggled by the game that owns this scene
-  this.isActive = false;
 };
 
 Kane.Scene.prototype = Object.create(SceneInterface);
@@ -40,6 +40,7 @@ Kane.Scene.prototype.update = function (dT) {
 
   if (this.entityManager) { 
     this.entityManager.removeDead();
+    this.entityManager.sortBy('zIndex'); 
     this.entityManager.updateAll(dT);  
   } 
 

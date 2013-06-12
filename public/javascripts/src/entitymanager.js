@@ -10,17 +10,18 @@ var EntityManagerInterface = {
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
   applyForAll: function (methodName, argArray) {},
-
+  
   //define mandatory interface attribute
   drawplane: {},
 };
 
 //requires array of entities
-Kane.EntityManager = function (drawplane) {
-  if (!drawplane) { 
+Kane.EntityManager = function (settings) {
+  if (!settings.drawplane) { 
     throw new Error('must provide drawplane'); 
   }
-  this.drawplane = drawplane;
+
+  _.extend(this, settings);
 };
 
 Kane.EntityManager.prototype = new Array;

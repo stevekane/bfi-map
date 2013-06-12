@@ -274,17 +274,18 @@ var EntityManagerInterface = {
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
   applyForAll: function (methodName, argArray) {},
-
+  
   //define mandatory interface attribute
   drawplane: {},
 };
 
 //requires array of entities
-Kane.EntityManager = function (drawplane) {
-  if (!drawplane) { 
+Kane.EntityManager = function (settings) {
+  if (!settings.drawplane) { 
     throw new Error('must provide drawplane'); 
   }
-  this.drawplane = drawplane;
+
+  _.extend(this, settings);
 };
 
 Kane.EntityManager.prototype = new Array;
@@ -938,20 +939,18 @@ inputWizard.attachToDomNode(document.body)
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = new Kane.DrawPlane(entityCanvas)
-  , entityManager = new Kane.EntityManager(entityPlane)
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
     clock: clock
   });
 
 //pass in our inputWizard and our entityManager
-var ingame = new Kane.Scene(
-  'ingame', 
-  {
-    inputWizard: inputWizard, 
-    entityManager: entityManager
-  }
-);
+var ingame = new Kane.Scene({
+  name: 'ingame',
+  inputWizard: inputWizard, 
+  entityManager: entityManager
+});
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -1055,12 +1054,10 @@ ingame.keyup = function (keyName) {
 };
 
 //pass in our inputWizard and our entityManager
-var inmenu = new Kane.Scene(
-  'inmenu', 
-  {
-    inputWizard: inputWizard, 
-  }
-);
+var inmenu = new Kane.Scene({
+  name: 'inmenu',
+  inputWizard: inputWizard, 
+});
 
 //define onEnter hook to subscribe to inputWizard
 inmenu.onEnter = function () {
@@ -1121,20 +1118,20 @@ var SceneInterface = {
   
   //list of required attributes
   name: ""
+  
 };
 
 /*
 note, if the settings provided include a name it will be overwritten
 by the provided name 
 */
-Kane.Scene = function (name, settings) {
+Kane.Scene = function (settings) {
+  if (!settings.name) {
+    throw new Error('no name provided in settings hash');
+  }
+
   //apply settings object to this scene
   _.extend(this, settings);
-
-  this.name = name;
-
-  //this will be toggled by the game that owns this scene
-  this.isActive = false;
 };
 
 Kane.Scene.prototype = Object.create(SceneInterface);
@@ -1146,6 +1143,7 @@ Kane.Scene.prototype.update = function (dT) {
 
   if (this.entityManager) { 
     this.entityManager.removeDead();
+    this.entityManager.sortBy('zIndex'); 
     this.entityManager.updateAll(dT);  
   } 
 

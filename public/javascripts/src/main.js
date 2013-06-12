@@ -38,20 +38,18 @@ inputWizard.attachToDomNode(document.body)
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
   , entityPlane = new Kane.DrawPlane(entityCanvas)
-  , entityManager = new Kane.EntityManager(entityPlane)
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
     clock: clock
   });
 
 //pass in our inputWizard and our entityManager
-var ingame = new Kane.Scene(
-  'ingame', 
-  {
-    inputWizard: inputWizard, 
-    entityManager: entityManager
-  }
-);
+var ingame = new Kane.Scene({
+  name: 'ingame',
+  inputWizard: inputWizard, 
+  entityManager: entityManager
+});
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -155,12 +153,10 @@ ingame.keyup = function (keyName) {
 };
 
 //pass in our inputWizard and our entityManager
-var inmenu = new Kane.Scene(
-  'inmenu', 
-  {
-    inputWizard: inputWizard, 
-  }
-);
+var inmenu = new Kane.Scene({
+  name: 'inmenu',
+  inputWizard: inputWizard, 
+});
 
 //define onEnter hook to subscribe to inputWizard
 inmenu.onEnter = function () {

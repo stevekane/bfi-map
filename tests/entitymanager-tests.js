@@ -5,25 +5,26 @@ var assert = chai.assert;
 describe('Kane.EntityManager', function () {
   var em
     , drawplane = {
-        clearAll: function () {}
+        clearAll: function () {},
+        drawAll: function (){}
       };
   
   beforeEach(function () {
 
-    em = new Kane.EntityManager(drawplane);
+    em = new Kane.EntityManager({drawplane: drawplane});
   });
 
   it('should be an object', function () {
     assert.isObject(em);
   }); 
 
-  it('should throw if no drawplane is provided to constructor', function () {
+  it('should throw if no drawplane provided in settings hash', function () {
     assert.throws(function () {
       em = new Kane.EntityManager();
     });
 
     assert.doesNotThrow(function () {
-      em = new Kane.EntityManager(drawplane);
+      em = new Kane.EntityManager({drawplane: drawplane});
     });
   });
 

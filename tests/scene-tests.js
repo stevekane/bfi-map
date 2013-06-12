@@ -7,11 +7,17 @@ describe('Kane.Scene', function () {
   var s;
 
   beforeEach(function () {
-    s = new Kane.Scene('testScene', {});
+    s = new Kane.Scene({name: 'testScene'});
   });
 
   it('should return an object', function () {
     assert.isObject(s);
+  });
+
+  it('should throw if no name provided in settings hash', function () {
+    assert.throw(function (){
+      s = new Kane.Scene({});
+    });
   });
 
   describe('#update()', function () {
