@@ -8,6 +8,7 @@ require('drawplane.js');
 require('entity.js');
 require('entitymanager.js');
 require('inputwizard.js');
+require('image.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');

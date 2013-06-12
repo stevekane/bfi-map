@@ -16,23 +16,6 @@ Kane.DrawPlane = function (settings) {
 
 Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
 
-//private
-Kane.DrawPlane.prototype._validateColor = function (color) {
-  var validColor = /^#[0123456789abcdef]*$/i;
-
-  return color.match(validColor);  
-};
-
-//creates new canvas and attaches it to target of DOM
-var _createBoard = function (name, target) {
-  var boardEl = document.createElement('canvas');
-
-  boardEl.id = name;
-  target.appendChild(boardEl);
-  return document.getElementById(name);
-};
-
-//public
 //this method will fill the entire board with a solid color
 Kane.DrawPlane.prototype.fillAll = function (color) {
   this.drawRect(color, 0, 0, this.board.width, this.board.height);
@@ -40,7 +23,7 @@ Kane.DrawPlane.prototype.fillAll = function (color) {
 
 //draw rect w/ provided location/dimesions
 Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
-  if (!this._validateColor(color)) { 
+  if (!_validateColor(color)) { 
     throw new TypeError('invalid color'); 
   }
   //color must be valid hex
@@ -62,3 +45,10 @@ Kane.DrawPlane.prototype.drawImage = function ( image,
 Kane.DrawPlane.prototype.clearAll = function () {
   this.ctx.clearRect(0, 0, this.board.width, this.board.height);
 };
+
+function _validateColor (color) {
+  var validColor = /^#[0123456789abcdef]*$/i;
+
+  return color.match(validColor);  
+};
+
