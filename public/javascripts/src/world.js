@@ -5,4 +5,3 @@ Kane.World = function (settings) {
 };
 
 Kane.World.prototype = Object.create(WorldInterface);
-

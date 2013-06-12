@@ -44,16 +44,20 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
-//BACON STATS SETUP
-entityManager.baconLength = new Bacon.Bus();
-entityManager.baconCollisions = new Bacon.Bus();
-
 //pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene({
   name: 'ingame',
   inputWizard: inputWizard, 
   entityManager: entityManager
 });
+
+/*
+ALL BACON ACTIVITY USES DOM ELEMENTS DEFINED IN THE HTML DOC
+THIS IS JUST TEMPORARY AND CAUSES TESTS TO FAIL
+*/
+//BACON STATS SETUP
+ingame.entityManager.baconLength = new Bacon.Bus();
+ingame.entityManager.baconCollisions = new Bacon.Bus();
 
 //BACON STAT PUSHING BEHAVIOR
 ingame.onUpdate = function (dT) {
@@ -68,15 +72,25 @@ ingame.onUpdate = function (dT) {
 var entCount = document.getElementById('entityCount')
   , colCount = document.getElementById('collisionCount');
 
-entityManager.baconLength.onValue(function (val) {
-  entCount.textContent = val;  
-});
+/*
+we wrap this in a conditional for the time being to avoid
+failing tests (the test runner uses a generated .html file
+and not the index.html file where these two dom elements are
+defined
+*/
+if (entCount && colCount) {
 
-entityManager.baconCollisions.onValue(function (val) {
-  colCount.textContent = colCount.textContent ? 
-                         parseInt(colCount.textContent) + val : 
-                         val;
-});
+  entityManager.baconLength.onValue(function (val) {
+    entCount.textContent = val;  
+  });
+
+  entityManager.baconCollisions.onValue(function (val) {
+    colCount.textContent = colCount.textContent ? 
+                           parseInt(colCount.textContent) + val : 
+                           val;
+  });
+}
+
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
