@@ -15,7 +15,6 @@ var SceneInterface = {
   
   //list of required attributes
   name: ""
-  
 };
 
 /*

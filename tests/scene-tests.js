@@ -3,7 +3,6 @@ minispade.require('main.js');
 var assert = chai.assert;
 
 describe('Kane.Scene', function () {
-  //TODO: move this into a stub class version of these objects
   var s;
 
   beforeEach(function () {

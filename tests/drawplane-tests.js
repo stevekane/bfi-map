@@ -20,9 +20,10 @@ describe('Kane.DrawPlane', function () {
     document.body.appendChild(canvas);
     canvasInDom = document.getElementById(id);
   });
+
   //get a new instance of Kane.DrawPlane for each test
   beforeEach(function () {
-    drawPlane = new Kane.DrawPlane(canvasInDom);
+    drawPlane = new Kane.DrawPlane({board: canvasInDom});
   });
   
   it('should create a new object', function () {

@@ -5,13 +5,13 @@ var DrawPlaneInterface = {
   clearAll: function () {}
 };
 
-Kane.DrawPlane = function (board) {
-  if (!board) { 
+Kane.DrawPlane = function (settings) {
+  if (!settings.board) { 
     throw new Error('must provide canvas domnode'); 
   }
 
-  this.board = board;
-  this.ctx = board.getContext('2d');
+  _.extend(this, settings);
+  this.ctx = this.board.getContext('2d');
 };
 
 Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);

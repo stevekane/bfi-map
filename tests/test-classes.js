@@ -7,6 +7,6 @@ window.Test = {
     canvas.id = name;
     document.body.appendChild(canvas);
     domNode = document.getElementById(name); 
-    return new Kane.DrawPlane(domNode);
+    return new Kane.DrawPlane({board: domNode});
   }, 
 };

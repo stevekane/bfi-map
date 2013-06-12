@@ -72,13 +72,13 @@ var DrawPlaneInterface = {
   clearAll: function () {}
 };
 
-Kane.DrawPlane = function (board) {
-  if (!board) { 
+Kane.DrawPlane = function (settings) {
+  if (!settings.board) { 
     throw new Error('must provide canvas domnode'); 
   }
 
-  this.board = board;
-  this.ctx = board.getContext('2d');
+  _.extend(this, settings);
+  this.ctx = this.board.getContext('2d');
 };
 
 Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
@@ -924,7 +924,7 @@ function createCanvas (w, h, name) {
 
 //global background canvas object
 var bgCanvas = createCanvas(640, 480, 'gameboard')
-  , bgPlane = new Kane.DrawPlane(bgCanvas);
+  , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
 bgPlane.fillAll(generateColor());
@@ -938,7 +938,7 @@ inputWizard.attachToDomNode(document.body)
 //Construction of specific scene
 //setup entity set for this scene
 var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = new Kane.DrawPlane(entityCanvas)
+  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
@@ -1118,7 +1118,6 @@ var SceneInterface = {
   
   //list of required attributes
   name: ""
-  
 };
 
 /*
