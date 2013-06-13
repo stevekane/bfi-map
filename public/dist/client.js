@@ -1,3 +1,32 @@
+minispade.register('cache.js', function() {
+"use strict";
+var CacheInterface = {
+  cache: function (name, item) {},
+  getByName: function (name) {},
+};
+
+Kane.Cache = function (settings) {
+  _.extend(this, settings);
+
+  this.store = {};
+};
+
+Kane.Cache.prototype = Object.create(CacheInterface);
+
+Kane.Cache.prototype.cache = function (name, item) {
+  this.store[name] = item; 
+};
+
+Kane.Cache.prototype.getByName = function (name) {
+  if (!this.store[name]) {
+    throw new Error('no resource named ', name, ' found');
+  }
+
+  return this.store[name];
+};
+
+});
+
 minispade.register('clock.js', function() {
 "use strict";
 var ClockInterface = {
@@ -639,71 +668,6 @@ function draw () {
 
 });
 
-minispade.register('image.js', function() {
-"use strict";
-var ImageInterface = {
-  load: function () {},
-
-  //public interface attributes
-  data: null,
-  isLoaded: false,
-  didError: false,
-  height: null,
-  width: null  
-};
-
-Kane.Image = function (settings) {
-  if (!settings.fileName) {
-    throw new Error('no fileName provided in settings');
-  }
-
-  _.extend(this, settings);
-
-  this.data = new Image();
-
-  this.data.onload = function () {
-    this.isLoaded = true;
-    this.height = this.data.height;
-    this.width = this.data.width;
-    this.onLoad();
-  }.bind(this);
-
-  this.data.onerror = function () {
-    this.didError = true;
-    this.onError();
-  }.bind(this);
-
-  this.isLoaded = false;
-  this.didError = false;
-
-  this.height = null;
-  this.width = null;
-
-  if (true == settings.autoLoad) {
-    this.load();
-  }
-};
-
-Kane.Image.prototype = Object.create(ImageInterface);
-
-Kane.Image.prototype.load = function () {
-  //reset our loading variables
-  this.didError = false;
-  this.isLoaded = false;
-  //set the src value to initiate browser http load attempt
-  this.data.src = this.fileName; 
-}; 
-
-Kane.Image.prototype.onLoad = function () {
-  
-};
-
-Kane.Image.prototype.onError = function () {
-
-};
-
-});
-
 minispade.register('inputwizard.js', function() {
 "use strict";
 /*
@@ -954,8 +918,8 @@ minispade.register('loader.js', function() {
 "use strict";
 var LoaderInterface = {
   loadImage: function (fileName) {},
-  pushToCache: function () {},
-  handleError: function () {},
+  pushToCache: function (name, image) {},
+  handleError: function (name, image) {},
 
   //public interface attributes
   loading: {}
@@ -965,6 +929,7 @@ Kane.Loader = function (settings) {
   if (!settings.cache) {
     throw new Error('no cache provided in settings');
   }
+
   _.extend(this, settings);
 
   this.loading = {}; 
@@ -973,7 +938,8 @@ Kane.Loader = function (settings) {
 Kane.Loader.prototype = Object.create(LoaderInterface);
 
 Kane.Loader.prototype.loadImage = function (fileName) {
-  var newImage = new Image();
+  var newImage = new Image()
+    , name = stripExtension(fileName);
   
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
@@ -981,11 +947,11 @@ Kane.Loader.prototype.loadImage = function (fileName) {
 
   //callback defined in scope w/ this new image
   function onLoad () {
-    this.pushToCache(newImage);
+    this.pushToCache(name, newImage);
   }
 
   function onError () {
-    this.handleError(newImage);
+    this.handleError(name, newImage);
   }
 
   //setting the src will immediatly trigger a server request
@@ -994,29 +960,33 @@ Kane.Loader.prototype.loadImage = function (fileName) {
   newImage.src = fileName;
 
   //store them as k/v pairs 
-  this.loading[fileName] = newImage;
+  this.loading[name] = newImage;
 };
 
 //this is generally called by Image onload callbacks
-Kane.Loader.prototype.pushToCache = function (imageName) {
-  if (!imageName) {
+Kane.Loader.prototype.pushToCache = function (name, image) {
+  if (!name) {
     throw new Error('no imageName provided');
   }
   
   //cache this image
-  this.cache.cacheImage(this.loading[imageName]);
+  this.cache.cache(name, image);
 
   //delete this k/v pair from loading
-  delete this.loading[imageName];
+  delete this.loading[name];
 };
 
 //this is generally called by Image onerror callbacks
-Kane.Loader.prototype.handleError = function (imageName) {
-  if (!imageName) {
+Kane.Loader.prototype.handleError = function (name, image) {
+  if (!name) {
     throw new Error('no imageName provided');
   }
 
-  delete this.loading[imageName];
+  delete this.loading[name];
+};
+
+function stripExtension (name) {
+  return name.match(/(.*)\..*/)[1];
 };
 
 });
@@ -1024,16 +994,24 @@ Kane.Loader.prototype.handleError = function (imageName) {
 minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
+
+//"utility objects"
 minispade.require('clock.js');
-minispade.require('game.js');
 minispade.require('loader.js');
-minispade.require('world.js');
-minispade.require('scene.js');
+minispade.require('cache.js');
+
+//"dom objects"
+minispade.require('inputwizard.js');
 minispade.require('drawplane.js');
+
+//"high levl objects"
+minispade.require('game.js');
+minispade.require('scene.js');
+minispade.require('world.js');
+
+//"entity objects"
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
-minispade.require('inputwizard.js');
-minispade.require('image.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');

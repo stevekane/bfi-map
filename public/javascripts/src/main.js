@@ -1,15 +1,22 @@
 window.Kane = {};
 
+//"utility objects"
 require('clock.js');
-require('game.js');
 require('loader.js');
-require('world.js');
-require('scene.js');
+require('cache.js');
+
+//"dom objects"
+require('inputwizard.js');
 require('drawplane.js');
+
+//"high levl objects"
+require('game.js');
+require('scene.js');
+require('world.js');
+
+//"entity objects"
 require('entity.js');
 require('entitymanager.js');
-require('inputwizard.js');
-require('image.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
