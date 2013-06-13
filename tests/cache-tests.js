@@ -42,4 +42,26 @@ describe("Kane.Cache", function () {
       assert.equal(cache.getByName('testImage'), testImage);
     });
   });
+
+  describe('#allInCache()', function () {
+    it('should return boolean value', function () {
+      assert.isBoolean(cache.allInCache());
+    });
+
+    it('should return true if every item is in the cache else false', function () {
+      var ob1 = {
+        name: 'ob1',
+        asset : {}
+      };
+      var ob2 = {
+        name: 'ob2',
+        asset : {}
+      };
+      cache.cache(ob1);
+      cache.cache(ob2);
+
+      assert.isTrue(cache.allInCache(['ob1', 'ob2']));
+      assert.isFalse(cache.allInCache(['ob1', 'ob2', 'ob3'])); 
+    });
+  });
 });
