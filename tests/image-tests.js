@@ -6,55 +6,53 @@ describe('Kane.Image', function () {
   var image;
 
   beforeEach(function () {
-    image = new Kane.Image();
+    image = new Kane.Image({
+      fileName: 'cat.png'
+    });
   });
 
-  it('should return an object', function () {
+  it('should return an object with'+
+    'data/origin/isLoaded/didError/height/width attributes', function () {
     assert.isObject(image);
+    assert.isObject(image.data);
+    assert.instanceOf(image.data, Image);
+
+    assert.isDefined(image.origin);
+    assert.isString(image.origin);
+
+    assert.isFalse(image.isLoaded);
+    assert.isFalse(image.didError);
+  
+    assert.isDefined(image.height);
+    assert.isDefined(image.width);
   });
 
-  it('should define an array of images', function () {
-    assert.isArray(image.files);
-  });
-
-  describe('#addFile()', function () {
-    it('should be a function', function () {
-      assert.isFunction(image.addFile);
-    });
-  
-    it('should add an additional file to the list of files', function () {
-      var fileName = 'cat.png';
-
-      image.addFile(fileName);
-      assert.lengthOf(image.files, 1);
-      assert.equal(image.files[0], fileName);
-    });
-
-    it('should not add filenames that are already in files array', function () {
-      var fileName = "cat.png";
-  
-      image.addFile(fileName);
-      image.addFile(fileName);
-      image.addFile(fileName);
-      image.addFile(fileName);
-      
-      //here we assert that only 1 copy of the fileName was added
-      assert.lengthOf(image.files, 1);
+  it('should throw if no fileName is provided in settings hash', function () {
+    assert.throw(function () {
+      image = new Kane.Image();
     });
   });
-  
-  describe('#removeFile()', function () {
-    it('should be a function', function () {
-      assert.isFunction(image.removeFile);
-    }); 
 
-    it('should remove the fileName from the list of files', function () {
-      var fileName = 'cat.png';
+  it('should call load if settings hash includes autoLoad: true', function () {
+    image = new Kane.Image({
+      autoLoad: true,
+      fileName: 'autoloading.png'
+    });
+    assert.equal(
+      image.data.src, 
+      window.location.origin + '/autoloading.png'
+    );
+  });
 
-      image.addFile(fileName);
-      image.removeFile(fileName);
-      
-      assert.lengthOf(image.files, 0);
+  describe('#load()', function () {
+    it('should set the src of the data object', function () {
+      image.load();
+
+      assert.isDefined(image.data.src); 
+      assert.equal(
+        image.data.src,
+        window.location.origin + '/cat.png'
+      );
     });
   });
   

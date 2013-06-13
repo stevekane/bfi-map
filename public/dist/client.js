@@ -642,38 +642,52 @@ function draw () {
 minispade.register('image.js', function() {
 "use strict";
 var ImageInterface = {
-  addFile: function (fileName) {},
-  removeFile: function (fileName) {},
+  load: function () {},
 
   //public interface attributes
-  files: [],
+  data: null,
+  origin: window.location.origin,
+  isLoaded: false,
+  didError: false,
+  height: null,
+  width: null  
 };
 
 Kane.Image = function (settings) {
-  this.files = [];
+  if (!settings.fileName) {
+    throw new Error('no fileName provided in settings');
+  }
+
+  //define the origin before loading settings in case 
+  //an origin is defined in the settings
+  this.origin = window.location.origin;
 
   _.extend(this, settings);
+
+  this.data = new Image();
+  this.data.onload = this.onLoad;
+  this.data.onerror = this.onError;
+  this.data.onload = this.onLoad;
+
+  this.isLoaded = false;
+  this.didError = false;
+
+  this.height = null;
+  this.width = null;
+
+  if (true == settings.autoLoad) {
+    this.load();
+  }
 };
 
 Kane.Image.prototype = Object.create(ImageInterface);
 
-Kane.Image.prototype.addFile = function (fileName) {
-  //do nothing if this fileName already exists
-  if (_(this.files).contains(fileName)) {
-    return;
-  }
-  this.files.push(fileName);
-};
+Kane.Image.prototype.load = function () {
+  this.data.src = this.fileName; 
+}; 
 
-Kane.Image.prototype.removeFile = function (fileName) {
-  //do nothing if this fileName already exists
-  if (!_(this.files).contains(fileName)) {
-    throw new Error('fileName not found in files');
-  }
-
-  //TODO: simplest way...not entirely efficient
-  this.files = _(this.files).without(fileName);
-};
+Kane.Image.prototype.onLoad = function () {};
+Kane.Image.prototype.onError = function () {};
 
 });
 
