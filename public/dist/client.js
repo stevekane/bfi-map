@@ -13,8 +13,14 @@ Kane.Cache = function (settings) {
 
 Kane.Cache.prototype = Object.create(CacheInterface);
 
-Kane.Cache.prototype.cache = function (name, item) {
-  this.store[name] = item; 
+Kane.Cache.prototype.cache = function (object) {
+  if (!object.name) {
+    throw new Error('no name provided for the object');
+  }
+  if (!object.asset) {
+    throw new Error('no asset provided for the object');
+  }
+  this.store[object.name] = object.asset; 
 };
 
 Kane.Cache.prototype.getByName = function (name) {
@@ -912,17 +918,21 @@ minispade.register('loader.js', function() {
 "use strict";
 var LoaderInterface = {
   loadImage: function (fileName) {},
-  pushToCache: function (name, image) {},
   handleError: function (name, image) {},
+  broadcast: function (object) {},
 
   //public interface attributes
-  loading: {}
+  loading: {},
+  bus: null
 };
 
 Kane.Loader = function (settings) {
   if (!settings.cache) {
     throw new Error('no cache provided in settings');
   }
+  if (!settings.bus) {
+    throw new Error('no bus provided in settings');
+  } 
 
   _.extend(this, settings);
 
@@ -941,11 +951,17 @@ Kane.Loader.prototype.loadImage = function (fileName) {
 
   //callback defined in scope w/ this new image
   function onLoad () {
-    this.pushToCache(name, newImage);
+    this.broadcast({
+      name: name,
+      asset: newImage
+    });
   }
 
   function onError () {
-    this.handleError(name, newImage);
+    this.handleError({
+      name: name,
+      asset: newImage
+    });
   }
 
   //setting the src will immediatly trigger a server request
@@ -957,26 +973,34 @@ Kane.Loader.prototype.loadImage = function (fileName) {
   this.loading[name] = newImage;
 };
 
-//this is generally called by Image onload callbacks
-Kane.Loader.prototype.pushToCache = function (name, image) {
-  if (!name) {
-    throw new Error('no imageName provided');
+//this is generally called by Image onerror callbacks
+Kane.Loader.prototype.handleError = function (object) {
+  if (!object.name) {
+    throw new Error('no name provided');
   }
-  
-  //cache this image
-  this.cache.cache(name, image);
+  if (!object.asset) {
+    throw new Error('no asset provided');
+  }
 
-  //delete this k/v pair from loading
-  delete this.loading[name];
+  delete this.loading[object.name];
 };
 
-//this is generally called by Image onerror callbacks
-Kane.Loader.prototype.handleError = function (name, image) {
-  if (!name) {
-    throw new Error('no imageName provided');
-  }
+Kane.Loader.prototype.broadcast = function (object) {
+  if (!object.name) {
+    throw new Error('no name provided'); 
+  } 
+  if (!object.asset) {
+    throw new Error('no asset provided'); 
+  } 
 
-  delete this.loading[name];
+  /*
+  push this object onto the bus.  Anyone subscribing to this bus
+  will see this object and may respond as they desire
+  */
+  this.bus.push(object);
+
+  //remove this asset from the loading object
+  delete this.loading[object.name];
 };
 
 function stripExtension (name) {
@@ -1042,9 +1066,26 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
-//setup loader/cache
-var cache = new Kane.Cache();
-var loader = new Kane.Loader({cache: cache});
+//setup loader/cache/bus.  optionally we inject the bus onto 
+//the cache to be more clear about its dependencies
+var bus = new Bacon.Bus();
+var cache = new Kane.Cache({
+  bus: bus
+});
+var loader = new Kane.Loader({
+  cache: cache,
+  bus: bus
+});
+
+//let's make our cache 'listen' to our loader's bus
+cache.bus.onValue( function (object) {
+  this.cache(object);
+}.bind(cache));
+
+//let's add another bus listener to demonstrate its value
+bus.onValue( function (object) {
+  console.log(object.name, ' has been loaded successfully!');
+});
 
 //pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene({

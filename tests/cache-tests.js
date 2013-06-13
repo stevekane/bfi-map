@@ -18,8 +18,14 @@ describe("Kane.Cache", function () {
       assert.isFunction(cache.cache);
     });
     it('should push the provided object into the cache', function () {
-      cache.cache('testImage', new Image());      
-      
+      var image = new Image();
+
+      cache.cache({
+        name: 'testImage', 
+        asset: image
+      });      
+     
+      assert.equal(cache.getByName('testImage'), image);
     });
   });
 
@@ -27,7 +33,11 @@ describe("Kane.Cache", function () {
     it('should return an object found by the provided name', function () {
       var testImage = new Image();
 
-      cache.cache('testImage', testImage);
+      cache.cache({
+        name: 'testImage', 
+        asset: testImage
+      });
+
       assert.isDefined(cache.getByName('testImage'));
       assert.equal(cache.getByName('testImage'), testImage);
     });

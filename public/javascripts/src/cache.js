@@ -11,8 +11,14 @@ Kane.Cache = function (settings) {
 
 Kane.Cache.prototype = Object.create(CacheInterface);
 
-Kane.Cache.prototype.cache = function (name, item) {
-  this.store[name] = item; 
+Kane.Cache.prototype.cache = function (object) {
+  if (!object.name) {
+    throw new Error('no name provided for the object');
+  }
+  if (!object.asset) {
+    throw new Error('no asset provided for the object');
+  }
+  this.store[object.name] = object.asset; 
 };
 
 Kane.Cache.prototype.getByName = function (name) {

@@ -53,9 +53,26 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
-//setup loader/cache
-var cache = new Kane.Cache();
-var loader = new Kane.Loader({cache: cache});
+//setup loader/cache/bus.  optionally we inject the bus onto 
+//the cache to be more clear about its dependencies
+var bus = new Bacon.Bus();
+var cache = new Kane.Cache({
+  bus: bus
+});
+var loader = new Kane.Loader({
+  cache: cache,
+  bus: bus
+});
+
+//let's make our cache 'listen' to our loader's bus
+cache.bus.onValue( function (object) {
+  this.cache(object);
+}.bind(cache));
+
+//let's add another bus listener to demonstrate its value
+bus.onValue( function (object) {
+  console.log(object.name, ' has been loaded successfully!');
+});
 
 //pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene({
