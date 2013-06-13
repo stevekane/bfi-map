@@ -12,13 +12,10 @@ describe('Kane.Image', function () {
   });
 
   it('should return an object with'+
-    'data/origin/isLoaded/didError/height/width attributes', function () {
+    'data/isLoaded/didError/height/width attributes', function () {
     assert.isObject(image);
     assert.isObject(image.data);
     assert.instanceOf(image.data, Image);
-
-    assert.isDefined(image.origin);
-    assert.isString(image.origin);
 
     assert.isFalse(image.isLoaded);
     assert.isFalse(image.didError);
@@ -40,7 +37,7 @@ describe('Kane.Image', function () {
     });
     assert.equal(
       image.data.src, 
-      window.location.origin + '/autoloading.png'
+      window.location.origin + "/" + 'autoloading.png'
     );
   });
 
@@ -55,5 +52,16 @@ describe('Kane.Image', function () {
       );
     });
   });
-  
+
+  describe("#onLoad()", function () {
+    it('should be a function', function () {
+      assert.isFunction(image.onLoad);
+    });
+  });
+
+  describe("#onError()", function () {
+    it('should be a function', function () {
+      assert.isFunction(image.onError);
+    });
+  });
 });

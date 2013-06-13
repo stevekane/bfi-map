@@ -3,7 +3,6 @@ var ImageInterface = {
 
   //public interface attributes
   data: null,
-  origin: window.location.origin,
   isLoaded: false,
   didError: false,
   height: null,
@@ -15,16 +14,21 @@ Kane.Image = function (settings) {
     throw new Error('no fileName provided in settings');
   }
 
-  //define the origin before loading settings in case 
-  //an origin is defined in the settings
-  this.origin = window.location.origin;
-
   _.extend(this, settings);
 
   this.data = new Image();
-  this.data.onload = this.onLoad;
-  this.data.onerror = this.onError;
-  this.data.onload = this.onLoad;
+
+  this.data.onload = function () {
+    this.isLoaded = true;
+    this.height = this.data.height;
+    this.width = this.data.width;
+    this.onLoad();
+  }.bind(this);
+
+  this.data.onerror = function () {
+    this.didError = true;
+    this.onError();
+  }.bind(this);
 
   this.isLoaded = false;
   this.didError = false;
@@ -40,8 +44,17 @@ Kane.Image = function (settings) {
 Kane.Image.prototype = Object.create(ImageInterface);
 
 Kane.Image.prototype.load = function () {
+  //reset our loading variables
+  this.didError = false;
+  this.isLoaded = false;
+  //set the src value to initiate browser http load attempt
   this.data.src = this.fileName; 
 }; 
 
-Kane.Image.prototype.onLoad = function () {};
-Kane.Image.prototype.onError = function () {};
+Kane.Image.prototype.onLoad = function () {
+  
+};
+
+Kane.Image.prototype.onError = function () {
+
+};
