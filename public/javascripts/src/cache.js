@@ -16,9 +16,5 @@ Kane.Cache.prototype.cache = function (name, item) {
 };
 
 Kane.Cache.prototype.getByName = function (name) {
-  if (!this.store[name]) {
-    throw new Error('no resource named ', name, ' found');
-  }
-
   return this.store[name];
 };

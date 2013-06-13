@@ -31,11 +31,5 @@ describe("Kane.Cache", function () {
       assert.isDefined(cache.getByName('testImage'));
       assert.equal(cache.getByName('testImage'), testImage);
     });
-
-    it('should throw if no object by that name is found', function () {
-      assert.throws(function () {
-        cache.getByName('notThere');
-      });
-    });
   });
 });

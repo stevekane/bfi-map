@@ -85,18 +85,17 @@ describe('Kane.DrawPlane', function () {
   });
 
   describe("#drawImage", function () {
-    var sx = 0, sy = 0, sw = 1, sh = 1
-      , x = 0, y = 0, w = 1, h = 1;
+    var sx = 0, sy = 0; 
 
     it('should throw an error if no valid Image provided', function (done) {
       assert.doesNotThrow(function () {
-        drawPlane.drawImage(new Image(), sx, sy, sw, sh, x, y, w, h);
+        drawPlane.drawImage(new Image(), sx, sy);
       });
       assert.throws(function () {
         drawPlane.drawImage();
       });
       assert.throws(function () {
-        drawPlane.drawImage('image', sx, sy, sw, sh, x, y, w, h);
+        drawPlane.drawImage('image', sx, sy);
       });
       done(); 
     });

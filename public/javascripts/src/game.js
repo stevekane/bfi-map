@@ -133,8 +133,8 @@ function update () {
   if (!this.isRunning) { return; }
 
   var dT = this.clock.getTimeDelta();
-  _(this.scenes).each(function (element) {
-    element.update(dT)
+  _(this.scenes).each(function (scene) {
+    scene.update(dT)
   }, this);
 };
 

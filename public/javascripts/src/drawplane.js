@@ -31,15 +31,13 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
   this.ctx.fillRect(x, y, w, h);
 };
 
-Kane.DrawPlane.prototype.drawImage = function ( image, 
-                                                sx, sy, sw, sh, 
-                                                x, y, w, h) {
+Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
   var isValidImage = image instanceof Image;
 
   if (!isValidImage) { 
     throw new Error('not a valid image!'); 
   }
-  this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+  this.ctx.drawImage(image, sx, sy);
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {

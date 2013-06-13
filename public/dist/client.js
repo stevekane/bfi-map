@@ -18,10 +18,6 @@ Kane.Cache.prototype.cache = function (name, item) {
 };
 
 Kane.Cache.prototype.getByName = function (name) {
-  if (!this.store[name]) {
-    throw new Error('no resource named ', name, ' found');
-  }
-
   return this.store[name];
 };
 
@@ -127,15 +123,13 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
   this.ctx.fillRect(x, y, w, h);
 };
 
-Kane.DrawPlane.prototype.drawImage = function ( image, 
-                                                sx, sy, sw, sh, 
-                                                x, y, w, h) {
+Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
   var isValidImage = image instanceof Image;
 
   if (!isValidImage) { 
     throw new Error('not a valid image!'); 
   }
-  this.ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+  this.ctx.drawImage(image, sx, sy);
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
@@ -652,8 +646,8 @@ function update () {
   if (!this.isRunning) { return; }
 
   var dT = this.clock.getTimeDelta();
-  _(this.scenes).each(function (element) {
-    element.update(dT)
+  _(this.scenes).each(function (scene) {
+    scene.update(dT)
   }, this);
 };
 
@@ -1030,7 +1024,7 @@ var bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
-bgPlane.fillAll(generateColor());
+//bgPlane.fillAll(generateColor());
 
 //input wizard configuration
 //we will add our subscriber from the scene instance
@@ -1048,11 +1042,17 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
+//setup loader/cache
+var cache = new Kane.Cache();
+var loader = new Kane.Loader({cache: cache});
+
 //pass in our inputWizard and our entityManager
 var ingame = new Kane.Scene({
   name: 'ingame',
   inputWizard: inputWizard, 
-  entityManager: entityManager
+  entityManager: entityManager,
+  cache: cache,
+  loader: loader
 });
 
 /*
@@ -1100,6 +1100,10 @@ if (entCount && colCount) {
 ingame.onEnter = function () {
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
+
+  var spriteSheet = this.cache.getByName('public/images/spritesheet');
+  console.log(spriteSheet);
+  bgPlane.drawImage(spriteSheet, 0, 0);
 };
 
 //define onExit hook to un-subscribe to inputWizard
@@ -1131,11 +1135,6 @@ ingame.keynameVelocityMapping = {
 //setup inputHandling for ingame
 ingame.keyup = function (keyName) {
   var mapping = this.keynameVelocityMapping[keyName];
-
-  //add a check for the escape key
-  if ('escape' === keyName) {
-    this.game.setCurrentScene('inmenu');
-  }
 
   if (mapping) {
     var dx = mapping.dx * Math.random()
@@ -1195,35 +1194,42 @@ ingame.keyup = function (keyName) {
   }
 };
 
-//pass in our inputWizard and our entityManager
-var inmenu = new Kane.Scene({
-  name: 'inmenu',
-  inputWizard: inputWizard, 
+var loading = new Kane.Scene({
+  name: 'loading',
+  loader: loader,
+  cache: cache
 });
 
-//define onEnter hook to subscribe to inputWizard
-inmenu.onEnter = function () {
-  console.log('inmenu entered!');
-  this.inputWizard.addSubscriber(this);
+loading.loader.loadImage('public/images/spritesheet.png');
+
+loading.onEnter = function () {
+  console.log('loading');
 };
 
-//define onExit hook to un-subscribe to inputWizard
-inmenu.onExit = function () {
-  console.log('inmenu exited!');
-  this.inputWizard.removeSubscriber(this);
+loading.onExit = function () {
+  console.log('loading complete');
 };
 
-inmenu.keyup = function (keyName) {
-  if ('escape' === keyName) {
-    this.game.setCurrentScene('ingame');
+loading.onUpdate = function () {
+  var spriteSheet = this.cache.getByName('public/images/spritesheet');
+ 
+  //if we are ingame, dont worry about this methods further checks 
+  if ('ingame' == this.game.getCurrentScene().name) {
+    return;
+  }
+
+  if (spriteSheet) {
+    this.game.setCurrentScene('ingame'); 
+  } else {
+    console.log('...');
   }
 };
 
 
 //configure the game object before starting it
 game.addScene(ingame);
-game.addScene(inmenu);
-game.setCurrentScene('ingame');
+game.addScene(loading);
+game.setCurrentScene('loading');
 
 game.start();
 
