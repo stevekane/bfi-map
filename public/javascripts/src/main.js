@@ -222,10 +222,13 @@ ingame.keyup = function (keyName) {
   }
 };
 
+//we are adding an assets object to our scene which we will
+//reference against our cache to determine if loading is complete
 var loading = new Kane.Scene({
   name: 'loading',
   loader: loader,
-  cache: cache
+  cache: cache,
+  assets: ['public/images/spritesheet']
 });
 
 loading.loader.loadImage('public/images/spritesheet.png');
@@ -239,15 +242,13 @@ loading.onExit = function () {
 };
 
 loading.onUpdate = function () {
-  var spriteSheet = this.cache.getByName('public/images/spritesheet');
- 
   //if we are ingame, dont worry about this methods further checks 
   if ('ingame' == this.game.getCurrentScene().name) {
     return;
   }
 
-  if (spriteSheet) {
-    this.game.setCurrentScene('ingame'); 
+  if (this.cache.allInCache(this.assets)) {
+    this.game.setCurrentScene('ingame');
   } else {
     console.log('...');
   }

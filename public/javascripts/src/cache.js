@@ -1,5 +1,7 @@
 var CacheInterface = {
   cache: function (name, item) {},
+  flushByName: function (name) {},
+  flush: function () {},
   getByName: function (name) {},
   allInCache: function (nameArray) {},
 };
@@ -20,6 +22,14 @@ Kane.Cache.prototype.cache = function (object) {
     throw new Error('no asset provided for the object');
   }
   this.store[object.name] = object.asset; 
+};
+
+Kane.Cache.prototype.flushByName = function (name) {
+  delete this.store[name];
+};
+
+Kane.Cache.prototype.flush = function () {
+  this.store = {};
 };
 
 Kane.Cache.prototype.getByName = function (name) {

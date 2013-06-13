@@ -29,6 +29,38 @@ describe("Kane.Cache", function () {
     });
   });
 
+  describe("#flushByName()", function () {
+    it('should remove the named object from the cache', function () {
+      cache.cache({
+        name: "toBeFlushed",
+        asset: {}
+      });
+
+      cache.flushByName('toBeFlushed');
+      assert.isUndefined(cache.getByName('toByFlushed'));
+    });
+  });
+
+  describe("#flush()", function () {
+    it('should remove everything from the cache', function () {
+      var ob1 = {
+        name: 'ob1',
+        asset : {}
+      };
+      var ob2 = {
+        name: 'ob2',
+        asset : {}
+      };
+      
+      cache.cache(ob1);
+      cache.cache(ob2);
+
+      cache.flush();
+
+      assert.isFalse(cache.allInCache(['ob1', 'ob2']));
+    });
+  });
+
   describe("#getByName", function () {
     it('should return an object found by the provided name', function () {
       var testImage = new Image();
