@@ -950,11 +950,83 @@ var keyboardMapping = {
 
 });
 
+minispade.register('loader.js', function() {
+"use strict";
+var LoaderInterface = {
+  loadImage: function (fileName) {},
+  pushToCache: function () {},
+  handleError: function () {},
+
+  //public interface attributes
+  loading: {}
+};
+
+Kane.Loader = function (settings) {
+  if (!settings.cache) {
+    throw new Error('no cache provided in settings');
+  }
+  _.extend(this, settings);
+
+  this.loading = {}; 
+};
+
+Kane.Loader.prototype = Object.create(LoaderInterface);
+
+Kane.Loader.prototype.loadImage = function (fileName) {
+  var newImage = new Image();
+  
+  if (!fileName) {
+    throw new Error('no fileName provided to loadImage');
+  }
+
+  //callback defined in scope w/ this new image
+  function onLoad () {
+    this.pushToCache(newImage);
+  }
+
+  function onError () {
+    this.handleError(newImage);
+  }
+
+  //setting the src will immediatly trigger a server request
+  newImage.onload = onLoad.bind(this);
+  newImage.onerror = onError.bind(this);
+  newImage.src = fileName;
+
+  //store them as k/v pairs 
+  this.loading[fileName] = newImage;
+};
+
+//this is generally called by Image onload callbacks
+Kane.Loader.prototype.pushToCache = function (imageName) {
+  if (!imageName) {
+    throw new Error('no imageName provided');
+  }
+  
+  //cache this image
+  this.cache.cacheImage(this.loading[imageName]);
+
+  //delete this k/v pair from loading
+  delete this.loading[imageName];
+};
+
+//this is generally called by Image onerror callbacks
+Kane.Loader.prototype.handleError = function (imageName) {
+  if (!imageName) {
+    throw new Error('no imageName provided');
+  }
+
+  delete this.loading[imageName];
+};
+
+});
+
 minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
 minispade.require('clock.js');
 minispade.require('game.js');
+minispade.require('loader.js');
 minispade.require('world.js');
 minispade.require('scene.js');
 minispade.require('drawplane.js');
