@@ -8,7 +8,7 @@ Kane.ImageLoader.prototype = Object.create(Kane.Loader.prototype);
 
 Kane.ImageLoader.prototype.loadAsset = function (fileName) {
   var newImage = new Image()
-    , name = stripExtension(fileName);
+    , name = Kane.Utils.stripExtension(fileName);
   
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
@@ -35,8 +35,4 @@ Kane.ImageLoader.prototype.loadAsset = function (fileName) {
   newImage.src = fileName;
 
   this.loading[name] = newImage;
-};
-
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
 };

@@ -11,7 +11,7 @@ Kane.JSONLoader = function (settings) {
 Kane.JSONLoader.prototype = Object.create(Kane.Loader.prototype);
 
 Kane.JSONLoader.prototype.loadAsset = function (fileName) {
-  var name = stripExtension(fileName)
+  var name = Kane.Utils.stripExtension(fileName)
     , ajax
     , ajaxStream;
 
@@ -40,8 +40,4 @@ Kane.JSONLoader.prototype.loadAsset = function (fileName) {
 
   //store them as k/v pairs 
   this.loading[name] = {};
-};
-
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
 };

@@ -1,5 +1,8 @@
 window.Kane = {};
 
+//utility functions
+require('utils.js');
+
 //"utility objects"
 require('clock.js');
 require('loader.js');
@@ -37,7 +40,7 @@ var bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
-//bgPlane.fillAll(generateColor());
+//bgPlane.fillAll(Kane.Utils.generateColor());
 
 //input wizard configuration
 //we will add our subscriber from the scene instance
@@ -285,8 +288,6 @@ loading.onUpdate = function () {
   allImages = this.imageCache.allInCache(this.imageAssets);  
   allJSON = this.jsonCache.allInCache(this.jsonAssets);  
 
-  
-
   if (allImages && allJSON) {
     this.game.setCurrentScene('ingame');
   } else {
@@ -301,7 +302,3 @@ game.addScene(loading);
 game.setCurrentScene('loading');
 
 game.start();
-
-function generateColor () {
-  return "#" + Math.random().toString(16).slice(2, 8);
-};

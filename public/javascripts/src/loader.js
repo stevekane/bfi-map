@@ -26,7 +26,7 @@ Kane.Loader.prototype = Object.create(LoaderInterface);
 //this is just mapped out here for ref, you will override
 //this if using as a prototype
 Kane.Loader.prototype.loadAsset = function (fileName) {
-  var name = stripExtension(fileName);
+  var name = Kane.Utils.stripExtension(fileName);
 
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
@@ -63,8 +63,4 @@ Kane.Loader.prototype.broadcast = function (object) {
 
   //remove this asset from the loading object
   delete this.loading[object.name];
-};
-
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
 };

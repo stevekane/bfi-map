@@ -142,7 +142,7 @@ Kane.DrawPlane.prototype.fillAll = function (color) {
 
 //draw rect w/ provided location/dimesions
 Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
-  if (!_validateColor(color)) { 
+  if (!Kane.Utils.validateColor(color)) { 
     throw new TypeError('invalid color'); 
   }
   //color must be valid hex
@@ -162,13 +162,6 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 Kane.DrawPlane.prototype.clearAll = function () {
   this.ctx.clearRect(0, 0, this.board.width, this.board.height);
 };
-
-function _validateColor (color) {
-  var validColor = /^#[0123456789abcdef]*$/i;
-
-  return color.match(validColor);  
-};
-
 
 });
 
@@ -701,7 +694,7 @@ Kane.ImageLoader.prototype = Object.create(Kane.Loader.prototype);
 
 Kane.ImageLoader.prototype.loadAsset = function (fileName) {
   var newImage = new Image()
-    , name = stripExtension(fileName);
+    , name = Kane.Utils.stripExtension(fileName);
   
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
@@ -728,10 +721,6 @@ Kane.ImageLoader.prototype.loadAsset = function (fileName) {
   newImage.src = fileName;
 
   this.loading[name] = newImage;
-};
-
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
 };
 
 });
@@ -998,7 +987,7 @@ Kane.JSONLoader = function (settings) {
 Kane.JSONLoader.prototype = Object.create(Kane.Loader.prototype);
 
 Kane.JSONLoader.prototype.loadAsset = function (fileName) {
-  var name = stripExtension(fileName)
+  var name = Kane.Utils.stripExtension(fileName)
     , ajax
     , ajaxStream;
 
@@ -1027,10 +1016,6 @@ Kane.JSONLoader.prototype.loadAsset = function (fileName) {
 
   //store them as k/v pairs 
   this.loading[name] = {};
-};
-
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
 };
 
 });
@@ -1065,7 +1050,7 @@ Kane.Loader.prototype = Object.create(LoaderInterface);
 //this is just mapped out here for ref, you will override
 //this if using as a prototype
 Kane.Loader.prototype.loadAsset = function (fileName) {
-  var name = stripExtension(fileName);
+  var name = Kane.Utils.stripExtension(fileName);
 
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
@@ -1104,15 +1089,14 @@ Kane.Loader.prototype.broadcast = function (object) {
   delete this.loading[object.name];
 };
 
-function stripExtension (name) {
-  return name.match(/(.*)\..*/)[1];
-};
-
 });
 
 minispade.register('main.js', function() {
 "use strict";
 window.Kane = {};
+
+//utility functions
+minispade.require('utils.js');
 
 //"utility objects"
 minispade.require('clock.js');
@@ -1151,7 +1135,7 @@ var bgCanvas = createCanvas(640, 480, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
-//bgPlane.fillAll(generateColor());
+//bgPlane.fillAll(Kane.Utils.generateColor());
 
 //input wizard configuration
 //we will add our subscriber from the scene instance
@@ -1399,8 +1383,6 @@ loading.onUpdate = function () {
   allImages = this.imageCache.allInCache(this.imageAssets);  
   allJSON = this.jsonCache.allInCache(this.jsonAssets);  
 
-  
-
   if (allImages && allJSON) {
     this.game.setCurrentScene('ingame');
   } else {
@@ -1415,10 +1397,6 @@ game.addScene(loading);
 game.setCurrentScene('loading');
 
 game.start();
-
-function generateColor () {
-  return "#" + Math.random().toString(16).slice(2, 8);
-};
 
 });
 
@@ -1484,6 +1462,26 @@ Kane.Scene.prototype.onEnter = function () {};
 Kane.Scene.prototype.onExit = function () {};
 Kane.Scene.prototype.onUpdate = function (dT) {};
 Kane.Scene.prototype.onDraw = function () {};
+
+});
+
+minispade.register('utils.js', function() {
+"use strict";
+Kane.Utils = {
+  generateColor: function () {
+    return "#" + Math.random().toString(16).slice(2, 8);
+  },
+
+  validateColor: function (color) {
+    var validColor = /^#[0-9a-f]{3}$|[0-9a-f]{6}$/i;
+
+    return validColor.test(color);
+  },
+
+  stripExtension: function (name) {
+    return name.match(/(.*)\..*/)[1];
+  },
+}
 
 });
 

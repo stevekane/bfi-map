@@ -23,7 +23,7 @@ Kane.DrawPlane.prototype.fillAll = function (color) {
 
 //draw rect w/ provided location/dimesions
 Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
-  if (!_validateColor(color)) { 
+  if (!Kane.Utils.validateColor(color)) { 
     throw new TypeError('invalid color'); 
   }
   //color must be valid hex
@@ -43,10 +43,3 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 Kane.DrawPlane.prototype.clearAll = function () {
   this.ctx.clearRect(0, 0, this.board.width, this.board.height);
 };
-
-function _validateColor (color) {
-  var validColor = /^#[0123456789abcdef]*$/i;
-
-  return color.match(validColor);  
-};
-
