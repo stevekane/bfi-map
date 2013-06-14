@@ -55,34 +55,59 @@ var entityCanvas = createCanvas(640, 480, 'entities')
     clock: clock
   });
 
-//setup loader/cache/bus.  optionally we inject the bus onto 
-//the cache to be more clear about its dependencies
-var bus = new Bacon.Bus();
-var cache = new Kane.Cache({
-  bus: bus
+//setup image loader/cache/bus.  optionally we inject the bus onto 
+//the cache to be more explicit about its dependencies
+var imageBus = new Bacon.Bus();
+var imageCache = new Kane.Cache({
+  bus: imageBus 
 });
-var loader = new Kane.Loader({
-  cache: cache,
-  bus: bus
+var imageLoader = new Kane.ImageLoader({
+  cache: imageCache,
+  bus: imageBus 
 });
 
 //let's make our cache 'listen' to our loader's bus
-cache.bus.onValue( function (object) {
+imageCache.bus.onValue( function (object) {
   this.cache(object);
-}.bind(cache));
+}.bind(imageCache));
 
-//let's add another bus listener to demonstrate its value
-bus.onValue( function (object) {
+//let's add another bus listener to log the loading 
+imageCache.bus.onValue( function (object) {
   console.log(object.name, ' has been loaded successfully!');
 });
 
-//pass in our inputWizard and our entityManager
+//setup json loader/cache/bus.  optionally we inject the bus onto
+//this cache to be more explicit about its dependencies
+var jsonBus = new Bacon.Bus();
+var jsonCache = new Kane.Cache({
+  bus: jsonBus 
+});
+var jsonLoader = new Kane.JSONLoader({
+  cache: jsonCache,
+  bus:jsonBus 
+});
+
+//let's make our cache 'listen' to our loader's bus
+jsonCache.bus.onValue( function (object) {
+  this.cache(object);
+}.bind(jsonCache));
+
+//let's add another bus listener to log the loading
+jsonCache.bus.onValue( function (object) {
+  console.log(object.name, ' has been loaded successfully!');
+});
+
+/*
+pass in our inputWizard and our entityManager
+we also pass it a reference to our image/json cache
+incase we wish to pull objects from them
+*/
 var ingame = new Kane.Scene({
   name: 'ingame',
   inputWizard: inputWizard, 
   entityManager: entityManager,
-  cache: cache,
-  loader: loader
+  imageCache: imageCache,
+  jsonCache: jsonCache,
 });
 
 /*
@@ -128,11 +153,10 @@ if (entCount && colCount) {
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
+  var spriteSheet = this.imageCache.getByName('public/images/spritesheet');
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
 
-  var spriteSheet = this.cache.getByName('public/images/spritesheet');
-  console.log(spriteSheet);
   bgPlane.drawImage(spriteSheet, 0, 0);
 };
 
@@ -224,16 +248,22 @@ ingame.keyup = function (keyName) {
   }
 };
 
-//we are adding an assets object to our scene which we will
-//reference against our cache to determine if loading is complete
+/*
+this is a loading scene.  It will load assets into the provided
+caches using the provided loaders and then advance to ingame
+*/
 var loading = new Kane.Scene({
   name: 'loading',
-  loader: loader,
-  cache: cache,
-  assets: ['public/images/spritesheet']
+  imageLoader: imageLoader,
+  jsonLoader: jsonLoader,
+  imageCache: imageCache,
+  jsonCache: jsonCache,
+  imageAssets: ['public/images/spritesheet'],
+  jsonAssets: ['public/json/spritesheet']
 });
 
-loading.loader.loadAsset('public/images/spritesheet.png');
+loading.imageLoader.loadAsset('public/images/spritesheet.png');
+loading.jsonLoader.loadAsset('public/json/spritesheet.json');
 
 loading.onEnter = function () {
   console.log('loading');
@@ -244,12 +274,20 @@ loading.onExit = function () {
 };
 
 loading.onUpdate = function () {
+  var allImages
+    , allJSON;
+
   //if we are ingame, dont worry about this methods further checks 
   if ('ingame' == this.game.getCurrentScene().name) {
     return;
   }
 
-  if (this.cache.allInCache(this.assets)) {
+  allImages = this.imageCache.allInCache(this.imageAssets);  
+  allJSON = this.jsonCache.allInCache(this.jsonAssets);  
+
+  
+
+  if (allImages && allJSON) {
     this.game.setCurrentScene('ingame');
   } else {
     console.log('...');
