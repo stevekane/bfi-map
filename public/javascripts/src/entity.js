@@ -1,3 +1,5 @@
+require('kane.js');
+
 var EntityInterface = {
   kill: function () {},
   isDead: function () {},

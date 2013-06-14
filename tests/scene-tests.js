@@ -1,4 +1,4 @@
-minispade.require('main.js');
+minispade.require('scene.js');
 
 var assert = chai.assert;
 

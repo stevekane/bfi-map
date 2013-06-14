@@ -1,3 +1,5 @@
+require('kane.js');
+
 var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},

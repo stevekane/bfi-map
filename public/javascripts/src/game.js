@@ -1,3 +1,5 @@
+require('kane.js');
+
 var GameInterface = {
   addScene: function (scene) {},
   removeScene: function (name) {},

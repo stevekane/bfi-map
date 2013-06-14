@@ -1,3 +1,5 @@
+require('kane.js');
+
 /*
 update and draw generally should be left alone.  they both expose hooks
 for calling onUpdate and onDraw which may be defined however you desire

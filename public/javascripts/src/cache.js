@@ -1,3 +1,5 @@
+require('kane.js');
+
 var CacheInterface = {
   cache: function (name, item) {},
   flushByName: function (name) {},

@@ -1,3 +1,5 @@
+require('kane.js');
+
 var WorldInterface = {
   loadData: function(data) {},
 

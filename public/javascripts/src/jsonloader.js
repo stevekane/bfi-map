@@ -1,3 +1,4 @@
+require('kane.js');
 require('loader.js');
 
 //WE EXTEND LOADER

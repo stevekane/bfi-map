@@ -1,4 +1,4 @@
-minispade.require('main.js');
+minispade.require('clock.js');
 
 var asser = chai.assert;
 

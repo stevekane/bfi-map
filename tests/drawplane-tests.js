@@ -1,4 +1,4 @@
-minispade.require('main.js');
+minispade.require('drawplane.js');
 
 var assert = chai.assert;
 

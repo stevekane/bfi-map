@@ -1,4 +1,4 @@
-minispade.require('main.js');
+minispade.require('utils.js');
 
 var assert = chai.assert;
 
@@ -32,6 +32,7 @@ describe("Kane.Utils", function () {
       assert.isFalse(Kane.Utils.validateColor(wrongLengthHexColor));
     });
   });
+
   describe("#stripExtension()", function () {
     it('return the filename with the file extension removed', function () {
       var imageName = "cat/in/hat.png"

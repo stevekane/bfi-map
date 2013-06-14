@@ -1,4 +1,4 @@
-minispade.require('main.js');
+minispade.require('world.js');
 
 var assert = chai.assert;
 

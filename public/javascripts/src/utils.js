@@ -1,3 +1,5 @@
+require('kane.js');
+
 Kane.Utils = {
   generateColor: function () {
     return "#" + Math.random().toString(16).slice(2, 8);
@@ -10,6 +12,6 @@ Kane.Utils = {
   },
 
   stripExtension: function (name) {
-    return name.match(/(.*)\..*/)[1];
+    return name.slice(0, name.indexOf('.'));
   },
 }

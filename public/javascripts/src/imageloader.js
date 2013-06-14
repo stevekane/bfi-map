@@ -1,3 +1,6 @@
+require('kane.js');
+require('loader.js');
+
 Kane.ImageLoader = function (settings) {
   Kane.Loader.call(this, settings);
 

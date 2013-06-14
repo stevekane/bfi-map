@@ -1,5 +1,8 @@
 minispade.register('cache.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var CacheInterface = {
   cache: function (name, item) {},
   flushByName: function (name) {},
@@ -52,6 +55,9 @@ Kane.Cache.prototype.allInCache = function (nameArray) {
 
 minispade.register('clock.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var ClockInterface = {
   start: function () {},
   stop: function () {},
@@ -117,6 +123,9 @@ Kane.Clock.prototype.getTimeDelta = function () {
 
 minispade.register('drawplane.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},
@@ -167,6 +176,9 @@ Kane.DrawPlane.prototype.clearAll = function () {
 
 minispade.register('entity.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var EntityInterface = {
   kill: function () {},
   isDead: function () {},
@@ -292,6 +304,9 @@ function updateVelocity(dT, a, oldVel) {
 
 minispade.register('entitymanager.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var EntityManagerInterface = {
   generateUniqueId: function () {},
   spawn: function (constructor, args) {},
@@ -531,6 +546,9 @@ Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
 
 minispade.register('game.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var GameInterface = {
   addScene: function (scene) {},
   removeScene: function (name) {},
@@ -684,6 +702,10 @@ function draw () {
 
 minispade.register('imageloader.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+minispade.require('loader.js');
+
 Kane.ImageLoader = function (settings) {
   Kane.Loader.call(this, settings);
 
@@ -727,6 +749,9 @@ Kane.ImageLoader.prototype.loadAsset = function (fileName) {
 
 minispade.register('inputwizard.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 /*
 this object is responsible for listening to keyboard events
 and passing the information on to its subscribers after some
@@ -974,6 +999,7 @@ var keyboardMapping = {
 minispade.register('jsonloader.js', function() {
 "use strict";
 
+minispade.require('kane.js');
 minispade.require('loader.js');
 
 //WE EXTEND LOADER
@@ -1020,8 +1046,17 @@ Kane.JSONLoader.prototype.loadAsset = function (fileName) {
 
 });
 
+minispade.register('kane.js', function() {
+"use strict";
+window.Kane = {};
+
+});
+
 minispade.register('loader.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var LoaderInterface = {
   loadAsset: function (fileName) {},
   handleError: function (name, image) {},
@@ -1093,7 +1128,8 @@ Kane.Loader.prototype.broadcast = function (object) {
 
 minispade.register('main.js', function() {
 "use strict";
-window.Kane = {};
+//require the high level Kane.Object
+minispade.require('kane.js');
 
 //utility functions
 minispade.require('utils.js');
@@ -1402,6 +1438,9 @@ game.start();
 
 minispade.register('scene.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 /*
 update and draw generally should be left alone.  they both expose hooks
 for calling onUpdate and onDraw which may be defined however you desire
@@ -1467,6 +1506,9 @@ Kane.Scene.prototype.onDraw = function () {};
 
 minispade.register('utils.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 Kane.Utils = {
   generateColor: function () {
     return "#" + Math.random().toString(16).slice(2, 8);
@@ -1479,7 +1521,7 @@ Kane.Utils = {
   },
 
   stripExtension: function (name) {
-    return name.match(/(.*)\..*/)[1];
+    return name.slice(0, name.indexOf('.'));
   },
 }
 
@@ -1487,6 +1529,9 @@ Kane.Utils = {
 
 minispade.register('world.js', function() {
 "use strict";
+
+minispade.require('kane.js');
+
 var WorldInterface = {
   loadData: function(data) {},
 

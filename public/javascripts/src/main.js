@@ -1,4 +1,5 @@
-window.Kane = {};
+//require the high level Kane.Object
+require('kane.js');
 
 //utility functions
 require('utils.js');

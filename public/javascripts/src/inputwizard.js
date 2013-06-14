@@ -1,3 +1,5 @@
+require('kane.js');
+
 /*
 this object is responsible for listening to keyboard events
 and passing the information on to its subscribers after some

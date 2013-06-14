@@ -1,3 +1,5 @@
+require('kane.js');
+
 var ClockInterface = {
   start: function () {},
   stop: function () {},

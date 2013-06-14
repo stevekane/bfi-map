@@ -1,3 +1,5 @@
+require('kane.js');
+
 var LoaderInterface = {
   loadAsset: function (fileName) {},
   handleError: function (name, image) {},

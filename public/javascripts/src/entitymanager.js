@@ -1,3 +1,5 @@
+require('kane.js');
+
 var EntityManagerInterface = {
   generateUniqueId: function () {},
   spawn: function (constructor, args) {},
