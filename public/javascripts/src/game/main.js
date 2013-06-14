@@ -1,28 +1,28 @@
 //require the high level Kane.Object
-require('kane.js');
+require('../kane.js');
 
 //utility functions
-require('utils.js');
+require('../utils.js');
 
 //"utility objects"
-require('clock.js');
-require('loader.js');
-require('jsonloader.js');
-require('imageloader.js');
-require('cache.js');
+require('../clock.js');
+require('../loader.js');
+require('../jsonloader.js');
+require('../imageloader.js');
+require('../cache.js');
 
 //"dom objects"
-require('inputwizard.js');
-require('drawplane.js');
+require('../inputwizard.js');
+require('../drawplane.js');
 
 //"high levl objects"
-require('game.js');
-require('scene.js');
-require('world.js');
+require('../game.js');
+require('../scene.js');
+require('../world.js');
 
 //"entity objects"
-require('entity.js');
-require('entitymanager.js');
+require('../entity.js');
+require('../entitymanager.js');
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
