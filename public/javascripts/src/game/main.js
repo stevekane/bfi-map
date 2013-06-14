@@ -1,28 +1,37 @@
+/*
+ENGINE REQUIRES
+*/
 //require the high level Kane.Object
-require('../kane.js');
+require('kane.js');
 
 //utility functions
-require('../utils.js');
+require('utils.js');
 
 //"utility objects"
-require('../clock.js');
-require('../loader.js');
-require('../jsonloader.js');
-require('../imageloader.js');
-require('../cache.js');
+require('clock.js');
+require('loader.js');
+require('jsonloader.js');
+require('imageloader.js');
+require('cache.js');
 
 //"dom objects"
-require('../inputwizard.js');
-require('../drawplane.js');
+require('inputwizard.js');
+require('drawplane.js');
 
 //"high levl objects"
-require('../game.js');
-require('../scene.js');
-require('../world.js');
+require('game.js');
+require('scene.js');
+require('world.js');
 
 //"entity objects"
-require('../entity.js');
-require('../entitymanager.js');
+require('entity.js');
+require('entitymanager.js');
+
+/*
+GAME REQUIRES
+*/
+require('game/entities.js');
+
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -135,25 +144,15 @@ ingame.onUpdate = function (dT) {
 var entCount = document.getElementById('entityCount')
   , colCount = document.getElementById('collisionCount');
 
-/*
-we wrap this in a conditional for the time being to avoid
-failing tests (the test runner uses a generated .html file
-and not the index.html file where these two dom elements are
-defined
-*/
-if (entCount && colCount) {
+entityManager.baconLength.onValue(function (val) {
+  entCount.textContent = val;  
+});
 
-  entityManager.baconLength.onValue(function (val) {
-    entCount.textContent = val;  
-  });
-
-  entityManager.baconCollisions.onValue(function (val) {
-    colCount.textContent = colCount.textContent ? 
-                           parseInt(colCount.textContent) + val : 
-                           val;
-  });
-}
-
+entityManager.baconCollisions.onValue(function (val) {
+  colCount.textContent = colCount.textContent ? 
+                         parseInt(colCount.textContent) + val : 
+                         val;
+});
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -190,63 +189,22 @@ ingame.keynameVelocityMapping = {
   },
 };
 
-//setup inputHandling for ingame
+//REWRITE USING EXTERNALLY DEFINED ENTITIES
 ingame.keyup = function (keyName) {
   var mapping = this.keynameVelocityMapping[keyName];
-
+  
   if (mapping) {
     var dx = mapping.dx * Math.random()
       , dy = mapping.dy * Math.random();
- 
+
     this.entityManager.spawn(
-      Kane.Entity, 
+      Kane.Projectile,
       {
         x: Math.round(Math.random() * 640),
         y: Math.round(Math.random() * 480),
         dx: dx,
         dy: dy,
-        w: 40,
-        h: 40,
         ddy: .001,
-        color: '#1356ab',
-        killtimer: Date.now() + 2000,
-
-        //introduce afterupdate method to check if we should kill
-        afterUpdate: function (dT) {
-          if (Date.now() > this.killtimer) {
-            this.kill();   
-          }
-        },
-
-        collide: function (target) {
-          this.kill();
-          target.kill();
-          
-          for (var i=0; i<20; i++) {
-            this.manager.spawn(
-              Kane.Entity, 
-              {
-                doesCollide: false,
-                x: this.x,
-                y: this.y,
-                dx: Math.random() * (this.dx + target.dx),
-                dy: Math.random() * (this.dy + target.dy),
-                w: 8,
-                h: 8,
-                ddy: .001,
-                color: "#bb0000",
-                killtimer: Date.now() + 500,
-
-                //introduce afterupdate method to check if we should kill
-                afterUpdate: function (dT) {
-                  if (Date.now() > this.killtimer) {
-                    this.kill();   
-                  }
-                },
-              }
-            ); 
-          }
-        }
       }
     );
   }

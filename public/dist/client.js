@@ -700,8 +700,80 @@ function draw () {
 
 });
 
+minispade.register('game/entities.js', function() {
+"use strict";
+
+minispade.require('entity.js');
+
+Kane.Particle = function (settings) {
+  //default settings
+  this.lifespan = 600;
+  this.killtimer = Date.now() + this.lifespan;
+  this.color = "#1382bb";
+  this.h = 5;
+  this.w = 5; 
+
+  Kane.Entity.call(this, settings);
+  this.doesCollide = false;
+};
+
+Kane.Particle.prototype = Object.create(Kane.Entity.prototype);
+
+//check kill timer to see if we should kill ourselves
+Kane.Particle.prototype.afterUpdate = function (dT) {
+  if (Date.now() > this.killtimer) {
+    this.kill();
+  }
+};
+
+Kane.Projectile = function (settings) {
+  this.lifespan = 2000;
+  this.killtimer = Date.now() + this.lifespan;
+  this.color = "#1356ab";
+  this.doesCollide = true;
+  this.h = 24;
+  this.w = 24; 
+
+  Kane.Entity.call(this, settings);
+};
+
+Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
+
+Kane.Projectile.prototype.afterUpdate = function (dT) {
+  if (Date.now() > this.killtimer) {
+    this.kill();
+  }
+};
+
+Kane.Projectile.prototype.collide = function (target) {
+  //kill ourselves and the target
+  this.kill();
+  target.kill();
+
+  //spawn "gib" particles
+  for (var i=0; i<20; i++) {
+    this.manager.spawn(
+      Kane.Particle,
+      {
+        x: this.x,
+        y:  this.y,
+        dx: Math.random() * (this.dx + target.dx),
+        dy: Math.random() * (this.dy + target.dy),
+        w: 8,
+        h: 8,
+        ddy: .001,
+      }
+    );
+  }
+};
+
+});
+
 minispade.register('game/main.js', function() {
 "use strict";
+/*
+ENGINE REQUIRES
+*/
 //require the high level Kane.Object
 minispade.require('kane.js');
 
@@ -727,6 +799,12 @@ minispade.require('world.js');
 //"entity objects"
 minispade.require('entity.js');
 minispade.require('entitymanager.js');
+
+/*
+GAME REQUIRES
+*/
+minispade.require('game/entities.js');
+
 
 function createCanvas (w, h, name) {
   var canvas = document.createElement('canvas');
@@ -839,25 +917,15 @@ ingame.onUpdate = function (dT) {
 var entCount = document.getElementById('entityCount')
   , colCount = document.getElementById('collisionCount');
 
-/*
-we wrap this in a conditional for the time being to avoid
-failing tests (the test runner uses a generated .html file
-and not the index.html file where these two dom elements are
-defined
-*/
-if (entCount && colCount) {
+entityManager.baconLength.onValue(function (val) {
+  entCount.textContent = val;  
+});
 
-  entityManager.baconLength.onValue(function (val) {
-    entCount.textContent = val;  
-  });
-
-  entityManager.baconCollisions.onValue(function (val) {
-    colCount.textContent = colCount.textContent ? 
-                           parseInt(colCount.textContent) + val : 
-                           val;
-  });
-}
-
+entityManager.baconCollisions.onValue(function (val) {
+  colCount.textContent = colCount.textContent ? 
+                         parseInt(colCount.textContent) + val : 
+                         val;
+});
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
@@ -894,63 +962,22 @@ ingame.keynameVelocityMapping = {
   },
 };
 
-//setup inputHandling for ingame
+//REWRITE USING EXTERNALLY DEFINED ENTITIES
 ingame.keyup = function (keyName) {
   var mapping = this.keynameVelocityMapping[keyName];
-
+  
   if (mapping) {
     var dx = mapping.dx * Math.random()
       , dy = mapping.dy * Math.random();
- 
+
     this.entityManager.spawn(
-      Kane.Entity, 
+      Kane.Projectile,
       {
         x: Math.round(Math.random() * 640),
         y: Math.round(Math.random() * 480),
         dx: dx,
         dy: dy,
-        w: 40,
-        h: 40,
         ddy: .001,
-        color: '#1356ab',
-        killtimer: Date.now() + 2000,
-
-        //introduce afterupdate method to check if we should kill
-        afterUpdate: function (dT) {
-          if (Date.now() > this.killtimer) {
-            this.kill();   
-          }
-        },
-
-        collide: function (target) {
-          this.kill();
-          target.kill();
-          
-          for (var i=0; i<20; i++) {
-            this.manager.spawn(
-              Kane.Entity, 
-              {
-                doesCollide: false,
-                x: this.x,
-                y: this.y,
-                dx: Math.random() * (this.dx + target.dx),
-                dy: Math.random() * (this.dy + target.dy),
-                w: 8,
-                h: 8,
-                ddy: .001,
-                color: "#bb0000",
-                killtimer: Date.now() + 500,
-
-                //introduce afterupdate method to check if we should kill
-                afterUpdate: function (dT) {
-                  if (Date.now() > this.killtimer) {
-                    this.kill();   
-                  }
-                },
-              }
-            ); 
-          }
-        }
       }
     );
   }
