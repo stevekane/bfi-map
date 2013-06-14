@@ -30,7 +30,10 @@ require('entitymanager.js');
 /*
 GAME REQUIRES
 */
-require('game/entities.js');
+require('game/projectile.js');
+require('game/particle.js');
+require('game/loadingscene.js');
+require('game/entityscene.js');
 
 
 function createCanvas (w, h, name) {
@@ -214,46 +217,20 @@ ingame.keyup = function (keyName) {
 this is a loading scene.  It will load assets into the provided
 caches using the provided loaders and then advance to ingame
 */
-var loading = new Kane.Scene({
+
+var loading = new Kane.LoadingScene({
   name: 'loading',
   imageLoader: imageLoader,
   jsonLoader: jsonLoader,
   imageCache: imageCache,
   jsonCache: jsonCache,
   imageAssets: ['public/images/spritesheet'],
-  jsonAssets: ['public/json/spritesheet']
-});
+  jsonAssets: ['public/json/spritesheet'],
+  targetSceneName: 'ingame' 
+})
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');
 loading.jsonLoader.loadAsset('public/json/spritesheet.json');
-
-loading.onEnter = function () {
-  console.log('loading');
-};
-
-loading.onExit = function () {
-  console.log('loading complete');
-};
-
-loading.onUpdate = function () {
-  var allImages
-    , allJSON;
-
-  //if we are ingame, dont worry about this methods further checks 
-  if ('ingame' == this.game.getCurrentScene().name) {
-    return;
-  }
-
-  allImages = this.imageCache.allInCache(this.imageAssets);  
-  allJSON = this.jsonCache.allInCache(this.jsonAssets);  
-
-  if (allImages && allJSON) {
-    this.game.setCurrentScene('ingame');
-  } else {
-    console.log('...');
-  }
-};
-
 
 //configure the game object before starting it
 game.addScene(ingame);

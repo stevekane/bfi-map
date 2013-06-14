@@ -700,71 +700,80 @@ function draw () {
 
 });
 
-minispade.register('game/entities.js', function() {
+minispade.register('game/entityscene.js', function() {
 "use strict";
 
-minispade.require('entity.js');
+});
 
-Kane.Particle = function (settings) {
-  //default settings
-  this.lifespan = 600;
-  this.killtimer = Date.now() + this.lifespan;
-  this.color = "#1382bb";
-  this.h = 5;
-  this.w = 5; 
+minispade.register('game/loadingscene.js', function() {
+"use strict";
 
-  Kane.Entity.call(this, settings);
-  this.doesCollide = false;
+minispade.require('scene.js');
+
+Kane.LoadingScene = function (settings) {
+  _.extend(this, settings);
+
+  if (!settings.targetSceneName) {
+    this.targetSceneName = this.name;
+  }
+  //defaults
+  this.imageCache = null;
+  this.imageLoader = null;
+  this.jsonCache = null;
+  this.jsonLoader = null;
+  this.imageAssets = [];
+  this.jsonAssets = [];
+
+  Kane.Scene.call(this, settings);
 };
 
-Kane.Particle.prototype = Object.create(Kane.Entity.prototype);
+Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
 
-//check kill timer to see if we should kill ourselves
-Kane.Particle.prototype.afterUpdate = function (dT) {
-  if (Date.now() > this.killtimer) {
-    this.kill();
+Kane.LoadingScene.prototype.onUpdate = function (dT) {
+  var allImages
+    , allJSON;
+
+  //check if this is the currentScene, if not do nothing
+  if (this.name !== this.game.getCurrentScene().name) {
+    return;
+  } 
+
+  //if we have an imageCache, check if all our images are loaded
+  if (this.imageCache) {
+    allImages = this.imageCache.allInCache(this.imageAssets);
+  } else {
+    allImages = true;
+  }
+
+  //if we have a jsonCache, check if all our json is loaded  
+  if (this.jsonCache) {
+    allJSON = this.jsonCache.allInCache(this.jsonAssets);
+  } else {
+    allJSON = true;
+  }
+  
+  //if all the images and json are in their respective caches, do something
+  if (allImages && allJSON) {
+    this.loadComplete();
+  } else {
+    this.stillLoading();
   }
 };
 
-Kane.Projectile = function (settings) {
-  this.lifespan = 2000;
-  this.killtimer = Date.now() + this.lifespan;
-  this.color = "#1356ab";
-  this.doesCollide = true;
-  this.h = 24;
-  this.w = 24; 
-
-  Kane.Entity.call(this, settings);
+Kane.LoadingScene.prototype.loadComplete = function () {
+  this.game.setCurrentScene(this.targetSceneName); 
 };
 
-Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
-
-Kane.Projectile.prototype.afterUpdate = function (dT) {
-  if (Date.now() > this.killtimer) {
-    this.kill();
-  }
+Kane.LoadingScene.prototype.stillLoading = function () {
+  console.log('still loading...');
 };
 
-Kane.Projectile.prototype.collide = function (target) {
-  //kill ourselves and the target
-  this.kill();
-  target.kill();
+Kane.LoadingScene.prototype.onEnter = function () {
+  console.log('loading assets for ', this.targetSceneName);
+};
 
-  //spawn "gib" particles
-  for (var i=0; i<20; i++) {
-    this.manager.spawn(
-      Kane.Particle,
-      {
-        x: this.x,
-        y:  this.y,
-        dx: Math.random() * (this.dx + target.dx),
-        dy: Math.random() * (this.dy + target.dy),
-        w: 8,
-        h: 8,
-        ddy: .001,
-      }
-    );
-  }
+Kane.LoadingScene.prototype.onExit = function () {
+  console.log('transitioning from ', this.name, ' to', this.targetSceneName);
 };
 
 });
@@ -803,7 +812,10 @@ minispade.require('entitymanager.js');
 /*
 GAME REQUIRES
 */
-minispade.require('game/entities.js');
+minispade.require('game/projectile.js');
+minispade.require('game/particle.js');
+minispade.require('game/loadingscene.js');
+minispade.require('game/entityscene.js');
 
 
 function createCanvas (w, h, name) {
@@ -987,46 +999,20 @@ ingame.keyup = function (keyName) {
 this is a loading scene.  It will load assets into the provided
 caches using the provided loaders and then advance to ingame
 */
-var loading = new Kane.Scene({
+
+var loading = new Kane.LoadingScene({
   name: 'loading',
   imageLoader: imageLoader,
   jsonLoader: jsonLoader,
   imageCache: imageCache,
   jsonCache: jsonCache,
   imageAssets: ['public/images/spritesheet'],
-  jsonAssets: ['public/json/spritesheet']
-});
+  jsonAssets: ['public/json/spritesheet'],
+  targetSceneName: 'ingame' 
+})
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');
 loading.jsonLoader.loadAsset('public/json/spritesheet.json');
-
-loading.onEnter = function () {
-  console.log('loading');
-};
-
-loading.onExit = function () {
-  console.log('loading complete');
-};
-
-loading.onUpdate = function () {
-  var allImages
-    , allJSON;
-
-  //if we are ingame, dont worry about this methods further checks 
-  if ('ingame' == this.game.getCurrentScene().name) {
-    return;
-  }
-
-  allImages = this.imageCache.allInCache(this.imageAssets);  
-  allJSON = this.jsonCache.allInCache(this.jsonAssets);  
-
-  if (allImages && allJSON) {
-    this.game.setCurrentScene('ingame');
-  } else {
-    console.log('...');
-  }
-};
-
 
 //configure the game object before starting it
 game.addScene(ingame);
@@ -1034,6 +1020,83 @@ game.addScene(loading);
 game.setCurrentScene('loading');
 
 game.start();
+
+});
+
+minispade.register('game/particle.js', function() {
+"use strict";
+
+minispade.require('entity.js');
+
+Kane.Particle = function (settings) {
+  //default settings
+  this.lifespan = 600;
+  this.killtimer = Date.now() + this.lifespan;
+  this.color = "#1382bb";
+  this.h = 5;
+  this.w = 5; 
+
+  Kane.Entity.call(this, settings);
+  this.doesCollide = false;
+};
+
+Kane.Particle.prototype = Object.create(Kane.Entity.prototype);
+
+//check kill timer to see if we should kill ourselves
+Kane.Particle.prototype.afterUpdate = function (dT) {
+  if (Date.now() > this.killtimer) {
+    this.kill();
+  }
+};
+
+
+});
+
+minispade.register('game/projectile.js', function() {
+"use strict";
+
+minispade.require('entity.js');
+
+Kane.Projectile = function (settings) {
+  this.lifespan = 2000;
+  this.killtimer = Date.now() + this.lifespan;
+  this.color = "#1356ab";
+  this.doesCollide = true;
+  this.h = 24;
+  this.w = 24; 
+
+  Kane.Entity.call(this, settings);
+};
+
+Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
+
+Kane.Projectile.prototype.afterUpdate = function (dT) {
+  if (Date.now() > this.killtimer) {
+    this.kill();
+  }
+};
+
+Kane.Projectile.prototype.collide = function (target) {
+  //kill ourselves and the target
+  this.kill();
+  target.kill();
+
+  //spawn "gib" particles
+  for (var i=0; i<20; i++) {
+    this.manager.spawn(
+      Kane.Particle,
+      {
+        x: this.x,
+        y:  this.y,
+        dx: Math.random() * (this.dx + target.dx),
+        dy: Math.random() * (this.dy + target.dy),
+        w: 8,
+        h: 8,
+        ddy: .001,
+      }
+    );
+  }
+};
 
 });
 
