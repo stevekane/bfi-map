@@ -3,6 +3,8 @@ window.Kane = {};
 //"utility objects"
 require('clock.js');
 require('loader.js');
+require('jsonloader.js');
+require('imageloader.js');
 require('cache.js');
 
 //"dom objects"
@@ -231,7 +233,7 @@ var loading = new Kane.Scene({
   assets: ['public/images/spritesheet']
 });
 
-loading.loader.loadImage('public/images/spritesheet.png');
+loading.loader.loadAsset('public/images/spritesheet.png');
 
 loading.onEnter = function () {
   console.log('loading');

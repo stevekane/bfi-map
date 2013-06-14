@@ -1,5 +1,5 @@
 var LoaderInterface = {
-  loadImage: function (fileName) {},
+  loadAsset: function (fileName) {},
   handleError: function (name, image) {},
   broadcast: function (object) {},
 
@@ -23,36 +23,16 @@ Kane.Loader = function (settings) {
 
 Kane.Loader.prototype = Object.create(LoaderInterface);
 
-Kane.Loader.prototype.loadImage = function (fileName) {
-  var newImage = new Image()
-    , name = stripExtension(fileName);
-  
+//this is just mapped out here for ref, you will override
+//this if using as a prototype
+Kane.Loader.prototype.loadAsset = function (fileName) {
+  var name = stripExtension(fileName);
+
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
   }
-
-  //callback defined in scope w/ this new image
-  function onLoad () {
-    this.broadcast({
-      name: name,
-      asset: newImage
-    });
-  }
-
-  function onError () {
-    this.handleError({
-      name: name,
-      asset: newImage
-    });
-  }
-
-  //setting the src will immediatly trigger a server request
-  newImage.onload = onLoad.bind(this);
-  newImage.onerror = onError.bind(this);
-  newImage.src = fileName;
-
-  //store them as k/v pairs 
-  this.loading[name] = newImage;
+  
+  this.loading[name] = {};
 };
 
 //this is generally called by Image onerror callbacks

@@ -689,6 +689,53 @@ function draw () {
 
 });
 
+minispade.register('imageloader.js', function() {
+"use strict";
+Kane.ImageLoader = function (settings) {
+  Kane.Loader.call(this, settings);
+
+  this.loading = {};
+};
+
+Kane.ImageLoader.prototype = Object.create(Kane.Loader.prototype);
+
+Kane.ImageLoader.prototype.loadAsset = function (fileName) {
+  var newImage = new Image()
+    , name = stripExtension(fileName);
+  
+  if (!fileName) {
+    throw new Error('no fileName provided to loadImage');
+  }
+
+  //callback defined in scope w/ this new image
+  function onLoad () {
+    this.broadcast({
+      name: name,
+      asset: newImage
+    });
+  }
+
+  function onError () {
+    this.handleError({
+      name: name,
+      asset: newImage
+    });
+  }
+
+  //setting the src will immediatly trigger a server request
+  newImage.onload = onLoad.bind(this);
+  newImage.onerror = onError.bind(this);
+  newImage.src = fileName;
+
+  this.loading[name] = newImage;
+};
+
+function stripExtension (name) {
+  return name.match(/(.*)\..*/)[1];
+};
+
+});
+
 minispade.register('inputwizard.js', function() {
 "use strict";
 /*
@@ -935,10 +982,63 @@ var keyboardMapping = {
 
 });
 
+minispade.register('jsonloader.js', function() {
+"use strict";
+
+minispade.require('loader.js');
+
+//WE EXTEND LOADER
+
+Kane.JSONLoader = function (settings) {
+  Kane.Loader.call(this, settings); 
+  
+  this.loading = {};
+};
+
+Kane.JSONLoader.prototype = Object.create(Kane.Loader.prototype);
+
+Kane.JSONLoader.prototype.loadAsset = function (fileName) {
+  var name = stripExtension(fileName)
+    , ajax
+    , ajaxStream;
+
+  if (!fileName) {
+    throw new Error('no fileName provided to loadImage');
+  }
+
+  //assign ajax var to initiate request
+  ajax = $.getJSON(fileName);
+  //create an event stream from the ajax call
+  ajaxStream = Bacon.fromPromise(ajax); 
+  //define stream behaviors for success/error
+  ajaxStream.onError(function () {
+    this.handleError({
+      name: name,
+      asset: {}
+    });
+  }.bind(this));
+
+  ajaxStream.onValue(function (json) {
+    this.broadcast({
+      name: name,
+      asset: json 
+    });
+  }.bind(this));
+
+  //store them as k/v pairs 
+  this.loading[name] = {};
+};
+
+function stripExtension (name) {
+  return name.match(/(.*)\..*/)[1];
+};
+
+});
+
 minispade.register('loader.js', function() {
 "use strict";
 var LoaderInterface = {
-  loadImage: function (fileName) {},
+  loadAsset: function (fileName) {},
   handleError: function (name, image) {},
   broadcast: function (object) {},
 
@@ -962,36 +1062,16 @@ Kane.Loader = function (settings) {
 
 Kane.Loader.prototype = Object.create(LoaderInterface);
 
-Kane.Loader.prototype.loadImage = function (fileName) {
-  var newImage = new Image()
-    , name = stripExtension(fileName);
-  
+//this is just mapped out here for ref, you will override
+//this if using as a prototype
+Kane.Loader.prototype.loadAsset = function (fileName) {
+  var name = stripExtension(fileName);
+
   if (!fileName) {
     throw new Error('no fileName provided to loadImage');
   }
-
-  //callback defined in scope w/ this new image
-  function onLoad () {
-    this.broadcast({
-      name: name,
-      asset: newImage
-    });
-  }
-
-  function onError () {
-    this.handleError({
-      name: name,
-      asset: newImage
-    });
-  }
-
-  //setting the src will immediatly trigger a server request
-  newImage.onload = onLoad.bind(this);
-  newImage.onerror = onError.bind(this);
-  newImage.src = fileName;
-
-  //store them as k/v pairs 
-  this.loading[name] = newImage;
+  
+  this.loading[name] = {};
 };
 
 //this is generally called by Image onerror callbacks
@@ -1037,6 +1117,8 @@ window.Kane = {};
 //"utility objects"
 minispade.require('clock.js');
 minispade.require('loader.js');
+minispade.require('jsonloader.js');
+minispade.require('imageloader.js');
 minispade.require('cache.js');
 
 //"dom objects"
@@ -1265,7 +1347,7 @@ var loading = new Kane.Scene({
   assets: ['public/images/spritesheet']
 });
 
-loading.loader.loadImage('public/images/spritesheet.png');
+loading.loader.loadAsset('public/images/spritesheet.png');
 
 loading.onEnter = function () {
   console.log('loading');

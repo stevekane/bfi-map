@@ -5,10 +5,10 @@ var assert = chai.assert;
 describe("Kane.Loader", function () {
   var loader
     , cache = {
-      cache: function () {},
+        cache: function () {},
     }
     , bus = {
-      push: function () {},
+        push: function () {},
     };
 
   beforeEach(function () {
@@ -36,23 +36,20 @@ describe("Kane.Loader", function () {
     });
   });
 
-  describe("#loadImage()", function () {
-    it('should throw if no image name provided', function () {
+  describe("#loadAsset()", function () {
+    it('should throw if no asset name provided', function () {
       assert.throws(function  () {
-        loader.loadImage(); 
+        loader.loadAsset(); 
       });
     });
     
     it('should add an image to the loading images', function () {
-      var loading = {}
-        , image;
+      var loadingAsset;
 
-      loader.loadImage('funny.png');
-      loading = loader.loading;
-      image = loading['funny'];
+      loader.loadAsset('funny.txt');
+      loadingAsset = loader.loading['funny'];
 
-      assert.isDefined(image);
-      assert.instanceOf(image, Image);
+      assert.isObject(loadingAsset);
     });
   });
 
@@ -80,7 +77,7 @@ describe("Kane.Loader", function () {
     });
   
     it('should remove the named object from the loading object', function () {
-      loader.loadImage('captaincrunch.jpg');
+      loader.loadAsset('captaincrunch.jpg');
 
       loader.broadcast({
         name: 'captaincrunch',
