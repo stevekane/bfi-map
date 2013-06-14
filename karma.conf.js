@@ -3,6 +3,7 @@ basePath = '';
 files = [
   MOCHA,
   MOCHA_ADAPTER,
+  {pattern: 'public/javascripts/libs/jquery-1.10.1.min.js', include: true},
   {pattern: 'public/javascripts/libs/chai.js', include: true},
   {pattern: 'public/javascripts/libs/minispade.js', include: true},
   {pattern: 'public/javascripts/libs/stats.min.js', include: true},
