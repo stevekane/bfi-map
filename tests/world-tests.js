@@ -47,28 +47,4 @@ describe('Kane.World', function () {
       });
     });
   });
-
-  //not testing this further as it's a fucking pain in the ass
-  describe("#loadRemoteData()", function () {
-    it('should send an ajax request for a json file by the specified name' +
-       'and it should fire the provided success/error callbacks', function (done) {
-      
-      function success () {
-        console.log('success');
-        done();
-      };
-      function error () {
-        console.log('error!');
-        done();
-      };
-
-      w.loadRemoteData('public/json/spritesheet.json', w, success, error); 
-    });
-    
-    it('should throw if not provided jsonName', function () {
-      assert.throws(function () {
-        w.loadRemoteData();
-      });
-    });
-  });
 });
