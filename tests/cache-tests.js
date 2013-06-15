@@ -74,7 +74,7 @@ describe("Kane.Cache", function () {
       assert.equal(cache.getByName('testImage'), testImage);
     });
   });
-
+  
   describe('#allInCache()', function () {
     it('should return boolean value', function () {
       assert.isBoolean(cache.allInCache());
