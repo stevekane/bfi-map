@@ -6,7 +6,10 @@ describe('Kane.Scene', function () {
   var s;
 
   beforeEach(function () {
-    s = new Kane.Scene({name: 'testScene'});
+    s = new Kane.Scene({
+      name: 'testScene',
+      bus: new Bacon.Bus() 
+    });
   });
 
   it('should return an object', function () {
@@ -17,6 +20,10 @@ describe('Kane.Scene', function () {
     assert.throw(function (){
       s = new Kane.Scene({});
     });
+  });
+
+  it('should throw if no bus is provided in settings', function () {
+    
   });
 
   describe('#update()', function () {

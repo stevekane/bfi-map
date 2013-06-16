@@ -95,5 +95,9 @@ describe("Kane.Cache", function () {
       assert.isTrue(cache.allInCache(['ob1', 'ob2']));
       assert.isFalse(cache.allInCache(['ob1', 'ob2', 'ob3'])); 
     });
+
+    it('should return true if provided empty array', function () {
+      assert.isTrue(cache.allInCache([]));
+    });
   });
 });

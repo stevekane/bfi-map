@@ -84,7 +84,7 @@ Kane.EntityManager.prototype.removeDead = function () {
   var deadEnts = []; 
 
   for (var i=0, len=this.length; i<len; i++) {
-    if (this[i].isDead()) {
+    if (this[i].isDead) {
       //push this onto the array of deadEnts to return
       deadEnts.push(this[i]);
       //remove from "this"

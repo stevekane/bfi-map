@@ -2,7 +2,6 @@ require('kane.js');
 
 var EntityInterface = {
   kill: function () {},
-  isDead: function () {},
   beforeUpdate: function (dT) {},
   update: function (dT) {}, 
   afterUpdate: function (dT) {},
@@ -47,7 +46,7 @@ var EntityInterface = {
 
 Kane.Entity = function (settings) {
   
-  this._isDead = false;
+  this.isDead = false;
   this.doesCollide = true;
 
   _.extend(this, settings);
@@ -56,11 +55,7 @@ Kane.Entity = function (settings) {
 Kane.Entity.prototype = Object.create(EntityInterface);
 
 Kane.Entity.prototype.kill = function () {
-  this._isDead = true;
-};
-
-Kane.Entity.prototype.isDead = function () {
-  return this._isDead;
+  this.isDead = true;
 };
 
 Kane.Entity.prototype.beforeUpdate = function (dT) {};

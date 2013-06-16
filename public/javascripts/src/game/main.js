@@ -25,16 +25,6 @@ var inputWizard = new Kane.InputWizard();
 inputWizard.attachToDomNode(document.body)
            .activateKeyboardForDomNode(document.body);
 
-//Construction of specific scene
-//setup entity set for this scene
-var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , clock = new Kane.Clock()
-  , game = new Kane.Game({
-    clock: clock
-  });
-
 //setup image loader/cache/bus.  optionally we inject the bus onto 
 //the cache to be more explicit about its dependencies
 var imageBus = new Bacon.Bus();
@@ -78,16 +68,50 @@ jsonCache.bus.onValue( function (object) {
 });
 
 /*
+create our bus for scene -> game communication
+this allows powerful pub/sub to scene change events etc
+*/
+var sceneBus = new Bacon.Bus();
+
+/*
+Construction of specific scene
+setup entity set for this scene
+*/
+var entityCanvas = createCanvas(640, 480, 'entities')
+  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
+  , clock = new Kane.Clock()
+  , game = new Kane.Game({
+    clock: clock,
+    bus: sceneBus
+  });
+
+/*
+configure our bus to listen for transition type events
+bus format is defined as {type: string, content: object}
+*/
+game.bus.onValue(function (ev) {
+  var type = ev.type
+    , name = ev.content.name
+    , scenes = this.getScenes();
+
+  if ('transition' === type && scenes[name]) {
+    this.setCurrentScene(name);
+  }
+}.bind(game));
+
+/*
 pass in our inputWizard and our entityManager
 we also pass it a reference to our image/json cache
 incase we wish to pull objects from them
 */
-var ingame = new Kane.Scene({
+var ingame = new Kane.GameScene({
   name: 'ingame',
   inputWizard: inputWizard, 
   entityManager: entityManager,
   imageCache: imageCache,
   jsonCache: jsonCache,
+  bus: sceneBus
 });
 
 /*
@@ -190,7 +214,8 @@ var loading = new Kane.LoadingScene({
   jsonCache: jsonCache,
   imageAssets: ['public/images/spritesheet'],
   jsonAssets: ['public/json/spritesheet'],
-  targetSceneName: 'ingame' 
+  targetSceneName: 'ingame',
+  bus: sceneBus
 })
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');

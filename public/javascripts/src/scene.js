@@ -15,8 +15,10 @@ var SceneInterface = {
   onDraw: function () {},
   onUpdate: function (dT) {},
   
+  
   //list of required attributes
-  name: ""
+  name: "",
+  bus: null,
 };
 
 /*
@@ -26,6 +28,9 @@ by the provided name
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
+  }
+  if (!settings.bus) {
+    throw new Error('no bus provided to constructor');
   }
 
   //apply settings object to this scene
@@ -38,21 +43,10 @@ Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 
     throw new Error('no dT provided to update'); 
   }
-
-  if (this.entityManager) { 
-    this.entityManager.removeDead();
-    this.entityManager.sortBy('zIndex'); 
-    this.entityManager.updateAll(dT);  
-  } 
-
   this.onUpdate(dT);
 };
 
 Kane.Scene.prototype.draw = function () {
-  if (this.entityManager) {
-    this.entityManager.drawAll();
-  }
-
   this.onDraw();
 };
 

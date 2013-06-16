@@ -218,7 +218,6 @@ minispade.require('kane.js');
 
 var EntityInterface = {
   kill: function () {},
-  isDead: function () {},
   beforeUpdate: function (dT) {},
   update: function (dT) {}, 
   afterUpdate: function (dT) {},
@@ -263,7 +262,7 @@ var EntityInterface = {
 
 Kane.Entity = function (settings) {
   
-  this._isDead = false;
+  this.isDead = false;
   this.doesCollide = true;
 
   _.extend(this, settings);
@@ -272,11 +271,7 @@ Kane.Entity = function (settings) {
 Kane.Entity.prototype = Object.create(EntityInterface);
 
 Kane.Entity.prototype.kill = function () {
-  this._isDead = true;
-};
-
-Kane.Entity.prototype.isDead = function () {
-  return this._isDead;
+  this.isDead = true;
 };
 
 Kane.Entity.prototype.beforeUpdate = function (dT) {};
@@ -428,7 +423,7 @@ Kane.EntityManager.prototype.removeDead = function () {
   var deadEnts = []; 
 
   for (var i=0, len=this.length; i<len; i++) {
-    if (this[i].isDead()) {
+    if (this[i].isDead) {
       //push this onto the array of deadEnts to return
       deadEnts.push(this[i]);
       //remove from "this"
@@ -597,8 +592,6 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
-  //reference to game object that owns this scene
-  game: null
 };
 
 Kane.Game = function (settings) {
@@ -613,7 +606,6 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
-  this.game = null;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -682,8 +674,14 @@ Kane.Game.prototype.setCurrentScene = function (name) {
   //capture the previous Scene
   oldScene = this.currentScene;
 
+
   //call old scene's onExit hook
   if (oldScene) { 
+
+    //do nothing if this is the current scene
+    if (oldScene.name === name) {
+      return;
+    }
     oldScene.onExit.call(oldScene) 
   };
 
@@ -734,7 +732,6 @@ function draw () {
   window.requestAnimationFrame(draw.bind(this));
 };
 
-
 });
 
 minispade.register('game/main.js', function() {
@@ -766,16 +763,6 @@ var bgCanvas = createCanvas(640, 480, 'gameboard')
 var inputWizard = new Kane.InputWizard();
 inputWizard.attachToDomNode(document.body)
            .activateKeyboardForDomNode(document.body);
-
-//Construction of specific scene
-//setup entity set for this scene
-var entityCanvas = createCanvas(640, 480, 'entities')
-  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , clock = new Kane.Clock()
-  , game = new Kane.Game({
-    clock: clock
-  });
 
 //setup image loader/cache/bus.  optionally we inject the bus onto 
 //the cache to be more explicit about its dependencies
@@ -820,16 +807,50 @@ jsonCache.bus.onValue( function (object) {
 });
 
 /*
+create our bus for scene -> game communication
+this allows powerful pub/sub to scene change events etc
+*/
+var sceneBus = new Bacon.Bus();
+
+/*
+Construction of specific scene
+setup entity set for this scene
+*/
+var entityCanvas = createCanvas(640, 480, 'entities')
+  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
+  , clock = new Kane.Clock()
+  , game = new Kane.Game({
+    clock: clock,
+    bus: sceneBus
+  });
+
+/*
+configure our bus to listen for transition type events
+bus format is defined as {type: string, content: object}
+*/
+game.bus.onValue(function (ev) {
+  var type = ev.type
+    , name = ev.content.name
+    , scenes = this.getScenes();
+
+  if ('transition' === type && scenes[name]) {
+    this.setCurrentScene(name);
+  }
+}.bind(game));
+
+/*
 pass in our inputWizard and our entityManager
 we also pass it a reference to our image/json cache
 incase we wish to pull objects from them
 */
-var ingame = new Kane.Scene({
+var ingame = new Kane.GameScene({
   name: 'ingame',
   inputWizard: inputWizard, 
   entityManager: entityManager,
   imageCache: imageCache,
   jsonCache: jsonCache,
+  bus: sceneBus
 });
 
 /*
@@ -932,7 +953,8 @@ var loading = new Kane.LoadingScene({
   jsonCache: jsonCache,
   imageAssets: ['public/images/spritesheet'],
   jsonAssets: ['public/json/spritesheet'],
-  targetSceneName: 'ingame' 
+  targetSceneName: 'ingame',
+  bus: sceneBus
 })
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');
@@ -962,11 +984,25 @@ Kane.GameScene = function (settings) {
   }
 
   _.extend(this, settings);
-
 };
 
 Kane.GameScene.prototype = Object.create(Kane.Scene.prototype);
 
+Kane.GameScene.prototype.update = function (dT) {
+  if (!dT) { 
+    throw new Error('no dT provided to update'); 
+  }
+
+  this.entityManager.removeDead();
+  this.entityManager.sortBy('zIndex'); 
+  this.entityManager.updateAll(dT);  
+  this.onUpdate(dT);
+};
+
+Kane.GameScene.prototype.draw = function () {
+  this.entityManager.drawAll();
+  this.onDraw();
+};
 
 });
 
@@ -1424,11 +1460,6 @@ Kane.LoadingScene.prototype.onUpdate = function (dT) {
   var allImages
     , allJSON;
 
-  //check if this is the currentScene, if not do nothing
-  if (this.name !== this.game.getCurrentScene().name) {
-    return;
-  } 
-
   //if we have an imageCache, check if all our images are loaded
   if (this.imageCache) {
     allImages = this.imageCache.allInCache(this.imageAssets);
@@ -1443,7 +1474,7 @@ Kane.LoadingScene.prototype.onUpdate = function (dT) {
     allJSON = true;
   }
   
-  //if all the images and json are in their respective caches, do something
+  //if all images and json are loaded, do something
   if (allImages && allJSON) {
     this.loadComplete();
   } else {
@@ -1451,8 +1482,14 @@ Kane.LoadingScene.prototype.onUpdate = function (dT) {
   }
 };
 
+//broadcast our loadComplete to the scene bus
 Kane.LoadingScene.prototype.loadComplete = function () {
-  this.game.setCurrentScene(this.targetSceneName); 
+  this.bus.push({
+    type: 'transition',
+    content: {
+      name: this.targetSceneName
+    } 
+  });
 };
 
 Kane.LoadingScene.prototype.stillLoading = function () {
@@ -1495,7 +1532,6 @@ Kane.Particle.prototype.afterUpdate = function (dT) {
   }
 };
 
-
 });
 
 minispade.register('projectile.js', function() {
@@ -1505,13 +1541,13 @@ minispade.require('entity.js');
 
 Kane.Projectile = function (settings) {
   this.lifespan = 2000;
-  this.killtimer = Date.now() + this.lifespan;
   this.color = "#1356ab";
   this.doesCollide = true;
   this.h = 24;
   this.w = 24; 
 
   Kane.Entity.call(this, settings);
+  this.killtimer = Date.now() + this.lifespan;
 };
 
 Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
@@ -1566,8 +1602,10 @@ var SceneInterface = {
   onDraw: function () {},
   onUpdate: function (dT) {},
   
+  
   //list of required attributes
-  name: ""
+  name: "",
+  bus: null,
 };
 
 /*
@@ -1577,6 +1615,9 @@ by the provided name
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
+  }
+  if (!settings.bus) {
+    throw new Error('no bus provided to constructor');
   }
 
   //apply settings object to this scene
@@ -1589,21 +1630,10 @@ Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 
     throw new Error('no dT provided to update'); 
   }
-
-  if (this.entityManager) { 
-    this.entityManager.removeDead();
-    this.entityManager.sortBy('zIndex'); 
-    this.entityManager.updateAll(dT);  
-  } 
-
   this.onUpdate(dT);
 };
 
 Kane.Scene.prototype.draw = function () {
-  if (this.entityManager) {
-    this.entityManager.drawAll();
-  }
-
   this.onDraw();
 };
 

@@ -28,22 +28,7 @@ describe('Kane.Entity', function () {
 
     it('should mark an entity for death', function () {
       en.kill();
-      assert.isTrue(en.isDead());
-    });
-  });
-
-  describe('#isDead()', function () {
-    it('should be a function', function () {
-      assert.isFunction(en.isDead);
-    })
-    
-    it('should return a boolean value', function () {
-      assert.isBoolean(en.isDead());
-    });
-
-    it('should return true if an object has been killed', function () {
-      en.kill();
-      assert.isTrue(en.isDead());
+      assert.isTrue(en.isDead);
     });
   });
 

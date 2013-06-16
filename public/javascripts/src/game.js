@@ -11,8 +11,6 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
-  //reference to game object that owns this scene
-  game: null
 };
 
 Kane.Game = function (settings) {
@@ -27,7 +25,6 @@ Kane.Game = function (settings) {
   this.currentScene = null;
 
   this.isRunning = false;
-  this.game = null;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -96,8 +93,14 @@ Kane.Game.prototype.setCurrentScene = function (name) {
   //capture the previous Scene
   oldScene = this.currentScene;
 
+
   //call old scene's onExit hook
   if (oldScene) { 
+
+    //do nothing if this is the current scene
+    if (oldScene.name === name) {
+      return;
+    }
     oldScene.onExit.call(oldScene) 
   };
 
@@ -147,4 +150,3 @@ function draw () {
   this.getCurrentScene().draw();
   window.requestAnimationFrame(draw.bind(this));
 };
-
