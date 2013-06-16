@@ -6,11 +6,19 @@ describe("Kane.Camera", function () {
   var c;
 
   beforeEach(function () {
-    c = new Kane.Camera();
+    c = new Kane.Camera({
+      scene: {}
+    });
   });
 
   it('should be an object', function () {
     assert.isObject(c); 
+  });
+
+  it('should throw if no scene is provided to constructor', function () {
+    assert.throws(function () {
+      c = new Kane.Camera();
+    });
   });
 
   describe("update()", function () {

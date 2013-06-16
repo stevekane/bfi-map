@@ -10,11 +10,11 @@ by the game object that owns this scene on scene transitions
 var SceneInterface = {
   update: function (dT) {},
   draw: function () {},
+
   onEnter: function () {},
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  
   
   //list of required attributes
   name: "",

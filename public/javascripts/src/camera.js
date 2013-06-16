@@ -43,7 +43,10 @@ the camera is attached to the scene after instantiation via
 an attachCamera method on the scene
 */
 Kane.Camera = function (settings) {
-  
+  if (!settings.scene) {
+    throw new Error('no scene provided in settings');
+  }
+
   _.extend(this, settings);
 };
 
@@ -65,7 +68,7 @@ Kane.Camera.prototype.draw = function () {
     this.drawWorld();
   } 
   if (this.scene.entityManager && this.entityPlane) {
-    this.drawBg();
+    this.drawEntities();
   } 
 };
 

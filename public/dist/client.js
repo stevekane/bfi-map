@@ -101,7 +101,10 @@ the camera is attached to the scene after instantiation via
 an attachCamera method on the scene
 */
 Kane.Camera = function (settings) {
-  
+  if (!settings.scene) {
+    throw new Error('no scene provided in settings');
+  }
+
   _.extend(this, settings);
 };
 
@@ -123,7 +126,7 @@ Kane.Camera.prototype.draw = function () {
     this.drawWorld();
   } 
   if (this.scene.entityManager && this.entityPlane) {
-    this.drawBg();
+    this.drawEntities();
   } 
 };
 
@@ -941,6 +944,15 @@ var ingame = new Kane.GameScene({
   bus: sceneBus
 });
 
+//define camera for our ingameScene
+var camera = new Kane.Camera({
+  scene: ingame,
+  entityPlane: entityPlane
+});
+
+//assign the camera to a camera attribute on the scene
+ingame.camera = camera;
+
 /*
 ALL BACON ACTIVITY USES DOM ELEMENTS DEFINED IN THE HTML DOC
 THIS IS JUST TEMPORARY AND CAUSES TESTS TO FAIL
@@ -1071,6 +1083,9 @@ Kane.GameScene = function (settings) {
     throw new Error('no inputWizard provided to constructor');
   }
 
+  //set a default camera
+  this.camera = null;
+
   _.extend(this, settings);
 };
 
@@ -1088,7 +1103,10 @@ Kane.GameScene.prototype.update = function (dT) {
 };
 
 Kane.GameScene.prototype.draw = function () {
-  this.entityManager.drawAll();
+  if (!this.camera) {
+    throw new Error('no camera defined for this scene!');
+  }
+  this.camera.draw();
   this.onDraw();
 };
 
@@ -1685,11 +1703,11 @@ by the game object that owns this scene on scene transitions
 var SceneInterface = {
   update: function (dT) {},
   draw: function () {},
+
   onEnter: function () {},
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  
   
   //list of required attributes
   name: "",

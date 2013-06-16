@@ -114,6 +114,15 @@ var ingame = new Kane.GameScene({
   bus: sceneBus
 });
 
+//define camera for our ingameScene
+var camera = new Kane.Camera({
+  scene: ingame,
+  entityPlane: entityPlane
+});
+
+//assign the camera to a camera attribute on the scene
+ingame.camera = camera;
+
 /*
 ALL BACON ACTIVITY USES DOM ELEMENTS DEFINED IN THE HTML DOC
 THIS IS JUST TEMPORARY AND CAUSES TESTS TO FAIL

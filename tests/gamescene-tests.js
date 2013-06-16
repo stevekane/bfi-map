@@ -23,4 +23,21 @@ describe("Kane.GameScene", function () {
   it('should return an object', function () {
     assert.isObject(gs);
   });
+
+  describe("#draw()", function () {
+    it('should throw if no camera is defined', function () {
+      var camera = {
+        draw: function () {}
+      };
+      assert.throws(function () {
+        gs.draw();
+      });
+
+      gs.camera = camera;
+
+      assert.doesNotThrow(function () {
+        gs.draw();
+      });
+    });
+  });
 });
