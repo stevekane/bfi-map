@@ -21,6 +21,7 @@ require('drawplane.js');
 //"high levl objects"
 require('game.js');
 require('world.js');
+require('camera.js');
 require('scene.js');
 require('loadingscene.js');
 require('gamescene.js');

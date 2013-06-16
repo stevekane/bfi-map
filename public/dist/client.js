@@ -53,6 +53,51 @@ Kane.Cache.prototype.allInCache = function (nameArray) {
 
 });
 
+minispade.register('camera.js', function() {
+"use strict";
+
+minispade.require('kane.js');
+
+var CameraInterface = {
+  update: function (dT) {},
+
+  //public interface attributes
+  x: 0,
+  y: 0,
+
+  //previous positions
+  lastx: 0,
+  lasty: 0,  
+
+  //dimensions
+  w: 0,
+  h: 0,
+  
+  //velocity
+  dx: 0,
+  dy: 0,
+  
+  //accel
+  ddx: 0,
+  ddy: 0,
+};
+
+Kane.Camera = function (settings) {
+  _.extend(this, settings);
+};
+
+Kane.Camera.prototype = Object.create(CameraInterface);
+
+Kane.Camera.prototype.update = function (dT) {
+  this.x = Kane.Utils.updatePosition(dT, this.dx, this.x);
+  this.y = Kane.Utils.updatePosition(dT, this.dy, this.y);
+
+  this.dx = Kane.Utils.updateVelocity(dT, this.ddx, this.dx);
+  this.dy = Kane.Utils.updateVelocity(dT, this.ddy, this.dy);
+};
+
+});
+
 minispade.register('clock.js', function() {
 "use strict";
 
@@ -199,6 +244,7 @@ minispade.require('drawplane.js');
 //"high levl objects"
 minispade.require('game.js');
 minispade.require('world.js');
+minispade.require('camera.js');
 minispade.require('scene.js');
 minispade.require('loadingscene.js');
 minispade.require('gamescene.js');
@@ -215,6 +261,7 @@ minispade.register('entity.js', function() {
 "use strict";
 
 minispade.require('kane.js');
+minispade.require('utils.js');
 
 var EntityInterface = {
   kill: function () {},
@@ -277,8 +324,6 @@ Kane.Entity.prototype.kill = function () {
 Kane.Entity.prototype.beforeUpdate = function (dT) {};
 
 Kane.Entity.prototype.update = function (dT) {
-  var potentialY;
-
   if (undefined == dT) { 
     throw new Error('delta time not provided'); 
   }
@@ -287,11 +332,11 @@ Kane.Entity.prototype.update = function (dT) {
   this.beforeUpdate(dT);
 
   //update positions after checking for 0
-  this.x = updatePosition(dT, this.dx, this.x);
-  this.y = updatePosition(dT, this.dy, this.y);
+  this.x = Kane.Utils.updatePosition(dT, this.dx, this.x);
+  this.y = Kane.Utils.updatePosition(dT, this.dy, this.y);
 
-  this.dx = updateVelocity(dT, this.ddx, this.dx);
-  this.dy = updateVelocity(dT, this.ddy, this.dy);
+  this.dx = Kane.Utils.updateVelocity(dT, this.ddx, this.dx);
+  this.dy = Kane.Utils.updateVelocity(dT, this.ddy, this.dy);
 
   //call our afterUpdate hook to allow custom behavior
   this.afterUpdate(dT);
@@ -323,14 +368,6 @@ Kane.Entity.prototype.collide = function (target) {
     throw new Error('no target provided');
   }
 };
-
-function updatePosition(dT, v, oldPos) {
-  return oldPos + dT * v;
-};
-
-function updateVelocity(dT, a, oldVel) {
-  return oldVel + dT * a;
-}; 
 
 });
 
@@ -1662,6 +1699,14 @@ Kane.Utils = {
 
   stripExtension: function (name) {
     return name.slice(0, name.indexOf('.'));
+  },
+
+  updatePosition: function (dT, v, oldPos) {
+    return oldPos + dT * v; 
+  },
+
+  updateVelocity: function (dT, a, oldVel) {
+    return oldVel + dT * a; 
   },
 }
 

@@ -42,4 +42,26 @@ describe("Kane.Utils", function () {
       assert.equal(Kane.Utils.stripExtension(jsonName), 'moose/tracks');
     });
   });
+
+  describe("#updatePosition()", function () {
+    it('should return the new position', function () {
+      var dT = 10
+        , v = .01
+        , oldPos = 0
+        , expectedNewPos = oldPos + dT * v;
+  
+      assert.equal(Kane.Utils.updatePosition(dT, v, oldPos), expectedNewPos); 
+    });
+  });
+
+  describe("#updateVelocity()", function () {
+    it('should return the new position', function () {
+      var dT = 10
+        , a = .01
+        , oldVel = 0
+        , expectedNewVel = oldVel + dT * a;
+  
+      assert.equal(Kane.Utils.updateVelocity(dT, a, oldVel), expectedNewVel); 
+    });
+  });
 });

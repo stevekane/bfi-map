@@ -14,4 +14,12 @@ Kane.Utils = {
   stripExtension: function (name) {
     return name.slice(0, name.indexOf('.'));
   },
+
+  updatePosition: function (dT, v, oldPos) {
+    return oldPos + dT * v; 
+  },
+
+  updateVelocity: function (dT, a, oldVel) {
+    return oldVel + dT * a; 
+  },
 }

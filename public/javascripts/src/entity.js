@@ -1,4 +1,5 @@
 require('kane.js');
+require('utils.js');
 
 var EntityInterface = {
   kill: function () {},
@@ -61,8 +62,6 @@ Kane.Entity.prototype.kill = function () {
 Kane.Entity.prototype.beforeUpdate = function (dT) {};
 
 Kane.Entity.prototype.update = function (dT) {
-  var potentialY;
-
   if (undefined == dT) { 
     throw new Error('delta time not provided'); 
   }
@@ -71,11 +70,11 @@ Kane.Entity.prototype.update = function (dT) {
   this.beforeUpdate(dT);
 
   //update positions after checking for 0
-  this.x = updatePosition(dT, this.dx, this.x);
-  this.y = updatePosition(dT, this.dy, this.y);
+  this.x = Kane.Utils.updatePosition(dT, this.dx, this.x);
+  this.y = Kane.Utils.updatePosition(dT, this.dy, this.y);
 
-  this.dx = updateVelocity(dT, this.ddx, this.dx);
-  this.dy = updateVelocity(dT, this.ddy, this.dy);
+  this.dx = Kane.Utils.updateVelocity(dT, this.ddx, this.dx);
+  this.dy = Kane.Utils.updateVelocity(dT, this.ddy, this.dy);
 
   //call our afterUpdate hook to allow custom behavior
   this.afterUpdate(dT);
@@ -107,11 +106,3 @@ Kane.Entity.prototype.collide = function (target) {
     throw new Error('no target provided');
   }
 };
-
-function updatePosition(dT, v, oldPos) {
-  return oldPos + dT * v;
-};
-
-function updateVelocity(dT, a, oldVel) {
-  return oldVel + dT * a;
-}; 
