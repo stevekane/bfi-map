@@ -22,4 +22,21 @@ Kane.Utils = {
   updateVelocity: function (dT, a, oldVel) {
     return oldVel + dT * a; 
   },
+
+  checkBBCollision: function (sub, tar) {
+    //don't collide with self
+    if (sub === tar) { 
+      return false; 
+    }
+
+    /*
+    to clearly visualize this visit
+    silentmatt.com/rectangle-intersection/
+    */ 
+    return ( (sub.x < (tar.x + tar.w)) && 
+             ((sub.x + sub.w) > tar.x) &&
+             (sub.y < (tar.y + tar.h)) &&
+             ((sub.y + sub.h) > tar.y) 
+    );
+  },
 }

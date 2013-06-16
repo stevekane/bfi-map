@@ -46,4 +46,29 @@ describe("Kane.Camera", function () {
       assert.equal(c.dy, expectedVely);
     });
   });
+
+  //DRAW METHODS NOT TESTED DUE TO PAIN W/ OBSERVING CONVAS PIXELS
+  describe("draw()", function () {
+    it('should be a function', function () {
+      assert.isFunction(c.draw);
+    });
+  });
+
+  describe("drawBg()", function () {
+    it('should be a function', function () {
+      assert.isFunction(c.drawBg);
+    });
+  });
+
+  describe("drawWorld()", function () {
+    it('should be a function', function () {
+      assert.isFunction(c.drawWorld);
+    });
+  });
+
+  describe("drawEntities()", function () {
+    it('should be a function', function () {
+      assert.isFunction(c.drawEntities);
+    });
+  });
 });

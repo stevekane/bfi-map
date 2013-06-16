@@ -1,4 +1,5 @@
 require('kane.js');
+require('utils.js');
 
 var EntityManagerInterface = {
   generateUniqueId: function () {},
@@ -134,25 +135,8 @@ Kane.EntityManager.prototype.drawAll = function () {
 
 Kane.EntityManager.prototype.findCollisions = function () {
   var collisions = []
-    , colliders = [];
-
-  function checkCollision (sub, tar) {
-    
-    //don't collide with self
-    if (sub === tar) { 
-      return false; 
-    }
-
-    /*
-    to clearly visualize this visit
-    silentmatt.com/rectangle-intersection/
-    */ 
-    return ( (sub.x < (tar.x + tar.w)) && 
-             ((sub.x + sub.w) > tar.x) &&
-             (sub.y < (tar.y + tar.h)) &&
-             ((sub.y + sub.h) > tar.y) 
-    );
-  };
+    , colliders = []
+    , checkCollision = Kane.Utils.checkBBCollision;
 
   function doesCollide (ent) {
     return ent.doesCollide;
