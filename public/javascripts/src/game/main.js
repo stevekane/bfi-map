@@ -164,7 +164,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 20;
+ingame.shotTimer = 40;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
@@ -177,7 +177,6 @@ ingame.onUpdate = function (dT) {
     this.lastShotFired = Date.now();
   } else {
     if ((this.lastShotFired + this.shotTimer) < Date.now()) {
-      this.fire(320, 400, -1 * Math.random(), -1 * Math.random());
       this.fire(0, 400, Math.random(), -1 * Math.random());
       this.fire(640, 400, -1 * Math.random(), -1 * Math.random());
       this.lastShotFired = Date.now();

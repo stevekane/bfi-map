@@ -158,8 +158,8 @@ Kane.Camera.prototype.drawEntities = function () {
   _(entsToDraw).each(function (ent, index, ents) {
     this.entityPlane.drawRect(
       ent.color,
-      ent.x - this.x,
-      ent.y - this.y,
+      Math.round(ent.x - this.x),
+      Math.round(ent.y - this.y),
       ent.w,
       ent.h 
     ); 
@@ -977,7 +977,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 20;
+ingame.shotTimer = 40;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
@@ -990,7 +990,6 @@ ingame.onUpdate = function (dT) {
     this.lastShotFired = Date.now();
   } else {
     if ((this.lastShotFired + this.shotTimer) < Date.now()) {
-      this.fire(320, 400, -1 * Math.random(), -1 * Math.random());
       this.fire(0, 400, Math.random(), -1 * Math.random());
       this.fire(640, 400, -1 * Math.random(), -1 * Math.random());
       this.lastShotFired = Date.now();
@@ -1676,9 +1675,8 @@ Kane.Projectile.prototype.afterUpdate = function (dT) {
 };
 
 Kane.Projectile.prototype.collide = function (target) {
-  //kill ourselves and the target
+  //kill ourselves
   this.kill();
-  target.kill();
 
   //spawn "gib" particles
   for (var i=0; i<20; i++) {
@@ -1827,10 +1825,6 @@ Kane.World = function (settings) {
     throw new Error('no bus provided in settings to constructor');
   }
 
-  //drawplane is a surface to draw our map onto
-  if (!settings.drawplane) {
-    throw new Error('no drawplane provided in settiungs to constructor');
-  }
   _.extend(this, settings);
 
   this.isLoaded = false;

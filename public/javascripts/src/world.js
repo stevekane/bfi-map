@@ -13,10 +13,6 @@ Kane.World = function (settings) {
     throw new Error('no bus provided in settings to constructor');
   }
 
-  //drawplane is a surface to draw our map onto
-  if (!settings.drawplane) {
-    throw new Error('no drawplane provided in settiungs to constructor');
-  }
   _.extend(this, settings);
 
   this.isLoaded = false;

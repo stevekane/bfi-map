@@ -35,7 +35,6 @@ describe("Kane.Projectile", function () {
 
       p.collide(targ);
       assert.isTrue(p.isDead); 
-      assert.isTrue(targ.isDead); 
     });
   });
   

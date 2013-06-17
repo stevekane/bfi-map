@@ -22,9 +22,8 @@ Kane.Projectile.prototype.afterUpdate = function (dT) {
 };
 
 Kane.Projectile.prototype.collide = function (target) {
-  //kill ourselves and the target
+  //kill ourselves
   this.kill();
-  target.kill();
 
   //spawn "gib" particles
   for (var i=0; i<20; i++) {
