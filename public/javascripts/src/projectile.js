@@ -1,13 +1,14 @@
 require('entity.js');
 
 Kane.Projectile = function (settings) {
+  Kane.Entity.call(this, settings);
+
   this.lifespan = 2000;
-  this.color = "#1356ab";
+  this.color = "#00bb22";
   this.doesCollide = true;
   this.h = 24;
   this.w = 24; 
 
-  Kane.Entity.call(this, settings);
   this.killtimer = Date.now() + this.lifespan;
 };
 

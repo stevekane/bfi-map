@@ -1,6 +1,8 @@
 require('entity.js');
 
 Kane.Particle = function (settings) {
+  Kane.Entity.call(this, settings);
+
   //default settings
   this.lifespan = 600;
   this.killtimer = Date.now() + this.lifespan;
@@ -8,7 +10,6 @@ Kane.Particle = function (settings) {
   this.h = 5;
   this.w = 5; 
 
-  Kane.Entity.call(this, settings);
   this.doesCollide = false;
 };
 

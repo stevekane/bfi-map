@@ -44,8 +44,30 @@ var EntityInterface = {
 
 Kane.Entity = function (settings) {
   
+  //defaults
   this.isDead = false;
   this.doesCollide = true;
+  
+  this.id = 0;
+  this.name = "";
+  this.type = "";
+  
+  this.zIndex = 0;
+  
+  this.x = 0;
+  this.y = 0;
+  
+  this.lastx = 0;
+  this.lasty = 0;
+
+  this.w = 0;
+  this.h = 0;
+
+  this.dx = 0;
+  this.dy = 0;
+
+  this.ddx = 0;
+  this.ddy = 0;
 
   _.extend(this, settings);
 };

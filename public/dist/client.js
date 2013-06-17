@@ -377,8 +377,30 @@ var EntityInterface = {
 
 Kane.Entity = function (settings) {
   
+  //defaults
   this.isDead = false;
   this.doesCollide = true;
+  
+  this.id = 0;
+  this.name = "";
+  this.type = "";
+  
+  this.zIndex = 0;
+  
+  this.x = 0;
+  this.y = 0;
+  
+  this.lastx = 0;
+  this.lasty = 0;
+
+  this.w = 0;
+  this.h = 0;
+
+  this.dx = 0;
+  this.dy = 0;
+
+  this.ddx = 0;
+  this.ddy = 0;
 
   _.extend(this, settings);
 };
@@ -1607,6 +1629,8 @@ minispade.register('particle.js', function() {
 minispade.require('entity.js');
 
 Kane.Particle = function (settings) {
+  Kane.Entity.call(this, settings);
+
   //default settings
   this.lifespan = 600;
   this.killtimer = Date.now() + this.lifespan;
@@ -1614,7 +1638,6 @@ Kane.Particle = function (settings) {
   this.h = 5;
   this.w = 5; 
 
-  Kane.Entity.call(this, settings);
   this.doesCollide = false;
 };
 
@@ -1635,13 +1658,14 @@ minispade.register('projectile.js', function() {
 minispade.require('entity.js');
 
 Kane.Projectile = function (settings) {
+  Kane.Entity.call(this, settings);
+
   this.lifespan = 2000;
-  this.color = "#1356ab";
+  this.color = "#00bb22";
   this.doesCollide = true;
   this.h = 24;
   this.w = 24; 
 
-  Kane.Entity.call(this, settings);
   this.killtimer = Date.now() + this.lifespan;
 };
 
