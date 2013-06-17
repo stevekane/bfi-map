@@ -7,6 +7,7 @@ var CameraInterface = {
   drawBg: function () {},
   drawEntities: function () {},
   drawWorld: function () {},
+  setSize: function (w, h) {},
 
   //public interface attributes
   x: 0,
@@ -30,20 +31,26 @@ var CameraInterface = {
 };
 
 /*
-Cameras can be initialized with the following attributes
-bgPlane - draw background image
-worldPlane - draw world
-entityPlane - draw entities
-
 Cameras must be instantiated with a scene object
 the scene tells the camera to draw at 60fps and it provides
 the data for the camera to draw
+
+Cameras must also be instantiated with a planes object that must
+contain at least one Kane.DrawPlane instance 
 
 the camera MUST be attached to a scene before it is made active
 */
 Kane.Camera = function (settings) {
   if (!settings.scene) {
     throw new Error('no scene provided in settings');
+  }
+
+  if (!settings.planes) {
+    throw new Error('no planes object provided to constructor');
+  }
+
+  if (0 === _.keys(settings.planes).length) {
+    throw new Error('no planes provided to constructor'); 
   }
 
   _.extend(this, settings);
@@ -60,20 +67,20 @@ Kane.Camera.prototype.update = function (dT) {
 };
 
 Kane.Camera.prototype.draw = function () {
-  if (this.scene.bgImage && this.bgPlane) {
+  if (this.scene.bgImage && this.planes.bgPlane) {
     this.drawBg();
   } 
-  if (this.scene.world && this.worldPlane) {
+  if (this.scene.world && this.planes.worldPlane) {
     this.drawWorld();
   } 
-  if (this.scene.entityManager && this.entityPlane) {
+  if (this.scene.entityManager && this.planes.entityPlane) {
     this.drawEntities();
   } 
 };
 
 Kane.Camera.prototype.drawBg = function () {
-  this.bgPlane.clearAll();
-  this.bgPlane.drawImage(this.scene.bgImage, 0, 0);
+  this.planes.bgPlane.clearAll();
+  this.planes.bgPlane.drawImage(this.scene.bgImage, 0, 0);
 };
 
 Kane.Camera.prototype.drawWorld = function () {
@@ -87,7 +94,7 @@ Kane.Camera.prototype.drawEntities = function () {
     , entsToDraw;
 
   //clear the canvas each draw cycle
-  this.entityPlane.clearAll();
+  this.planes.entityPlane.clearAll();
 
   //loop over all entities and check if they "collide" w/ the camera
   //which means they should be drawn 
@@ -99,7 +106,7 @@ Kane.Camera.prototype.drawEntities = function () {
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
     if (ent.currentSprite) {
-      this.entityPlane.drawSprite(
+      this.planes.entityPlane.drawSprite(
         ent.currentSprite,
         ent.x - this.y,
         ent.y - this.y,
@@ -107,7 +114,7 @@ Kane.Camera.prototype.drawEntities = function () {
         ent.h
       );
     } else {
-      this.entityPlane.drawRect(
+      this.planes.entityPlane.drawRect(
         ent.color,
         ent.x - this.x,
         ent.y - this.y,

@@ -7,7 +7,10 @@ describe("Kane.Camera", function () {
 
   beforeEach(function () {
     c = new Kane.Camera({
-      scene: {}
+      scene: {},
+      planes: {
+        bgPlane: {},
+      }
     });
   });
 
@@ -18,6 +21,23 @@ describe("Kane.Camera", function () {
   it('should throw if no scene is provided to constructor', function () {
     assert.throws(function () {
       c = new Kane.Camera();
+    });
+  });
+
+  it('should throw if no planes provided to constructor', function () {
+    assert.throws(function () {
+      c = new Kane.Camera({
+        scene: {},
+      });
+    });
+  });
+
+  it('should throw if planes object contains no planes', function () {
+    assert.throws(function () {
+      c = new Kane.Camera({
+        scene: {},
+        planes: {}
+      });
     });
   });
 
@@ -77,6 +97,16 @@ describe("Kane.Camera", function () {
   describe("drawEntities()", function () {
     it('should be a function', function () {
       assert.isFunction(c.drawEntities);
+    });
+  });
+
+  describe("#setSize()", function () {
+    it('should set the height and width of the camera and all its drawplanes', function () {
+      var h = 200
+        , w = 200;
+
+      c.setSize(w, h);
+      
     });
   });
 });

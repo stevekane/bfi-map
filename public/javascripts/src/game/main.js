@@ -14,13 +14,6 @@ function createCanvas (w, h, name) {
   return $canvas;
 };
 
-//global background canvas object
-var bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
-  , bgPlane = new Kane.DrawPlane({board: bgCanvas});
-
-//color background
-//bgPlane.fillAll(Kane.Utils.generateColor());
-
 //input wizard configuration
 //we will add our subscriber from the scene instance
 var inputWizard = new Kane.InputWizard();
@@ -81,6 +74,9 @@ setup entity set for this scene
 */
 var entityCanvas = createCanvas(document.width-100, document.height-20, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
+  , bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
+  , bgPlane = new Kane.DrawPlane({board: bgCanvas})
+
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
@@ -119,8 +115,10 @@ var ingame = new Kane.GameScene({
 //define camera for our ingameScene
 var camera = new Kane.Camera({
   scene: ingame,
-  entityPlane: entityPlane,
-  bgPlane: bgPlane,
+  planes: {
+    entityPlane: entityPlane,
+    bgPlane: bgPlane,
+  },
   h: document.height - 20,
   w: document.width - 100 
 });
