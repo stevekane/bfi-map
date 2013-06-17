@@ -117,7 +117,8 @@ var ingame = new Kane.GameScene({
 //define camera for our ingameScene
 var camera = new Kane.Camera({
   scene: ingame,
-  entityPlane: entityPlane
+  entityPlane: entityPlane,
+  bgPlane: bgPlane
 });
 
 //assign the camera to a camera attribute on the scene
@@ -151,7 +152,9 @@ ingame.onEnter = function () {
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
 
-  bgPlane.drawImage(spriteSheet, 0, 0);
+  console.log(spriteSheet);
+  //set the background image
+  this.bgImage = spriteSheet;
 };
 
 //define onExit hook to un-subscribe to inputWizard
@@ -161,7 +164,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 300;
+ingame.shotTimer = 20;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
@@ -235,15 +238,18 @@ caches using the provided loaders and then advance to ingame
 
 var loading = new Kane.LoadingScene({
   name: 'loading',
-  imageLoader: imageLoader,
-  jsonLoader: jsonLoader,
-  imageCache: imageCache,
-  jsonCache: jsonCache,
-  imageAssets: ['public/images/spritesheet'],
-  jsonAssets: ['public/json/spritesheet'],
   targetSceneName: 'ingame',
+
+  imageLoader: imageLoader,
+  imageCache: imageCache,
+  imageAssets: ['public/images/spritesheet'],
+
+  jsonLoader: jsonLoader,
+  jsonCache: jsonCache,
+  jsonAssets: ['public/json/spritesheet'],
+
   bus: sceneBus
-})
+});
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');
 loading.jsonLoader.loadAsset('public/json/spritesheet.json');

@@ -6,7 +6,6 @@ describe('Kane.EntityManager', function () {
   var em
     , drawplane = {
         clearAll: function () {},
-        drawAll: function (){}
       };
   
   beforeEach(function () {
@@ -137,17 +136,6 @@ describe('Kane.EntityManager', function () {
     });
   });
 
-  describe('#drawAll()', function () {
-    it('should be a function', function () {
-      assert.isFunction(em.drawAll);
-
-      assert.doesNotThrow(function () {
-        em.drawAll();
-      });
-    });
-  });
-
-  
   describe("#findCollisions()", function () {
     it('should be a function', function () {
       assert.isFunction(em.findCollisions);

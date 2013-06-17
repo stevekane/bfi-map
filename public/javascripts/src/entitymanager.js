@@ -7,7 +7,6 @@ var EntityManagerInterface = {
   removeDead: function () {},
   sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
-  drawAll: function () {},
   findCollisions: function () {},
   listEntities: function () {},
   findByType: function (type) {},
@@ -123,14 +122,6 @@ Kane.EntityManager.prototype.updateAll = function (dT) {
   _(collisions).each(function (collision) {
     collision.subject.collide.call(collision.subject, collision.target);
   }); 
-};
-
-Kane.EntityManager.prototype.drawAll = function () {
-  //clear the drawplane
-  this.drawplane.clearAll();
-
-  //call draw for each entity
-  this.callForAll('draw'); 
 };
 
 Kane.EntityManager.prototype.findCollisions = function () {

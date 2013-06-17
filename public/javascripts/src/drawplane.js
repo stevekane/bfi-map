@@ -39,6 +39,7 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
   if (!isValidImage) { 
     throw new Error('not a valid image!'); 
   }
+
   this.ctx.drawImage(image, sx, sy);
 };
 

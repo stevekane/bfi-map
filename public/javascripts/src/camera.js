@@ -39,8 +39,7 @@ Cameras must be instantiated with a scene object
 the scene tells the camera to draw at 60fps and it provides
 the data for the camera to draw
 
-the camera is attached to the scene after instantiation via
-an attachCamera method on the scene
+the camera MUST be attached to a scene before it is made active
 */
 Kane.Camera = function (settings) {
   if (!settings.scene) {
@@ -73,7 +72,8 @@ Kane.Camera.prototype.draw = function () {
 };
 
 Kane.Camera.prototype.drawBg = function () {
-  
+  this.bgPlane.clearAll();
+  this.bgPlane.drawImage(this.scene.bgImage, 0, 0);
 };
 
 Kane.Camera.prototype.drawWorld = function () {

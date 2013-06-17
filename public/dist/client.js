@@ -97,8 +97,7 @@ Cameras must be instantiated with a scene object
 the scene tells the camera to draw at 60fps and it provides
 the data for the camera to draw
 
-the camera is attached to the scene after instantiation via
-an attachCamera method on the scene
+the camera MUST be attached to a scene before it is made active
 */
 Kane.Camera = function (settings) {
   if (!settings.scene) {
@@ -131,7 +130,8 @@ Kane.Camera.prototype.draw = function () {
 };
 
 Kane.Camera.prototype.drawBg = function () {
-  
+  this.bgPlane.clearAll();
+  this.bgPlane.drawImage(this.scene.bgImage, 0, 0);
 };
 
 Kane.Camera.prototype.drawWorld = function () {
@@ -280,6 +280,7 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
   if (!isValidImage) { 
     throw new Error('not a valid image!'); 
   }
+
   this.ctx.drawImage(image, sx, sy);
 };
 
@@ -453,7 +454,6 @@ var EntityManagerInterface = {
   removeDead: function () {},
   sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
-  drawAll: function () {},
   findCollisions: function () {},
   listEntities: function () {},
   findByType: function (type) {},
@@ -569,14 +569,6 @@ Kane.EntityManager.prototype.updateAll = function (dT) {
   _(collisions).each(function (collision) {
     collision.subject.collide.call(collision.subject, collision.target);
   }); 
-};
-
-Kane.EntityManager.prototype.drawAll = function () {
-  //clear the drawplane
-  this.drawplane.clearAll();
-
-  //call draw for each entity
-  this.callForAll('draw'); 
 };
 
 Kane.EntityManager.prototype.findCollisions = function () {
@@ -947,7 +939,8 @@ var ingame = new Kane.GameScene({
 //define camera for our ingameScene
 var camera = new Kane.Camera({
   scene: ingame,
-  entityPlane: entityPlane
+  entityPlane: entityPlane,
+  bgPlane: bgPlane
 });
 
 //assign the camera to a camera attribute on the scene
@@ -981,7 +974,9 @@ ingame.onEnter = function () {
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
 
-  bgPlane.drawImage(spriteSheet, 0, 0);
+  console.log(spriteSheet);
+  //set the background image
+  this.bgImage = spriteSheet;
 };
 
 //define onExit hook to un-subscribe to inputWizard
@@ -991,7 +986,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 300;
+ingame.shotTimer = 20;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
@@ -1065,15 +1060,18 @@ caches using the provided loaders and then advance to ingame
 
 var loading = new Kane.LoadingScene({
   name: 'loading',
-  imageLoader: imageLoader,
-  jsonLoader: jsonLoader,
-  imageCache: imageCache,
-  jsonCache: jsonCache,
-  imageAssets: ['public/images/spritesheet'],
-  jsonAssets: ['public/json/spritesheet'],
   targetSceneName: 'ingame',
+
+  imageLoader: imageLoader,
+  imageCache: imageCache,
+  imageAssets: ['public/images/spritesheet'],
+
+  jsonLoader: jsonLoader,
+  jsonCache: jsonCache,
+  jsonAssets: ['public/json/spritesheet'],
+
   bus: sceneBus
-})
+});
 
 loading.imageLoader.loadAsset('public/images/spritesheet.png');
 loading.jsonLoader.loadAsset('public/json/spritesheet.json');
