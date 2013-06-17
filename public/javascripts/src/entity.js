@@ -6,9 +6,6 @@ var EntityInterface = {
   beforeUpdate: function (dT) {},
   update: function (dT) {}, 
   afterUpdate: function (dT) {},
-  beforeDraw: function () {},
-  draw: function () {},
-  afterDraw: function () {},
   collide: function (target) {},
   
   /*
@@ -83,21 +80,6 @@ Kane.Entity.prototype.update = function (dT) {
 Kane.Entity.prototype.afterUpdate = function (dT) {};
 
 Kane.Entity.prototype.beforeDraw = function () {};
-
-Kane.Entity.prototype.draw = function () {
-  if (!this.image) {
-    this.manager.drawplane.drawRect(
-      this.color, 
-      //x and y are rounded to avoid drawing on fractional pixels
-      Math.round(this.x),
-      Math.round(this.y), 
-      this.w, 
-      this.h
-    );
-  } else {
-    //this.drawplane.drawImage
-  }
-};
 
 Kane.Entity.prototype.afterDraw = function () {};
 

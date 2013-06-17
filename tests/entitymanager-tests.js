@@ -3,29 +3,16 @@ minispade.require('entitymanager.js');
 var assert = chai.assert;
 
 describe('Kane.EntityManager', function () {
-  var em
-    , drawplane = {
-        clearAll: function () {},
-      };
+  var em;
   
   beforeEach(function () {
 
-    em = new Kane.EntityManager({drawplane: drawplane});
+    em = new Kane.EntityManager();
   });
 
   it('should be an object', function () {
     assert.isObject(em);
   }); 
-
-  it('should throw if no drawplane provided in settings hash', function () {
-    assert.throws(function () {
-      em = new Kane.EntityManager();
-    });
-
-    assert.doesNotThrow(function () {
-      em = new Kane.EntityManager({drawplane: drawplane});
-    });
-  });
 
   describe('#generateUniqueId()', function () {
     it('should return a unique id', function () {
@@ -42,15 +29,14 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should create a new entity with provided constructor/settings object', function () {
-      var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
+      var ent = em.spawn(Kane.Entity);
 
       assert.isObject(ent);
-      assert.equal(drawplane, ent.drawplane);
       assert.instanceOf(ent, Kane.Entity);
     });
 
     it('should assign itself as a value called manager to the newly created entity', function () {
-      var ent = em.spawn(Kane.Entity, {drawplane: drawplane});
+      var ent = em.spawn(Kane.Entity);
       //TODO: probably should access this via getter
       assert.equal(ent.manager, em);
     });
@@ -68,8 +54,8 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should return a list of all dead entities', function () {
-      var deadEnt1 = em.spawn(Kane.Entity, {drawplane: drawplane})
-        , deadEnt2 = em.spawn(Kane.Entity, {drawplane: drawplane})
+      var deadEnt1 = em.spawn(Kane.Entity)
+        , deadEnt2 = em.spawn(Kane.Entity)
         , deadEnts
         , remainingEnts;
 
@@ -99,9 +85,9 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should sort the entities by the specified property', function () {
-      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 1});
-      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 2});
-      em.spawn(Kane.Entity, {drawplane: drawplane, zIndex: 0});
+      em.spawn(Kane.Entity, {zIndex: 1});
+      em.spawn(Kane.Entity, {zIndex: 2});
+      em.spawn(Kane.Entity, {zIndex: 0});
 
       em.sortBy('zIndex', true);
       
@@ -146,19 +132,16 @@ describe('Kane.EntityManager', function () {
         y: 20,
         h: 20,
         w: 20,
-        drawplane: {}
       },  overlap1 = {
         x: 5,
         y: 5,
         h: 5,
         w: 5,
-        drawplane: {}
       },  overlap2 = {
         x: 5,
         y: 5,
         h: 2,
         w: 2,
-        drawplane: {}
       }
         , collisions;
 
@@ -185,7 +168,7 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should return an array of entities', function () {
-      var newEnt = em.spawn(Kane.Entity, {drawplane: drawplane})
+      var newEnt = em.spawn(Kane.Entity, {})
         , ents = em.listEntities();
   
       assert.isObject(ents);
@@ -207,9 +190,9 @@ describe('Kane.EntityManager', function () {
     it('should return all entities of a specified type', function () {
       var enemies;
 
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'friend'});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'enemy'});
-      em.spawn(Kane.Entity, {drawplane: drawplane, type: 'enemy'});
+      em.spawn(Kane.Entity, {type: 'friend'});
+      em.spawn(Kane.Entity, {type: 'enemy'});
+      em.spawn(Kane.Entity, {type: 'enemy'});
 
       enemies = em.findByType('enemy');
       
@@ -233,8 +216,8 @@ describe('Kane.EntityManager', function () {
     it('should return all entities of a specified name', function () {
       var bobbys;
 
-      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'bobby'});
-      em.spawn(Kane.Entity, {drawplane: drawplane, name: 'teddy'});
+      em.spawn(Kane.Entity, {name: 'bobby'});
+      em.spawn(Kane.Entity, {name: 'teddy'});
 
       bobbys = em.findByName('bobby');
       

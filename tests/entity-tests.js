@@ -3,11 +3,10 @@ minispade.require('entity.js');
 var assert = chai.assert;
 
 describe('Kane.Entity', function () {
-  var en
-    , drawplane = Test.createDrawPlane('tests');
+  var en;
   
   beforeEach(function () {
-    en = new Kane.Entity({drawplane: drawplane});
+    en = new Kane.Entity();
   });
 
   it('should return an object', function () {
@@ -100,26 +99,6 @@ describe('Kane.Entity', function () {
     it('is fired after of updating (calculating physics)', function () {});
     it('should be a function', function () {
       assert.isFunction(en.afterUpdate); 
-    });
-  });
-
-  describe('#beforeDraw()', function () {
-    it('is fired before core of drawing', function () {});
-    it('should be a function', function () {
-      assert.isFunction(en.beforeDraw); 
-    });
-  });
-
-  describe('#draw()', function () {
-    it('should be a function', function () {
-      assert.isFunction(en.draw); 
-    });
-  });    
-
-  describe('#afterDraw()', function () {
-    it('is fired after drawing', function () {});
-    it('should be a function', function () {
-      assert.isFunction(en.afterDraw);
     });
   });
 

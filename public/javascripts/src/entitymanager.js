@@ -12,17 +12,10 @@ var EntityManagerInterface = {
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
   applyForAll: function (methodName, argArray) {},
-  
-  //define mandatory interface attribute
-  drawplane: {},
 };
 
 //requires array of entities
 Kane.EntityManager = function (settings) {
-  if (!settings.drawplane) { 
-    throw new Error('must provide drawplane'); 
-  }
-
   _.extend(this, settings);
 };
 
@@ -126,7 +119,6 @@ Kane.EntityManager.prototype.updateAll = function (dT) {
 
 Kane.EntityManager.prototype.findCollisions = function () {
   var collisions = []
-    , colliders = []
     , checkCollision = Kane.Utils.checkBBCollision;
 
   function doesCollide (ent) {
@@ -134,8 +126,7 @@ Kane.EntityManager.prototype.findCollisions = function () {
   };
 
   //iterate through all colliding entities
-  colliders = _(this).filter(doesCollide); 
-  _(colliders).each(function (subjectEnt, index, entities) {
+  _(this).filter(doesCollide).each(function (subjectEnt, index, entities) {
 
     //compare subjectEnt to all entities (discarding self)
     _(entities).each(function (targetEnt) {
