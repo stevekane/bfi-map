@@ -1,15 +1,23 @@
 minispade.require('camera.js');
+minispade.require('drawplane.js');
 
 var assert = chai.assert;
 
 describe("Kane.Camera", function () {
-  var c;
+  var c
+    , bgPlane 
+    , $canvas = $(document.createElement('canvas'));
+
+  $canvas.attr({id: 'bgPlane'});
+  $('body').append($canvas);
+  
+  bgPlane = new Kane.DrawPlane({board: $canvas}); 
 
   beforeEach(function () {
     c = new Kane.Camera({
       scene: {},
       planes: {
-        bgPlane: {},
+        bgPlane: bgPlane
       }
     });
   });
@@ -101,12 +109,15 @@ describe("Kane.Camera", function () {
   });
 
   describe("#setSize()", function () {
-    it('should set the height and width of the camera and all its drawplanes', function () {
+    it('should set the height and width of the camera and its drawplanes', function () {
       var h = 200
         , w = 200;
 
       c.setSize(w, h);
-      
+      assert.equal(c.h, h);
+      assert.equal(c.w, w);
+      assert.equal(c.planes.bgPlane.getWidth(), w);
+      assert.equal(c.planes.bgPlane.getHeight(), h);
     });
   });
 });

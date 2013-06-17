@@ -112,6 +112,12 @@ Kane.Camera = function (settings) {
   }
 
   _.extend(this, settings);
+
+  //set the size of the camera and all drawplanes
+  this.setSize(
+    settings.w || 640,
+    settings.h || 480
+  );
 };
 
 Kane.Camera.prototype = Object.create(CameraInterface);
@@ -181,6 +187,16 @@ Kane.Camera.prototype.drawEntities = function () {
       ); 
     }
   }, this);
+};
+
+Kane.Camera.prototype.setSize = function (w, h) {
+  this.w = w;
+  this.h = h;
+
+  //set the size of all the planes this camera controls
+  _.each(this.planes, function (plane) {
+    plane.setSize(w, h);
+  }); 
 };
 
 });
@@ -263,15 +279,27 @@ var DrawPlaneInterface = {
   drawRect: function (color, x, y, w, h) {},
   drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
   drawSprite: function (sprite, x, y, w, h) {},
-  clearAll: function () {}
+  clearAll: function () {},
+  setSize: function (w, h) {},
+  getWidth: function () {},
+  getHeight: function () {},
 };
 
 Kane.DrawPlane = function (settings) {
   if (!settings.board) { 
     throw new Error('must provide canvas domnode'); 
   }
+  
 
   _.extend(this, settings);
+
+  //set initial size of canvas
+  this.setSize(
+    settings.w || 640,
+    settings.h || 480
+  );
+
+  //set the drawing context for the board
   this.ctx = this.board[0].getContext('2d');
 };
 
@@ -338,6 +366,22 @@ Kane.DrawPlane.prototype.clearAll = function () {
     this.board.attr('width'), 
     this.board.attr('height')
   );
+};
+
+Kane.DrawPlane.prototype.setSize = function (w, h) {
+  //set size of the canvas element
+  this.board.attr({
+    width: w || 640,
+    height: h || 480
+  }); 
+};
+
+Kane.DrawPlane.prototype.getHeight = function () {
+  return this.board.attr('height');
+};
+
+Kane.DrawPlane.prototype.getWidth = function () {
+  return this.board.attr('width');
 };
 
 });
@@ -937,9 +981,9 @@ var sceneBus = new Bacon.Bus();
 Construction of specific scene
 setup entity set for this scene
 */
-var entityCanvas = createCanvas(document.width-100, document.height-20, 'entities')
+var entityCanvas = createCanvas(300, 300, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
+  , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
 
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
@@ -984,8 +1028,8 @@ var camera = new Kane.Camera({
     entityPlane: entityPlane,
     bgPlane: bgPlane,
   },
-  h: document.height - 20,
-  w: document.width - 100 
+  h: 540,
+  w: 1000 
 });
 
 //assign the camera to a camera attribute on the scene

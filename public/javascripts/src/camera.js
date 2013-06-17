@@ -54,6 +54,12 @@ Kane.Camera = function (settings) {
   }
 
   _.extend(this, settings);
+
+  //set the size of the camera and all drawplanes
+  this.setSize(
+    settings.w || 640,
+    settings.h || 480
+  );
 };
 
 Kane.Camera.prototype = Object.create(CameraInterface);
@@ -123,4 +129,14 @@ Kane.Camera.prototype.drawEntities = function () {
       ); 
     }
   }, this);
+};
+
+Kane.Camera.prototype.setSize = function (w, h) {
+  this.w = w;
+  this.h = h;
+
+  //set the size of all the planes this camera controls
+  _.each(this.planes, function (plane) {
+    plane.setSize(w, h);
+  }); 
 };

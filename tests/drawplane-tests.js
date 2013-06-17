@@ -135,4 +135,37 @@ describe('Kane.DrawPlane', function () {
     });
   });
 
+  describe("#setSize()", function () {
+    it('it should change the size of the board object', function () {
+      var w = 300
+        , h  = 400;
+
+      drawPlane.setSize(w, h);
+
+      assert.equal(w, drawPlane.getWidth());
+      assert.equal(h, drawPlane.getHeight());
+    });
+  });
+
+  describe("#getWidth()", function () {
+    it('should return the width of the canvas', function () {
+      var w = 300
+        , h = 300;    
+
+      drawPlane.setSize(w, h);
+      
+      assert.equal(drawPlane.getWidth(), w);
+    });
+  });
+
+  describe("#getHeight()", function () {
+    it('should return the height of the canvas', function () {
+      var w = 300
+        , h = 300;    
+
+      drawPlane.setSize(w, h);
+      
+      assert.equal(drawPlane.getHeight(), h);
+    });
+  });
 });

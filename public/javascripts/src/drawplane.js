@@ -5,15 +5,27 @@ var DrawPlaneInterface = {
   drawRect: function (color, x, y, w, h) {},
   drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
   drawSprite: function (sprite, x, y, w, h) {},
-  clearAll: function () {}
+  clearAll: function () {},
+  setSize: function (w, h) {},
+  getWidth: function () {},
+  getHeight: function () {},
 };
 
 Kane.DrawPlane = function (settings) {
   if (!settings.board) { 
     throw new Error('must provide canvas domnode'); 
   }
+  
 
   _.extend(this, settings);
+
+  //set initial size of canvas
+  this.setSize(
+    settings.w || 640,
+    settings.h || 480
+  );
+
+  //set the drawing context for the board
   this.ctx = this.board[0].getContext('2d');
 };
 
@@ -80,4 +92,20 @@ Kane.DrawPlane.prototype.clearAll = function () {
     this.board.attr('width'), 
     this.board.attr('height')
   );
+};
+
+Kane.DrawPlane.prototype.setSize = function (w, h) {
+  //set size of the canvas element
+  this.board.attr({
+    width: w || 640,
+    height: h || 480
+  }); 
+};
+
+Kane.DrawPlane.prototype.getHeight = function () {
+  return this.board.attr('height');
+};
+
+Kane.DrawPlane.prototype.getWidth = function () {
+  return this.board.attr('width');
 };

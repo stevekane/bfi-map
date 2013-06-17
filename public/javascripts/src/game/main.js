@@ -72,9 +72,9 @@ var sceneBus = new Bacon.Bus();
 Construction of specific scene
 setup entity set for this scene
 */
-var entityCanvas = createCanvas(document.width-100, document.height-20, 'entities')
+var entityCanvas = createCanvas(300, 300, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
+  , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
 
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
@@ -119,8 +119,8 @@ var camera = new Kane.Camera({
     entityPlane: entityPlane,
     bgPlane: bgPlane,
   },
-  h: document.height - 20,
-  w: document.width - 100 
+  h: 540,
+  w: 1000 
 });
 
 //assign the camera to a camera attribute on the scene
