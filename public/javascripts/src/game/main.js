@@ -15,7 +15,7 @@ function createCanvas (w, h, name) {
 };
 
 //global background canvas object
-var bgCanvas = createCanvas(640, 480, 'gameboard')
+var bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
@@ -79,7 +79,7 @@ var sceneBus = new Bacon.Bus();
 Construction of specific scene
 setup entity set for this scene
 */
-var entityCanvas = createCanvas(640, 480, 'entities')
+var entityCanvas = createCanvas(document.width-100, document.height-20, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
@@ -120,7 +120,9 @@ var ingame = new Kane.GameScene({
 var camera = new Kane.Camera({
   scene: ingame,
   entityPlane: entityPlane,
-  bgPlane: bgPlane
+  bgPlane: bgPlane,
+  h: document.height - 20,
+  w: document.width - 100 
 });
 
 //assign the camera to a camera attribute on the scene
@@ -154,7 +156,6 @@ ingame.onEnter = function () {
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
 
-  console.log(spriteSheet);
   //set the background image
   this.bgImage = spriteSheet;
 };
@@ -196,6 +197,8 @@ ingame.fire = function (x, y, dx, dy) {
       dx: dx,
       dy: dy,
       ddy: .001,
+      h: Math.round(40 - Math.random () * 20),
+      w: Math.round(40 - Math.random () * 20),
     }
   );
 };

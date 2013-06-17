@@ -34,7 +34,8 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
     Math.round(x), 
     Math.round(y), 
     w, 
-    h);
+    h
+  );
 };
 
 Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
@@ -52,5 +53,10 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
-  this.ctx.clearRect(0, 0, this.board.attr('width'), this.board.attr('height'));
+  this.ctx.clearRect(
+    0, 
+    0, 
+    this.board.attr('width'), 
+    this.board.attr('height')
+  );
 };

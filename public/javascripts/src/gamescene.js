@@ -1,6 +1,8 @@
 require('scene.js');
 
 Kane.GameScene = function (settings) {
+  Kane.Scene.call(this, settings);
+
   if (!settings.entityManager) {
     throw new Error('no entityManager provided to constructor');
   }

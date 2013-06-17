@@ -275,7 +275,8 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
     Math.round(x), 
     Math.round(y), 
     w, 
-    h);
+    h
+  );
 };
 
 Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
@@ -293,7 +294,12 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
-  this.ctx.clearRect(0, 0, this.board.attr('width'), this.board.attr('height'));
+  this.ctx.clearRect(
+    0, 
+    0, 
+    this.board.attr('width'), 
+    this.board.attr('height')
+  );
 };
 
 });
@@ -836,7 +842,7 @@ function createCanvas (w, h, name) {
 };
 
 //global background canvas object
-var bgCanvas = createCanvas(640, 480, 'gameboard')
+var bgCanvas = createCanvas(document.width-100, document.height-20, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas});
 
 //color background
@@ -900,7 +906,7 @@ var sceneBus = new Bacon.Bus();
 Construction of specific scene
 setup entity set for this scene
 */
-var entityCanvas = createCanvas(640, 480, 'entities')
+var entityCanvas = createCanvas(document.width-100, document.height-20, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
@@ -941,7 +947,9 @@ var ingame = new Kane.GameScene({
 var camera = new Kane.Camera({
   scene: ingame,
   entityPlane: entityPlane,
-  bgPlane: bgPlane
+  bgPlane: bgPlane,
+  h: document.height - 20,
+  w: document.width - 100 
 });
 
 //assign the camera to a camera attribute on the scene
@@ -975,7 +983,6 @@ ingame.onEnter = function () {
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
 
-  console.log(spriteSheet);
   //set the background image
   this.bgImage = spriteSheet;
 };
@@ -1017,6 +1024,8 @@ ingame.fire = function (x, y, dx, dy) {
       dx: dx,
       dy: dy,
       ddy: .001,
+      h: Math.round(40 - Math.random () * 20),
+      w: Math.round(40 - Math.random () * 20),
     }
   );
 };
@@ -1091,6 +1100,8 @@ minispade.register('gamescene.js', function() {
 minispade.require('scene.js');
 
 Kane.GameScene = function (settings) {
+  Kane.Scene.call(this, settings);
+
   if (!settings.entityManager) {
     throw new Error('no entityManager provided to constructor');
   }
@@ -1560,7 +1571,7 @@ minispade.register('loadingscene.js', function() {
 minispade.require('scene.js');
 
 Kane.LoadingScene = function (settings) {
-  _.extend(this, settings);
+  Kane.Scene.call(this, settings);
 
   if (!settings.targetSceneName) {
     this.targetSceneName = this.name;
@@ -1573,7 +1584,7 @@ Kane.LoadingScene = function (settings) {
   this.imageAssets = [];
   this.jsonAssets = [];
 
-  Kane.Scene.call(this, settings);
+  _.extend(this, settings);
 };
 
 Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
@@ -1645,6 +1656,8 @@ Kane.Particle = function (settings) {
   this.w = 5; 
 
   this.doesCollide = false;
+
+  _.extend(this, settings);
 };
 
 Kane.Particle.prototype = Object.create(Kane.Entity.prototype);
@@ -1665,15 +1678,19 @@ minispade.require('entity.js');
 
 //Kane.Projectile inherits core behavior from Kane.Entity
 Kane.Projectile = function (settings) {
+
   Kane.Entity.call(this, settings);
 
-  this.lifespan = 2000;
-  this.color = "#00bb22";
-  this.doesCollide = true;
   this.h = 24;
   this.w = 24; 
+  this.color = "#00bb22";
+
+  this.lifespan = 2000;
+  this.doesCollide = true;
 
   this.killtimer = Date.now() + this.lifespan;
+
+  _.extend(this, settings);
 };
 
 Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
@@ -1694,11 +1711,11 @@ Kane.Projectile.prototype.collide = function (target) {
       Kane.Particle,
       {
         x: this.x,
-        y:  this.y,
+        y: this.y,
         dx: Math.random() * (this.dx + target.dx),
         dy: Math.random() * (this.dy + target.dy),
-        w: 8,
-        h: 8,
+        w: 3,
+        h: 3,
         ddy: .001,
       }
     );

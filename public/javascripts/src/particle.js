@@ -12,6 +12,8 @@ Kane.Particle = function (settings) {
   this.w = 5; 
 
   this.doesCollide = false;
+
+  _.extend(this, settings);
 };
 
 Kane.Particle.prototype = Object.create(Kane.Entity.prototype);

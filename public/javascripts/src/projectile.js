@@ -2,15 +2,19 @@ require('entity.js');
 
 //Kane.Projectile inherits core behavior from Kane.Entity
 Kane.Projectile = function (settings) {
+
   Kane.Entity.call(this, settings);
 
-  this.lifespan = 2000;
-  this.color = "#00bb22";
-  this.doesCollide = true;
   this.h = 24;
   this.w = 24; 
+  this.color = "#00bb22";
+
+  this.lifespan = 2000;
+  this.doesCollide = true;
 
   this.killtimer = Date.now() + this.lifespan;
+
+  _.extend(this, settings);
 };
 
 Kane.Projectile.prototype = Object.create(Kane.Entity.prototype);
@@ -31,11 +35,11 @@ Kane.Projectile.prototype.collide = function (target) {
       Kane.Particle,
       {
         x: this.x,
-        y:  this.y,
+        y: this.y,
         dx: Math.random() * (this.dx + target.dx),
         dy: Math.random() * (this.dy + target.dy),
-        w: 8,
-        h: 8,
+        w: 3,
+        h: 3,
         ddy: .001,
       }
     );

@@ -1,7 +1,7 @@
 require('scene.js');
 
 Kane.LoadingScene = function (settings) {
-  _.extend(this, settings);
+  Kane.Scene.call(this, settings);
 
   if (!settings.targetSceneName) {
     this.targetSceneName = this.name;
@@ -14,7 +14,7 @@ Kane.LoadingScene = function (settings) {
   this.imageAssets = [];
   this.jsonAssets = [];
 
-  Kane.Scene.call(this, settings);
+  _.extend(this, settings);
 };
 
 Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
