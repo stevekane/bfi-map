@@ -1,15 +1,17 @@
 require('engine.js');
 
 function createCanvas (w, h, name) {
-  var canvas = document.createElement('canvas');
+  var $canvas = $(document.createElement('canvas'));
   
-  canvas.id = name;
-  canvas.height = h;
-  canvas.width = w;
+  $canvas.attr({
+    id: name,
+    height: h,
+    width: w
+  }); 
   
-  document.body.appendChild(canvas);
+  $('body').append($canvas);
 
-  return document.getElementById(name);
+  return $canvas;
 };
 
 //global background canvas object

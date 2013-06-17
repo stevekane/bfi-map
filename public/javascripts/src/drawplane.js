@@ -13,7 +13,7 @@ Kane.DrawPlane = function (settings) {
   }
 
   _.extend(this, settings);
-  this.ctx = this.board.getContext('2d');
+  this.ctx = this.board[0].getContext('2d');
 };
 
 Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
@@ -52,5 +52,5 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
-  this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+  this.ctx.clearRect(0, 0, this.board.attr('width'), this.board.attr('height'));
 };

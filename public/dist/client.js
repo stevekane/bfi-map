@@ -254,7 +254,7 @@ Kane.DrawPlane = function (settings) {
   }
 
   _.extend(this, settings);
-  this.ctx = this.board.getContext('2d');
+  this.ctx = this.board[0].getContext('2d');
 };
 
 Kane.DrawPlane.prototype = Object.create(DrawPlaneInterface);
@@ -293,7 +293,7 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
-  this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+  this.ctx.clearRect(0, 0, this.board.attr('width'), this.board.attr('height'));
 };
 
 });
@@ -822,15 +822,17 @@ minispade.register('game/main.js', function() {
 minispade.require('engine.js');
 
 function createCanvas (w, h, name) {
-  var canvas = document.createElement('canvas');
+  var $canvas = $(document.createElement('canvas'));
   
-  canvas.id = name;
-  canvas.height = h;
-  canvas.width = w;
+  $canvas.attr({
+    id: name,
+    height: h,
+    width: w
+  }); 
   
-  document.body.appendChild(canvas);
+  $('body').append($canvas);
 
-  return document.getElementById(name);
+  return $canvas;
 };
 
 //global background canvas object
