@@ -1,5 +1,6 @@
 require('entity.js');
 
+//Kane.Particle inherits core behavior from Kane.Entity
 Kane.Particle = function (settings) {
   Kane.Entity.call(this, settings);
 

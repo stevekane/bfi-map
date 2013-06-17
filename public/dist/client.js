@@ -434,10 +434,6 @@ Kane.Entity.prototype.update = function (dT) {
 
 Kane.Entity.prototype.afterUpdate = function (dT) {};
 
-Kane.Entity.prototype.beforeDraw = function () {};
-
-Kane.Entity.prototype.afterDraw = function () {};
-
 Kane.Entity.prototype.collide = function (target) {
   if (!target) {
     throw new Error('no target provided');
@@ -1628,6 +1624,7 @@ minispade.register('particle.js', function() {
 
 minispade.require('entity.js');
 
+//Kane.Particle inherits core behavior from Kane.Entity
 Kane.Particle = function (settings) {
   Kane.Entity.call(this, settings);
 
@@ -1657,6 +1654,7 @@ minispade.register('projectile.js', function() {
 
 minispade.require('entity.js');
 
+//Kane.Projectile inherits core behavior from Kane.Entity
 Kane.Projectile = function (settings) {
   Kane.Entity.call(this, settings);
 

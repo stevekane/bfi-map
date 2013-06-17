@@ -101,10 +101,6 @@ Kane.Entity.prototype.update = function (dT) {
 
 Kane.Entity.prototype.afterUpdate = function (dT) {};
 
-Kane.Entity.prototype.beforeDraw = function () {};
-
-Kane.Entity.prototype.afterDraw = function () {};
-
 Kane.Entity.prototype.collide = function (target) {
   if (!target) {
     throw new Error('no target provided');

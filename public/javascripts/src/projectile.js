@@ -1,5 +1,6 @@
 require('entity.js');
 
+//Kane.Projectile inherits core behavior from Kane.Entity
 Kane.Projectile = function (settings) {
   Kane.Entity.call(this, settings);
 
