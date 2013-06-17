@@ -1015,7 +1015,7 @@ ingame.onEnter = function () {
   this.inputWizard.addSubscriber(this);
 
   //set the background image
-  this.bgImage = spriteSheet;
+  //this.bgImage = spriteSheet;
 };
 
 //define onExit hook to un-subscribe to inputWizard
@@ -1025,7 +1025,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 40;
+ingame.shotTimer = 80;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
