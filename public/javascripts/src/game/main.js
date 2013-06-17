@@ -131,15 +131,6 @@ THIS IS JUST TEMPORARY AND CAUSES TESTS TO FAIL
 ingame.entityManager.baconLength = new Bacon.Bus();
 ingame.entityManager.baconCollisions = new Bacon.Bus();
 
-//BACON STAT PUSHING BEHAVIOR
-ingame.onUpdate = function (dT) {
-  var emLen = this.entityManager.length
-    , collisions = this.entityManager.findCollisions();
-
-  this.entityManager.baconLength.push(emLen);
-  this.entityManager.baconCollisions.push(collisions.length);
-};
-
 //Assign bacon stat streams to behaviors that render in the DOM
 var entCount = document.getElementById('entityCount')
   , colCount = document.getElementById('collisionCount');
@@ -167,6 +158,42 @@ ingame.onEnter = function () {
 ingame.onExit = function () {
   console.log('ingame exited!');
   this.inputWizard.removeSubscriber(this);
+};
+
+//define a timer to fire new objects (ms)
+ingame.shotTimer = 300;
+
+ingame.onUpdate = function (dT) {
+  var emLen = this.entityManager.length
+    , collisions = this.entityManager.findCollisions();
+
+  this.entityManager.baconLength.push(emLen);
+  this.entityManager.baconCollisions.push(collisions.length);
+
+  if (!this.lastShotFired) {
+    this.lastShotFired = Date.now();
+  } else {
+    if ((this.lastShotFired + this.shotTimer) < Date.now()) {
+      this.fire(320, 400, -1 * Math.random(), -1 * Math.random());
+      this.fire(0, 400, Math.random(), -1 * Math.random());
+      this.fire(640, 400, -1 * Math.random(), -1 * Math.random());
+      this.lastShotFired = Date.now();
+    }
+  }
+};
+
+//DEFINE utility method
+ingame.fire = function (x, y, dx, dy) {
+  this.entityManager.spawn(
+    Kane.Projectile,
+    {
+      x: x,
+      y: y,
+      dx: dx,
+      dy: dy,
+      ddy: .001,
+    }
+  );
 };
 
 //hacky mapping of keyname to dx/dy values
@@ -197,16 +224,7 @@ ingame.keyup = function (keyName) {
     var dx = mapping.dx * Math.random()
       , dy = mapping.dy * Math.random();
 
-    this.entityManager.spawn(
-      Kane.Projectile,
-      {
-        x: Math.round(Math.random() * 640),
-        y: Math.round(Math.random() * 480),
-        dx: dx,
-        dy: dy,
-        ddy: .001,
-      }
-    );
+    this.fire(Math.random() * 640, 0, dx, dy);
   }
 };
 
