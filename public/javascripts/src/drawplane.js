@@ -4,6 +4,7 @@ var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},
   drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  drawSprite: function (sprite, x, y, w, h) {},
   clearAll: function () {}
 };
 
@@ -38,7 +39,7 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
   );
 };
 
-Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
+Kane.DrawPlane.prototype.drawImage = function (image, x, y) {
   var isValidImage = image instanceof Image;
 
   if (!isValidImage) { 
@@ -47,8 +48,28 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 
   this.ctx.drawImage(
     image, 
-    Math.round(sx), 
-    Math.round(sy)
+    Math.round(x), 
+    Math.round(y)
+  );
+};
+
+Kane.DrawPlane.prototype.drawSprite = function (sprite, x, y, w, h) {
+  var isValidImage = sprite.spriteSheet instanceof Image;
+
+  if (!isValidImage) { 
+    throw new Error('sprite.spriteSheet is not a valid image!'); 
+  }
+
+  this.ctx.drawImage(
+    sprite.spriteSheet,
+    sprite.sx,
+    sprite.sy,
+    sprite.w,
+    sprite.h,
+    Math.round(x),
+    Math.round(y),
+    w,
+    h
   );
 };
 

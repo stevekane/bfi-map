@@ -98,12 +98,22 @@ Kane.Camera.prototype.drawEntities = function () {
   //if they should be drawn, calculate where they should be drawn
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
-    this.entityPlane.drawRect(
-      ent.color,
-      ent.x - this.x,
-      ent.y - this.y,
-      ent.w,
-      ent.h 
-    ); 
+    if (ent.currentSprite) {
+      this.entityPlane.drawSprite(
+        ent.currentSprite,
+        ent.x - this.y,
+        ent.y - this.y,
+        ent.w,
+        ent.h
+      );
+    } else {
+      this.entityPlane.drawRect(
+        ent.color,
+        ent.x - this.x,
+        ent.y - this.y,
+        ent.w,
+        ent.h 
+      ); 
+    }
   }, this);
 };

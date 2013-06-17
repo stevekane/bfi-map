@@ -38,8 +38,8 @@ Kane.Projectile.prototype.collide = function (target) {
         y: this.y,
         dx: Math.random() * (this.dx + target.dx),
         dy: Math.random() * (this.dy + target.dy),
-        w: 3,
-        h: 3,
+        w: 4,
+        h: 4,
         ddy: .001,
       }
     );

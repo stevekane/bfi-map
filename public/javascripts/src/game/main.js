@@ -189,16 +189,29 @@ ingame.onUpdate = function (dT) {
 
 //DEFINE utility method
 ingame.fire = function (x, y, dx, dy) {
+  var spriteSheet = this.imageCache.getByName('public/images/spritesheet')
+    , json = this.jsonCache.getByName('public/json/spritesheet')
+    , data = json.frames['grapebullet.png'].frame
+    //HACK SPRITE CLASS FOR TESTING
+    , sprite = {
+      spriteSheet: spriteSheet,
+      sx: data.x,
+      sy: data.y,
+      w: data.w,
+      h: data.h
+    };
+
   this.entityManager.spawn(
     Kane.Projectile,
     {
+      currentSprite: sprite,
       x: x,
       y: y,
       dx: dx,
       dy: dy,
       ddy: .001,
-      h: Math.round(40 - Math.random () * 20),
-      w: Math.round(40 - Math.random () * 20),
+      h: 30,
+      w: 30,
     }
   );
 };

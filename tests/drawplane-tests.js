@@ -101,6 +101,31 @@ describe('Kane.DrawPlane', function () {
     });
   });
 
+  describe("#drawSprite", function () {
+    var x = 0
+      , y = 0
+      , w = 30
+      , h = 30
+      , sprite = {
+          spriteSheet: new Image(),
+          sx: 0,
+          sy: 0,
+          w: 30,
+          h: 30 
+      }; 
+
+    it('should throw an error if no valid Image provided', function (done) {
+      assert.doesNotThrow(function () {
+        drawPlane.drawSprite(sprite, x, y, w, h);
+      });
+
+      assert.throws(function () {
+        drawPlane.drawSprite({}, x, y, w, h);
+      });
+      done(); 
+    });
+  });
+
   //we don't test the functionality for ease
   describe("#clearAll", function () {
     it('should run without error', function () {

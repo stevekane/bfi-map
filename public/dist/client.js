@@ -156,13 +156,23 @@ Kane.Camera.prototype.drawEntities = function () {
   //if they should be drawn, calculate where they should be drawn
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
-    this.entityPlane.drawRect(
-      ent.color,
-      ent.x - this.x,
-      ent.y - this.y,
-      ent.w,
-      ent.h 
-    ); 
+    if (ent.currentSprite) {
+      this.entityPlane.drawSprite(
+        ent.currentSprite,
+        ent.x - this.y,
+        ent.y - this.y,
+        ent.w,
+        ent.h
+      );
+    } else {
+      this.entityPlane.drawRect(
+        ent.color,
+        ent.x - this.x,
+        ent.y - this.y,
+        ent.w,
+        ent.h 
+      ); 
+    }
   }, this);
 };
 
@@ -245,6 +255,7 @@ var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},
   drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  drawSprite: function (sprite, x, y, w, h) {},
   clearAll: function () {}
 };
 
@@ -279,7 +290,7 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
   );
 };
 
-Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
+Kane.DrawPlane.prototype.drawImage = function (image, x, y) {
   var isValidImage = image instanceof Image;
 
   if (!isValidImage) { 
@@ -288,8 +299,28 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
 
   this.ctx.drawImage(
     image, 
-    Math.round(sx), 
-    Math.round(sy)
+    Math.round(x), 
+    Math.round(y)
+  );
+};
+
+Kane.DrawPlane.prototype.drawSprite = function (sprite, x, y, w, h) {
+  var isValidImage = sprite.spriteSheet instanceof Image;
+
+  if (!isValidImage) { 
+    throw new Error('sprite.spriteSheet is not a valid image!'); 
+  }
+
+  this.ctx.drawImage(
+    sprite.spriteSheet,
+    sprite.sx,
+    sprite.sy,
+    sprite.w,
+    sprite.h,
+    Math.round(x),
+    Math.round(y),
+    w,
+    h
   );
 };
 
@@ -1016,16 +1047,29 @@ ingame.onUpdate = function (dT) {
 
 //DEFINE utility method
 ingame.fire = function (x, y, dx, dy) {
+  var spriteSheet = this.imageCache.getByName('public/images/spritesheet')
+    , json = this.jsonCache.getByName('public/json/spritesheet')
+    , data = json.frames['grapebullet.png'].frame
+    //HACK SPRITE CLASS FOR TESTING
+    , sprite = {
+      spriteSheet: spriteSheet,
+      sx: data.x,
+      sy: data.y,
+      w: data.w,
+      h: data.h
+    };
+
   this.entityManager.spawn(
     Kane.Projectile,
     {
+      currentSprite: sprite,
       x: x,
       y: y,
       dx: dx,
       dy: dy,
       ddy: .001,
-      h: Math.round(40 - Math.random () * 20),
-      w: Math.round(40 - Math.random () * 20),
+      h: 30,
+      w: 30,
     }
   );
 };
@@ -1714,8 +1758,8 @@ Kane.Projectile.prototype.collide = function (target) {
         y: this.y,
         dx: Math.random() * (this.dx + target.dx),
         dy: Math.random() * (this.dy + target.dy),
-        w: 3,
-        h: 3,
+        w: 4,
+        h: 4,
         ddy: .001,
       }
     );
