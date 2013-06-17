@@ -158,8 +158,8 @@ Kane.Camera.prototype.drawEntities = function () {
   _(entsToDraw).each(function (ent, index, ents) {
     this.entityPlane.drawRect(
       ent.color,
-      Math.round(ent.x - this.x),
-      Math.round(ent.y - this.y),
+      ent.x - this.x,
+      ent.y - this.y,
       ent.w,
       ent.h 
     ); 
@@ -271,7 +271,11 @@ Kane.DrawPlane.prototype.drawRect = function (color, x, y, w, h) {
   }
   //color must be valid hex
   this.ctx.fillStyle = color;
-  this.ctx.fillRect(x, y, w, h);
+  this.ctx.fillRect(
+    Math.round(x), 
+    Math.round(y), 
+    w, 
+    h);
 };
 
 Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
@@ -281,7 +285,11 @@ Kane.DrawPlane.prototype.drawImage = function (image, sx, sy) {
     throw new Error('not a valid image!'); 
   }
 
-  this.ctx.drawImage(image, sx, sy);
+  this.ctx.drawImage(
+    image, 
+    Math.round(sx), 
+    Math.round(sy)
+  );
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {

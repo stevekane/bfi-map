@@ -100,8 +100,8 @@ Kane.Camera.prototype.drawEntities = function () {
   _(entsToDraw).each(function (ent, index, ents) {
     this.entityPlane.drawRect(
       ent.color,
-      Math.round(ent.x - this.x),
-      Math.round(ent.y - this.y),
+      ent.x - this.x,
+      ent.y - this.y,
       ent.w,
       ent.h 
     ); 
