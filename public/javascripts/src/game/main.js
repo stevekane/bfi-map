@@ -214,36 +214,9 @@ ingame.fire = function (x, y, dx, dy) {
   );
 };
 
-//hacky mapping of keyname to dx/dy values
-ingame.keynameVelocityMapping = {
-  left: {
-    dx: -1,
-    dy: 0 
-  },
-  right: {
-    dx: 1,
-    dy: 0 
-  },
-  up: {
-    dx: 0,
-    dy: -1
-  },
-  down: {
-    dx: 0,
-    dy: 1 
-  },
-};
-
 //REWRITE USING EXTERNALLY DEFINED ENTITIES
 ingame.keyup = function (keyName) {
-  var mapping = this.keynameVelocityMapping[keyName];
-  
-  if (mapping) {
-    var dx = mapping.dx * Math.random()
-      , dy = mapping.dy * Math.random();
-
-    this.fire(Math.random() * 640, 0, dx, dy);
-  }
+  $('body').append('<br>' + keyName);
 };
 
 /*

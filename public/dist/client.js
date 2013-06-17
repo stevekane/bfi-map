@@ -1123,36 +1123,9 @@ ingame.fire = function (x, y, dx, dy) {
   );
 };
 
-//hacky mapping of keyname to dx/dy values
-ingame.keynameVelocityMapping = {
-  left: {
-    dx: -1,
-    dy: 0 
-  },
-  right: {
-    dx: 1,
-    dy: 0 
-  },
-  up: {
-    dx: 0,
-    dy: -1
-  },
-  down: {
-    dx: 0,
-    dy: 1 
-  },
-};
-
 //REWRITE USING EXTERNALLY DEFINED ENTITIES
 ingame.keyup = function (keyName) {
-  var mapping = this.keynameVelocityMapping[keyName];
-  
-  if (mapping) {
-    var dx = mapping.dx * Math.random()
-      , dy = mapping.dy * Math.random();
-
-    this.fire(Math.random() * 640, 0, dx, dy);
-  }
+  $('body').append('<br>' + keyName);
 };
 
 /*
@@ -1876,6 +1849,34 @@ Kane.Scene.prototype.onEnter = function () {};
 Kane.Scene.prototype.onExit = function () {};
 Kane.Scene.prototype.onUpdate = function (dT) {};
 Kane.Scene.prototype.onDraw = function () {};
+
+});
+
+minispade.register('sprite.js', function() {
+"use strict";
+
+minispade.require('kane.js');
+
+var SpriteInterface = {
+
+};
+
+Kane.Sprite = function (settings) {
+  var validImage = settings.image instanceof Image;
+
+  this.x = 0;
+  this.y = 0;
+  this.w = 0;
+  this.h = 0;
+
+  if (!validImage) {
+    throw new Error('no valid image provided to constructor!');
+  };
+
+  _.extend(this, settings);
+};
+
+Kane.Sprite.prototype = Object.create(SpriteInterface);
 
 });
 
