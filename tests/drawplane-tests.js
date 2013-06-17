@@ -15,15 +15,15 @@ describe('Kane.DrawPlane', function () {
   before(function () {
     var id = "testcan";
 
-    canvas = document.createElement('canvas');
-    canvas.id = id;
-    document.body.appendChild(canvas);
-    canvasInDom = document.getElementById(id);
+    $canvas = $(document.createElement('canvas'));
+    $canvas.attr({id: id});
+    $('body').append($canvas);
+    canvasInDom = $canvas;
   });
 
   //get a new instance of Kane.DrawPlane for each test
   beforeEach(function () {
-    drawPlane = new Kane.DrawPlane({board: canvasInDom});
+    drawPlane = new Kane.DrawPlane({board: $canvas});
   });
   
   it('should create a new object', function () {
