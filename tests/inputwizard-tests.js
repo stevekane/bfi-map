@@ -53,6 +53,7 @@ describe('Kane.InputWizard', function () {
     $('body').trigger(keydownEvent); 
   });
   
+  //TODO: create jQuery.Event w/ offsetX/Y values to test those in event stream
   it('should emit an event on stream when mouseup fired on domnode', 
   function (done) {
     iw.stream

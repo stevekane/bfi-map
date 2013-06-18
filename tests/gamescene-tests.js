@@ -35,6 +35,10 @@ describe("Kane.GameScene", function () {
     });
   });
 
+  it('should inject a copy of itself onto the camera', function () {
+    assert.equal(gs, gs.camera.scene);
+  });
+
   it('should throw if not provided an entityManager', function () {
     assert.throws(function () {
       gs = new Kane.GameScene({

@@ -14,7 +14,6 @@ describe("Kane.LoadingScene", function () {
   beforeEach(function () {
     ls = new Kane.LoadingScene({
       name: 'loading',
-      bus: new Bacon.Bus(),
       targetSceneName: 'myTarget',
     });
   });
@@ -23,37 +22,9 @@ describe("Kane.LoadingScene", function () {
     assert.isObject(ls); 
   });
 
-  describe("#onUpdate()", function () {
-    it('should put a transition event on the scene bus', function (done) {
-      var busEvent;
-
-      //assign an event callback to the bus.  we expect a 
-      //bus event to fire from this onUpdate call
-      ls.bus.onValue(function (event) {
-        assert.equal(event.type, 'transition'); 
-        assert.equal(event.content.name, ls.targetSceneName); 
-        done();
-      });      
-
-      ls.onUpdate();
-    });
-  });
-
   describe("#loadComplete()", function () {
     it('should be a function', function () {
       assert.isFunction(ls.loadComplete);
-    });
-
-    it('should put a transition event on the scene bus', function (done) {
-      
-      //assign an event callback to the bus.  we expect a 
-      //bus event to fire from this loadComplete call
-      ls.bus.onValue(function (event) {
-        assert.equal(event.type, 'transition'); 
-        assert.equal(event.content.name, ls.targetSceneName); 
-        done();
-      });      
-      ls.loadComplete();
     });
   });
 

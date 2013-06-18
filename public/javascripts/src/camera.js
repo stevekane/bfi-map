@@ -41,10 +41,6 @@ contain at least one Kane.DrawPlane instance
 the camera MUST be attached to a scene before it is made active
 */
 Kane.Camera = function (settings) {
-  if (!settings.scene) {
-    throw new Error('no scene provided in settings');
-  }
-
   if (!settings.planes) {
     throw new Error('no planes object provided to constructor');
   }

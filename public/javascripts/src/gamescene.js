@@ -11,6 +11,9 @@ Kane.GameScene = function (settings) {
     throw new Error('no camera provided to constructor');
   }
 
+  //inject the scene onto the camera (used to access other scene objects)
+  settings.camera.scene = this; 
+  
   _.extend(this, settings);
 };
 

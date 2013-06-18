@@ -16,9 +16,11 @@ Kane.InputWizard = function (settings) {
 
   _.extend(this, settings);
 
-  //this is the broadcast channel for all events captured by this
-  //add keyboard event handlers and filter out the keyName
-  //TODO: add touch event handlers
+  /*
+  this is the broadcast channel for all events captured by this
+  add keyboard event handlers and filter out the keyName
+  TODO: add touch event handlers
+  */
   streams.push(
     domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
     domNode.asEventStream('keydown').filter(filterKey).map(mapKey),

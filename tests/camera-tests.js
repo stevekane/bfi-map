@@ -26,12 +26,6 @@ describe("Kane.Camera", function () {
     assert.isObject(c); 
   });
 
-  it('should throw if no scene is provided to constructor', function () {
-    assert.throws(function () {
-      c = new Kane.Camera();
-    });
-  });
-
   it('should throw if no planes provided to constructor', function () {
     assert.throws(function () {
       c = new Kane.Camera({

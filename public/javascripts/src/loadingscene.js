@@ -47,12 +47,7 @@ Kane.LoadingScene.prototype.onUpdate = function (dT) {
 
 //broadcast our loadComplete to the scene bus
 Kane.LoadingScene.prototype.loadComplete = function () {
-  this.bus.push({
-    type: 'transition',
-    content: {
-      name: this.targetSceneName
-    } 
-  });
+  this.game.setCurrentScene(this.targetSceneName);
 };
 
 Kane.LoadingScene.prototype.stillLoading = function () {
