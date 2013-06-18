@@ -222,7 +222,6 @@ var clock = new Kane.Clock()
         index: index,
         ingame: ingame
       },
-      
       //TODO THIS MUST BE REMOVED???
       bus: sceneBus
   });

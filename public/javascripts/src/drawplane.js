@@ -3,7 +3,7 @@ require('kane.js');
 var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},
-  drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  drawImage: function (image, sx, sy) {},
   drawSprite: function (sprite, x, y, w, h) {},
   clearAll: function () {},
   setSize: function (w, h) {},

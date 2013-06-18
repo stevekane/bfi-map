@@ -19,3 +19,10 @@ App.game = new Kane.Game({
 });
 
 4 Methods: start, stop, setCurrentScene, getCurrentScene
+
+Scene -> every game is composed of these.  They can be phases of a game,
+load screens, menus, etc.  They must have a name 
+
+App.ingame = new Kane.Scene({
+  name: 'ingame'
+});

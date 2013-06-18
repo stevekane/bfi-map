@@ -15,10 +15,8 @@ var SceneInterface = {
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  
-  //list of required attributes
-  name: "",
-  bus: null,
+
+  name: ''
 };
 
 /*
@@ -28,9 +26,6 @@ by the provided name
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
-  }
-  if (!settings.bus) {
-    throw new Error('no bus provided to constructor');
   }
 
   //apply settings object to this scene

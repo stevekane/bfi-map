@@ -313,7 +313,7 @@ minispade.require('kane.js');
 var DrawPlaneInterface = {
   fillAll: function (hexColor) {},
   drawRect: function (color, x, y, w, h) {},
-  drawImage: function (image, sx, sy, sw, sh, x, y, w, h) {},
+  drawImage: function (image, sx, sy) {},
   drawSprite: function (sprite, x, y, w, h) {},
   clearAll: function () {},
   setSize: function (w, h) {},
@@ -1138,7 +1138,6 @@ var clock = new Kane.Clock()
         index: index,
         ingame: ingame
       },
-      
       //TODO THIS MUST BE REMOVED???
       bus: sceneBus
   });
@@ -1811,10 +1810,8 @@ var SceneInterface = {
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
-  
-  //list of required attributes
-  name: "",
-  bus: null,
+
+  name: ''
 };
 
 /*
@@ -1824,9 +1821,6 @@ by the provided name
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
-  }
-  if (!settings.bus) {
-    throw new Error('no bus provided to constructor');
   }
 
   //apply settings object to this scene
