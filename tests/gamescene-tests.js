@@ -9,14 +9,16 @@ describe("Kane.GameScene", function () {
         sortBy: function () {},
         updateAll: function () {},
         drawAll: function () {},
+    }
+    , camera = {
+        draw: function () {} 
     };
 
   beforeEach(function () {
     gs = new Kane.GameScene({
       name: 'game',
-      bus: new Bacon.Bus(),
       entityManager: entMan,
-      inputWizard: {} 
+      camera: camera
     });
   });
 
@@ -24,20 +26,27 @@ describe("Kane.GameScene", function () {
     assert.isObject(gs);
   });
 
+  it('should throw if not provided a camera', function () {
+    assert.throws(function () {
+      gs = new Kane.GameScene({
+        name: 'game',
+        entityManager: entMan,
+      });
+    });
+  });
+
+  it('should throw if not provided an entityManager', function () {
+    assert.throws(function () {
+      gs = new Kane.GameScene({
+        name: 'game',
+        camera: camera
+      });
+    });
+  });
+
   describe("#draw()", function () {
-    it('should throw if no camera is defined', function () {
-      var camera = {
-        draw: function () {}
-      };
-      assert.throws(function () {
-        gs.draw();
-      });
-
-      gs.camera = camera;
-
-      assert.doesNotThrow(function () {
-        gs.draw();
-      });
+    it('it is a function', function () {
+      assert.isFunction(gs.draw); 
     });
   });
 });

@@ -1172,12 +1172,9 @@ Kane.GameScene = function (settings) {
     throw new Error('no entityManager provided to constructor');
   }
 
-  if(!settings.inputWizard) {
-    throw new Error('no inputWizard provided to constructor');
+  if (!settings.camera) {
+    throw new Error('no camera provided to constructor');
   }
-
-  //set a default camera
-  this.camera = null;
 
   _.extend(this, settings);
 };
@@ -1196,9 +1193,6 @@ Kane.GameScene.prototype.update = function (dT) {
 };
 
 Kane.GameScene.prototype.draw = function () {
-  if (!this.camera) {
-    throw new Error('no camera defined for this scene!');
-  }
   this.camera.draw();
   this.onDraw();
 };
