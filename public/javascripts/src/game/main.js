@@ -80,8 +80,8 @@ var entityCanvas = createCanvas(300, 300, 'entities')
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
-    clock: clock,
-    bus: sceneBus
+      clock: clock,
+      bus: sceneBus
   });
 
 /*
@@ -206,11 +206,10 @@ ingame.fire = function (x, y, dx, dy) {
       h: 30,
       w: 30,
     }
- );
+  );
 };
 
 ingame.keyup = function (keyName) {
-  $('body').append('<br>' + keyName);
 };
 
 /*

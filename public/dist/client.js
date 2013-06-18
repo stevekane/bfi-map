@@ -1,3 +1,39 @@
+minispade.register('assetloader.js', function() {
+"use strict";
+/*
+Asset loaders is solely responsible for reaching out to the server
+to retrive assets for use in the game.  
+
+FILETYPES SUPPORTED:
+.json - LoadJson
+.png - LoadPng
+.jpg - LoadJpg
+
+As files are loaded, events are pushed onto the bus of two types
+
+{
+  type: 'load' || 'failedToLoad',
+  name: 'myAsset.ext'
+  asset: JSObj
+}
+
+The scene instance that owns this loader should subscribe to the bus
+
+*/
+minispade.require('kane.js');
+
+var AssetLoaderInterface = {
+
+};
+
+Kane.AssetLoader = function (settings) {
+  
+};
+
+Kane.AssetLoader.prototype = Object.create(AssetLoaderInterface);
+
+});
+
 minispade.register('cache.js', function() {
 "use strict";
 
@@ -992,8 +1028,8 @@ var entityCanvas = createCanvas(300, 300, 'entities')
   , entityManager = new Kane.EntityManager({drawplane: entityPlane})
   , clock = new Kane.Clock()
   , game = new Kane.Game({
-    clock: clock,
-    bus: sceneBus
+      clock: clock,
+      bus: sceneBus
   });
 
 /*
@@ -1118,11 +1154,10 @@ ingame.fire = function (x, y, dx, dy) {
       h: 30,
       w: 30,
     }
- );
+  );
 };
 
 ingame.keyup = function (keyName) {
-  $('body').append('<br>' + keyName);
 };
 
 /*
