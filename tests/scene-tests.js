@@ -45,6 +45,22 @@ describe('Kane.Scene', function () {
     });
   });
 
+  describe("#keyDown()", function () {
+    it('should throw if no keyName provided', function () {
+      assert.throws(function () {
+        s.keyDown();
+      });
+    });
+  });
+
+  describe("#keyUp()", function () {
+    it('should throw if no keyName provided', function () {
+      assert.throws(function () {
+        s.keyUp();
+      });
+    });
+  });
+
   describe('#onEnter()', function () {
     it('should be a function', function () {
       assert.isFunction(s.onEnter);

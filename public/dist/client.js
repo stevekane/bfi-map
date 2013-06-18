@@ -1800,12 +1800,16 @@ var SceneInterface = {
   update: function (dT) {},
   draw: function () {},
 
+  keyDown: function (keyName) {},
+  keyUp: function (keyName) {},
+
   onEnter: function () {},
   onExit: function () {},
   onDraw: function () {},
   onUpdate: function (dT) {},
 
-  name: ''
+  name: '',
+  keyMap: {},
 };
 
 /*
@@ -1816,6 +1820,9 @@ Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
   }
+
+  //set default keyMap
+  this.keyMap = {};
 
   //apply settings object to this scene
   _.extend(this, settings);
@@ -1832,6 +1839,38 @@ Kane.Scene.prototype.update = function (dT) {
 
 Kane.Scene.prototype.draw = function () {
   this.onDraw();
+};
+
+Kane.Scene.prototype.keyDown = function (keyName) {
+  var action;
+
+  if (!keyName) {
+    throw new Error('no keyName provided to keyDown');
+  }
+
+  //identify our action from the keyMap
+  action = this.keyMap[keyName].keyDown;
+
+  //if there is an action, execute it
+  if (action) {
+    action.call(this);
+  }
+};
+
+Kane.Scene.prototype.keyUp = function (keyName) {
+  var action;
+
+  if (!keyName) {
+    throw new Error('no keyName provided to keyDown');
+  }
+
+  //identify our action from the keyMap
+  action = this.keyMap[keyName].keyUp;
+
+  //if there is an action, execute it
+  if (action) {
+    action.call(this);
+  }
 };
 
 Kane.Scene.prototype.onEnter = function () {};
