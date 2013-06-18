@@ -77,27 +77,7 @@ var entityCanvas = createCanvas(300, 300, 'entities')
   , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
 
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , clock = new Kane.Clock()
-  , game = new Kane.Game({
-      clock: clock,
-      bus: sceneBus
-  });
-
-/*
-configure our bus to listen for transition type events
-bus format is defined as {type: string, content: object}
-*/
-game.bus.onValue(function (ev) {
-  var type = ev.type
-    , name = ev.content.name
-    , scenes = this.getScenes();
-
-  if ('transition' === type && scenes[name]) {
-    this.setCurrentScene(name);
-  }
-}.bind(game));
-
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane});
 /*
 pass in our inputWizard and our entityManager
 we also pass it a reference to our image/json cache
@@ -217,8 +197,8 @@ this is a loading scene.  It will load assets into the provided
 caches using the provided loaders and then advance to ingame
 */
 
-var loading = new Kane.LoadingScene({
-  name: 'loading',
+var index = new Kane.LoadingScene({
+  name: 'index',
   targetSceneName: 'ingame',
 
   imageLoader: imageLoader,
@@ -232,12 +212,33 @@ var loading = new Kane.LoadingScene({
   bus: sceneBus
 });
 
-loading.imageLoader.loadAsset('public/images/spritesheet.png');
-loading.jsonLoader.loadAsset('public/json/spritesheet.json');
+index.imageLoader.loadAsset('public/images/spritesheet.png');
+index.jsonLoader.loadAsset('public/json/spritesheet.json');
 
-//configure the game object before starting it
-game.addScene(ingame);
-game.addScene(loading);
-game.setCurrentScene('loading');
+var clock = new Kane.Clock()
+  , game = new Kane.Game({
+      clock: clock,
+      scenes: {
+        index: index,
+        ingame: ingame
+      },
+      
+      //TODO THIS MUST BE REMOVED???
+      bus: sceneBus
+  });
+
+/*
+configure our bus to listen for transition type events
+bus format is defined as {type: string, content: object}
+*/
+game.bus.onValue(function (ev) {
+  var type = ev.type
+    , name = ev.content.name;
+
+  if ('transition' === type) {
+    this.setCurrentScene(name);
+  }
+
+}.bind(game));
 
 game.start();

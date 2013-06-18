@@ -1,9 +1,6 @@
 require('kane.js');
 
 var GameInterface = {
-  addScene: function (scene) {},
-  removeScene: function (name) {},
-  getScenes: function () {},
   getCurrentScene: function () {},
   setCurrentScene: function (name) {},
   start: function () {},
@@ -18,56 +15,28 @@ Kane.Game = function (settings) {
     throw new Error('no clock provided to game'); 
   }
 
+  if (!settings.scenes) {
+    throw new Error('no scenes object provided to constructor');
+  }
+  
+  if (!settings.scenes.index) {
+    throw new Error('no index scene provided in scenes object to constructor');
+  }
+
   _.extend(this, settings);  
 
-  //a scenes object
-  this.scenes = {};
-  this.currentScene = null;
+  //set reference to game on each scene
+  _(this.scenes).each(function (scene) {
+    scene.game = this;
+  }, this);
+
+  //set the current scene to the provided index scene
+  this.currentScene = settings.scenes.index;  
 
   this.isRunning = false;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
-
-Kane.Game.prototype.addScene = function (scene) {
-  if (!scene) { 
-    throw new Error('no scene provided'); 
-  } 
-  if (!scene.name) { 
-    throw new Error('scene must have a name!'); 
-  }
-
-  /*
-  we need to add a reference to the game object onto this scene
-  this is used by scenes to make calls to "setCurrentScene" and other
-  scene related methods on the game object
-  */
-  scene.game = this; 
-
-  this.scenes[scene.name] = scene;
-};
-
-Kane.Game.prototype.removeScene = function (name) {
-  var targetScene;
-
-  if (!name) { 
-    throw new Error('no name provided'); 
-  }
-  
-  targetScene = this.scenes[name];
-
-  if (!targetScene) { 
-    throw new Error('no scene by that name found'); 
-  }
-
-  delete this.scenes[name]; 
-
-  return targetScene; 
-};
-
-Kane.Game.prototype.getScenes = function () {
-  return this.scenes;
-};
 
 Kane.Game.prototype.getCurrentScene = function () {
   if (!this.currentScene) { 
@@ -92,7 +61,6 @@ Kane.Game.prototype.setCurrentScene = function (name) {
     
   //capture the previous Scene
   oldScene = this.currentScene;
-
 
   //call old scene's onExit hook
   if (oldScene) { 

@@ -791,9 +791,6 @@ minispade.register('game.js', function() {
 minispade.require('kane.js');
 
 var GameInterface = {
-  addScene: function (scene) {},
-  removeScene: function (name) {},
-  getScenes: function () {},
   getCurrentScene: function () {},
   setCurrentScene: function (name) {},
   start: function () {},
@@ -808,56 +805,28 @@ Kane.Game = function (settings) {
     throw new Error('no clock provided to game'); 
   }
 
+  if (!settings.scenes) {
+    throw new Error('no scenes object provided to constructor');
+  }
+  
+  if (!settings.scenes.index) {
+    throw new Error('no index scene provided in scenes object to constructor');
+  }
+
   _.extend(this, settings);  
 
-  //a scenes object
-  this.scenes = {};
-  this.currentScene = null;
+  //set reference to game on each scene
+  _(this.scenes).each(function (scene) {
+    scene.game = this;
+  }, this);
+
+  //set the current scene to the provided index scene
+  this.currentScene = settings.scenes.index;  
 
   this.isRunning = false;
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
-
-Kane.Game.prototype.addScene = function (scene) {
-  if (!scene) { 
-    throw new Error('no scene provided'); 
-  } 
-  if (!scene.name) { 
-    throw new Error('scene must have a name!'); 
-  }
-
-  /*
-  we need to add a reference to the game object onto this scene
-  this is used by scenes to make calls to "setCurrentScene" and other
-  scene related methods on the game object
-  */
-  scene.game = this; 
-
-  this.scenes[scene.name] = scene;
-};
-
-Kane.Game.prototype.removeScene = function (name) {
-  var targetScene;
-
-  if (!name) { 
-    throw new Error('no name provided'); 
-  }
-  
-  targetScene = this.scenes[name];
-
-  if (!targetScene) { 
-    throw new Error('no scene by that name found'); 
-  }
-
-  delete this.scenes[name]; 
-
-  return targetScene; 
-};
-
-Kane.Game.prototype.getScenes = function () {
-  return this.scenes;
-};
 
 Kane.Game.prototype.getCurrentScene = function () {
   if (!this.currentScene) { 
@@ -882,7 +851,6 @@ Kane.Game.prototype.setCurrentScene = function (name) {
     
   //capture the previous Scene
   oldScene = this.currentScene;
-
 
   //call old scene's onExit hook
   if (oldScene) { 
@@ -1025,27 +993,7 @@ var entityCanvas = createCanvas(300, 300, 'entities')
   , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
 
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , clock = new Kane.Clock()
-  , game = new Kane.Game({
-      clock: clock,
-      bus: sceneBus
-  });
-
-/*
-configure our bus to listen for transition type events
-bus format is defined as {type: string, content: object}
-*/
-game.bus.onValue(function (ev) {
-  var type = ev.type
-    , name = ev.content.name
-    , scenes = this.getScenes();
-
-  if ('transition' === type && scenes[name]) {
-    this.setCurrentScene(name);
-  }
-}.bind(game));
-
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane});
 /*
 pass in our inputWizard and our entityManager
 we also pass it a reference to our image/json cache
@@ -1165,8 +1113,8 @@ this is a loading scene.  It will load assets into the provided
 caches using the provided loaders and then advance to ingame
 */
 
-var loading = new Kane.LoadingScene({
-  name: 'loading',
+var index = new Kane.LoadingScene({
+  name: 'index',
   targetSceneName: 'ingame',
 
   imageLoader: imageLoader,
@@ -1180,13 +1128,34 @@ var loading = new Kane.LoadingScene({
   bus: sceneBus
 });
 
-loading.imageLoader.loadAsset('public/images/spritesheet.png');
-loading.jsonLoader.loadAsset('public/json/spritesheet.json');
+index.imageLoader.loadAsset('public/images/spritesheet.png');
+index.jsonLoader.loadAsset('public/json/spritesheet.json');
 
-//configure the game object before starting it
-game.addScene(ingame);
-game.addScene(loading);
-game.setCurrentScene('loading');
+var clock = new Kane.Clock()
+  , game = new Kane.Game({
+      clock: clock,
+      scenes: {
+        index: index,
+        ingame: ingame
+      },
+      
+      //TODO THIS MUST BE REMOVED???
+      bus: sceneBus
+  });
+
+/*
+configure our bus to listen for transition type events
+bus format is defined as {type: string, content: object}
+*/
+game.bus.onValue(function (ev) {
+  var type = ev.type
+    , name = ev.content.name;
+
+  if ('transition' === type) {
+    this.setCurrentScene(name);
+  }
+
+}.bind(game));
 
 game.start();
 

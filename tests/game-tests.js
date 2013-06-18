@@ -4,8 +4,8 @@ var assert = chai.assert;
 
 describe('Kane.Game', function () {
   var game
-    , scene = {
-        name: 'testScene',
+    , indexScene = {
+        name: 'index',
         update: function (dT) {}, 
         draw: function () {}, 
         onEnter: function () {},
@@ -20,154 +20,68 @@ describe('Kane.Game', function () {
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
     game = new Kane.Game({
-      clock: clock 
+      clock: clock,
+      scenes: {
+        index: indexScene
+      }
     });
-    game.addScene(scene);
-    game.setCurrentScene('testScene');
   });
 
   it('should create a new object', function () {
     assert.isObject(game); 
   }); 
+
+  it('should throw if no clock is provided', function () {
+    assert.throws(function () {
+      game = new Kane.Game({
+        scenes: {
+          index: indexScene
+        }
+      })
+    });
+  });
+
+  it('should throw if no scenes object is provided', function () {
+    assert.throws(function () {
+      game = new Kane.Game({
+        clock: clock
+      })
+    });
+  });
+
+  it('should throw if no index scene is provided', function () {
+    assert.throws(function () {
+      game = new Kane.Game({
+        clock: clock,
+        scenes: {}
+      })
+    });
+  });
+
+  it('should set the currentScene to the provided index', function () {
+    assert.equal(indexScene, game.getCurrentScene());
+  });
+
+  it('should set isRunning to false', function () {
+    assert.isFalse(game.isRunning);
+  })
+
+  it('should set a reference to itself on each scene', function () {
+    assert.equal(game, game.getCurrentScene().game);
+  });
   
-  describe('#addScene()', function () {
-    it('should be a function', function () {
-      assert.isFunction(game.addScene); 
-    });
-
-    it('should throw if no scene with name attr provided', function () {
-      assert.throws(function () {
-        game.addScene();
-      });
-      
-      assert.throws(function () {
-        game.addScene({});
-      });
-
-      assert.doesNotThrow(function () {
-        game.addScene({name: 'testScene'});
-      });
-    });
-
-    it('should add a scene to the game object', function () {
-      var sceneName = 'testScene'
-        , scenes = []
-        , targetScene;
-
-      assert.isObject(game.getScenes());
-      game.addScene({
-        name: sceneName
-      });
-      
-      scenes = game.getScenes();
-      targetScene = scenes[sceneName];
-  
-      assert.isObject(targetScene);
-    });
-
-    it('should add the game as a reference on the scene', function () {
-      var sceneName = 'testScene'
-        , scene = {
-            name: sceneName
-        };
-
-      game.addScene(scene);
-      
-      assert.equal(game, scene.game);
-    });
-  });
-
-  describe('#removeScene()', function () {
-    it('should be a function', function () {
-      assert.isFunction(game.removeScene);
-    });
-    
-    it('should throw if no name provided', function () {
-      assert.throws(function () {
-        game.removeScene();
-      });
-    });
-
-    it('should throw if scene by the provided name is not found', function () {
-      assert.throws(function () {
-        game.removeScene('noSceneByThisName');
-      });
-    });
-
-    it('should remove the scene from the list of scenes and return it', function () {
-      var sceneName = "testScene"
-        , scene = {name: sceneName}
-        , removedScene
-        , remainingScenes;
-
-      game.addScene(scene);
-      removedScene = game.removeScene(sceneName);
-      remainingScenes = game.getScenes();
-
-      assert.equal(scene, removedScene);
-      assert.isUndefined(remainingScenes[sceneName]);
-    });
-
-  });
-
-  describe('#getScenes()', function () {
-    it('should be a function', function () {
-      assert.isFunction(game.getScenes);
-    });
-    
-    it('should return an object containing all scenes', function () {
-      var sceneName = 'testScene'
-        , sceneName2 = 'anotherScene'
-        , scenes = []
-        , targetScene
-        , targetScene2;
-
-      assert.isObject(game.getScenes());
-      game.addScene({name: sceneName});
-      game.addScene({name: sceneName2});
-      
-      scenes = game.getScenes();
-      targetScene = scenes[sceneName];
-      targetScene2 = scenes[sceneName2]; 
-
-      assert.isObject(targetScene);
-      assert.isObject(targetScene2);
-    });
-  });
-
   describe('#getCurrentScene()', function () {
     it('should be a function', function () {
       assert.isFunction(game.getCurrentScene);
     });
 
     it('should return the current scene', function () {
-      var sceneName = "testScene"
-        , currentScene; 
-
-      game.addScene({
-        name: sceneName,
-        update: function (dT) {}, 
-        draw: function () {}, 
-        onEnter: function () {}, 
-        onExit: function () {}, 
-      });
-      game.setCurrentScene(sceneName);
-      currentScene = game.getCurrentScene(); 
-  
-      assert.isObject(currentScene);
-      assert.equal(
-        sceneName,
-        currentScene.name
-      );
+      assert.equal(indexScene, game.getCurrentScene());
     });
     
     it('should throw if there is no current scene defined', function () {
-      game = new Kane.Game({
-        clock: clock
-      });
-      game.addScene(scene);
-
       assert.throws(function () {
+        game.setCurrentScene(null);
         game.getCurrentScene();
       });
     });
@@ -188,9 +102,24 @@ describe('Kane.Game', function () {
     });
 
     it('should assign current scene to provided scene name if it exists otherwise throw', function () {
-      var scene = {name: 'testScene'}; 
-    
-      game.addScene(scene);
+      var secondScene = {
+        name: 'secondScene',
+        update: function (dT) {}, 
+        draw: function () {}, 
+        onEnter: function () {},
+        onExit: function () {},
+      };
+
+      game = new Kane.Game({
+        clock: clock,
+        scenes: {
+          index: indexScene,
+          second: secondScene
+        }
+      });
+
+      game.setCurrentScene('second');
+      assert.equal(secondScene, game.getCurrentScene());
 
       assert.throws(function () {
         game.setCurrentScene('notValidScene');    
@@ -205,7 +134,7 @@ describe('Kane.Game', function () {
 
     it('should throw if there is no active current Scene', function () {
       assert.throws(function () {
-        game = new Kane.Game();
+        game.setCurrentScene(null);
         game.start();
       });
     });
