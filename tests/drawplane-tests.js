@@ -107,7 +107,7 @@ describe('Kane.DrawPlane', function () {
       , w = 30
       , h = 30
       , sprite = {
-          spriteSheet: new Image(),
+          image: new Image(),
           sx: 0,
           sy: 0,
           w: 30,

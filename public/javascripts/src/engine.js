@@ -14,6 +14,9 @@ require('jsonloader.js');
 require('imageloader.js');
 require('cache.js');
 
+//"types"
+require('sprite.js');
+
 //"dom objects"
 require('inputwizard.js');
 require('drawplane.js');

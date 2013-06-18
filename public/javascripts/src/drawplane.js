@@ -66,14 +66,14 @@ Kane.DrawPlane.prototype.drawImage = function (image, x, y) {
 };
 
 Kane.DrawPlane.prototype.drawSprite = function (sprite, x, y, w, h) {
-  var isValidImage = sprite.spriteSheet instanceof Image;
+  var isValidImage = sprite.image instanceof Image;
 
   if (!isValidImage) { 
     throw new Error('sprite.spriteSheet is not a valid image!'); 
   }
 
   this.ctx.drawImage(
-    sprite.spriteSheet,
+    sprite.image,
     sprite.sx,
     sprite.sy,
     sprite.w,

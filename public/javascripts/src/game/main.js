@@ -150,12 +150,8 @@ entityManager.baconCollisions.onValue(function (val) {
 
 //define onEnter hook to subscribe to inputWizard
 ingame.onEnter = function () {
-  var spriteSheet = this.imageCache.getByName('public/images/spritesheet');
   console.log('ingame entered!');
   this.inputWizard.addSubscriber(this);
-
-  //set the background image
-  //this.bgImage = spriteSheet;
 };
 
 //define onExit hook to un-subscribe to inputWizard
@@ -165,7 +161,7 @@ ingame.onExit = function () {
 };
 
 //define a timer to fire new objects (ms)
-ingame.shotTimer = 80;
+ingame.shotTimer = 200;
 
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
@@ -190,14 +186,13 @@ ingame.fire = function (x, y, dx, dy) {
   var spriteSheet = this.imageCache.getByName('public/images/spritesheet')
     , json = this.jsonCache.getByName('public/json/spritesheet')
     , data = json.frames['grapebullet.png'].frame
-    //HACK SPRITE CLASS FOR TESTING
-    , sprite = {
-      spriteSheet: spriteSheet,
-      sx: data.x,
-      sy: data.y,
-      w: data.w,
-      h: data.h
-    };
+    , sprite = new Kane.Sprite({
+        image: spriteSheet,
+        sx: data.x,
+        sy: data.y,
+        w: data.w,
+        h: data.h
+    });
 
   this.entityManager.spawn(
     Kane.Projectile,
@@ -211,10 +206,9 @@ ingame.fire = function (x, y, dx, dy) {
       h: 30,
       w: 30,
     }
-  );
+ );
 };
 
-//REWRITE USING EXTERNALLY DEFINED ENTITIES
 ingame.keyup = function (keyName) {
   $('body').append('<br>' + keyName);
 };
