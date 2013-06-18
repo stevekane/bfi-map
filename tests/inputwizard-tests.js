@@ -6,171 +6,86 @@ describe('Kane.InputWizard', function () {
   var iw;
   
   beforeEach(function () {
-    iw = new Kane.InputWizard();
+    iw = new Kane.InputWizard({});
   });
 
-  it('should return an object', function () {
+  it('should return an object that exposes a stream', function () {
     assert.isObject(iw); 
+    assert.isDefined(iw.stream);
   });
+
   
-  describe('#addSubscriber()', function () {
-    it('should be a function', function () {
-      assert.isFunction(iw.addSubscriber);
-    });
-  
-    it('should throw if no subscriber object provided', function () {
-      assert.throws(function () {
-        iw.addSubscriber();
-      }); 
-    });
+  it('should emit an event on stream when keyup fired on domnode', 
+  function (done) {
+    var keyupEvent
+      , keyCode = 40
+      , keyName = 'down';
 
-    it('should add the object to subscribers list', function () {
-      var sub = {name: 'testsub'}
-        , addedSub;
-
-      iw.addSubscriber(sub);
-      
-      //pick off the first subscriber
-      addedSub = iw.subscribers[0]; 
-      
-      assert.equal(addedSub, sub);
-    });
-  });
-
-  describe('#removeSubscriber()', function () {
-    it('should be a function', function () {
-      assert.isFunction(iw.removeSubscriber);
-    });
-
-    it('should throw if no subscriber object provided', function () {
-      assert.throws(function () {
-        iw.removeSubscriber();
-      }); 
-    });
-
-    it('should remove the subscriber from the list of subscribers', function () {
-      var sub = {name: 'another'};
-
-      iw.addSubscriber(sub)
-        .removeSubscriber(sub);
-      
-      assert.lengthOf(iw.subscribers, 0);
-    });
-
-    //we want this to throw so we dont fail silently and then not remove our subscriber
-    it('should throw if the subscriber is not in the list of subscribers', function () {
-      assert.throws(function () {
-        iw.removeSubscriber({});
-      });
-    });
-  });
- 
-  describe('#attachToDomNode()', function () {
-    var domNode;
-
-    before(function () {
-      var div = document.createElement('div');
-      div.id = 'testdiv';
-      document.body.appendChild(div);
-      domNode = document.getElementById('testdiv');
-    });
-
-    it('should be a function', function () {
-      assert.isFunction(iw.attachToDomNode);
-    });
-
-    it('should add the domNode to the current domNodes', function () {
-      iw.attachToDomNode(domNode);
-      assert.equal(iw.domNodes[0], domNode);
-    });
-    
-    it('should assign the domnode to document.body if none is provided', function () {
-      iw.attachToDomNode();
-      assert.equal(iw.domNodes[0], document.body);
-    });
-
-    it('should throw if the provided domNode is already attached', function () {
-      iw.attachToDomNode(document.body);
-      assert.throws(function () {
-        iw.attachToDomNode(document.body);
-      });
-    });
-  });
-
-  describe('#removeFromDomNode()', function () {
-    var domNode;
-
-    before(function () {
-      var div = document.createElement('div');
-      div.id = 'testdiv';
-      document.body.appendChild(div);
-      domNode = document.getElementById('testdiv');
-    });
-
-    it('should be a function', function () {
-      assert.isFunction(iw.removeFromDomNode);
+    iw.stream.filter(function (e) {
+      return e.type === 'keyup';
+    }).onValue(function (e) {
+      assert.equal(e.type, 'keyup');
+      assert.equal(e.keyName, keyName);
+      done();
     });
   
-    it('should throw if no domnode is provided or provided domnode isnt in domnodes', function () {
-      assert.throws(function () {
-        iw.removeFromDomNode();
-      });
-      assert.throws(function () {
-        iw.removeFromDomNode(document.body);
-      });
-    });
-
-    it('should remove the domNode from domNodes', function () {
-      iw.attachToDomNode(domNode)
-        .removeFromDomNode(domNode);
-
-      assert.lengthOf(iw.domNodes, 0);
-    });
+    keyupEvent = jQuery.Event('keyup');
+    keyupEvent.keyCode = keyCode; 
+    $('body').trigger(keyupEvent); 
   });
 
-  describe('#activateKeyboardForDomNode()', function () {
-    it('should be a function', function () {
-      assert.isFunction(iw.activateKeyboardForDomNode);
-    });
+  it('should emit an event on stream when keydown fired on domnode', 
+  function (done) {
+    var keydownEvent
+      , keyCode = 16  
+      , keyName = 'shift';
 
-    it('should throw if no domNode is provided ', function () {
-      assert.throws(function () {
-        iw.activateKeyboardForDomNode();
-      });  
+    iw.stream.filter(function (e) {
+      return e.type === 'keydown';
+    }).onValue(function (e) {
+      assert.equal(e.type, 'keydown');
+      assert.equal(e.keyName, keyName);
+      done();
     });
-
-    it('should throw if provided domNode isnt in domNodes', function () {
-      assert.throws(function () {
-        iw.activateKeyboardForDomNode(document.body);
-      });  
-
-      iw.attachToDomNode(document.body);
-      assert.doesNotThrow(function () {
-        iw.activateKeyboardForDomNode(document.body);
-      });
+  
+    keydownEvent = jQuery.Event('keydown');
+    keydownEvent.keyCode = keyCode; 
+    $('body').trigger(keydownEvent); 
+  });
+  
+  it('should emit an event on stream when mouseup fired on domnode', 
+  function (done) {
+    iw.stream
+    .filter(function (e) {
+      return e.type === "mouseup";
+    }).onValue(function (e) {
+      assert.equal(e.type, 'mouseup');
+      done();
     });
+    $('body').trigger('mouseup');
   });
 
-  describe('#deactivateKeyboardForDomNode()', function () {
-    it('should be a function', function () {
-      assert.isFunction(iw.deactivateKeyboardForDomNode);
+  it('should emit an event on stream when mousedown fired on domnode', 
+  function (done) {
+    iw.stream
+    .filter(function (e) {
+      return e.type === "mousedown";
+    }).onValue(function (e) {
+      assert.equal(e.type, 'mousedown');
+      done();
     });
+    $('body').trigger('mousedown');
+  });
 
-    it('should throw if no domNode is provided', function () {
-      assert.throws(function () {
-        iw.deactivateKeyboardForDomNode();
-      });  
+  it('should emit an event on stream when mousemove fired on domnode', 
+  function (done) {
+    iw.stream
+    .filter(function (e) {
+      return e.type === "mousemove";
+    }).onValue(function (e) {
+      assert.equal(e.type, 'mousemove');
+      done();
     });
-
-    it('should throw if provided domNode isnt in domNodes', function () {
-      assert.throws(function () {
-        iw.deactivateKeyboardForDomNode(document.body);
-      });  
-
-      iw.attachToDomNode(document.body);
-      assert.doesNotThrow(function () {
-        iw.deactivateKeyboardForDomNode(document.body);
-      });
-    });
+    $('body').trigger('mousemove');
   });
 });
