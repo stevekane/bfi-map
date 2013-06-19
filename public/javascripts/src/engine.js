@@ -1,7 +1,7 @@
 /*
 ENGINE REQUIRES
 */
-//require the high level Kane.Object
+//require the high level Kane Object
 require('kane.js');
 
 //utility functions
@@ -10,9 +10,6 @@ require('utils.js');
 //"utility objects"
 require('clock.js');
 require('assetloader.js');
-require('loader.js');
-require('jsonloader.js');
-require('imageloader.js');
 require('cache.js');
 
 //"types"
