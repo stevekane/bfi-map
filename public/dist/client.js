@@ -1037,20 +1037,6 @@ minispade.register('game/main.js', function() {
 
 minispade.require('engine.js');
 
-function createCanvas (w, h, name) {
-  var $canvas = $(document.createElement('canvas'));
-  
-  $canvas.attr({
-    id: name,
-    height: h,
-    width: w
-  }); 
-  
-  $('body').append($canvas);
-
-  return $canvas;
-};
-
 //input wizard configuration
 //we will add our subscriber from the scene instance
 var inputWizard = new Kane.InputWizard({});
@@ -1059,7 +1045,7 @@ var inputWizard = new Kane.InputWizard({});
 Construction of specific scene
 setup entity set for this scene
 */
-var entityCanvas = createCanvas(300, 300, 'entities')
+var entityCanvas = Kane.Utils.createCanvas(300, 300, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
   , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
@@ -1698,6 +1684,17 @@ Kane.Utils = {
              ((sub.y + sub.h) > tar.y) 
     );
   },
+  createCanvas: function (w, h, name) {
+    var $canvas = $(document.createElement('canvas'));
+    
+    $canvas.attr({
+      id: name,
+      height: h,
+      width: w
+    }); 
+    $('body').append($canvas);
+    return $canvas;
+  } 
 }
 
 });

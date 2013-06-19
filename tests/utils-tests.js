@@ -72,4 +72,50 @@ describe("Kane.Utils", function () {
       assert.equal(Kane.Utils.updateVelocity(dT, a, oldVel), expectedNewVel); 
     });
   });
+
+  describe("#checkBBCollision()", function () {
+    var b1 = {
+      x: 0,
+      y: 0,
+      w: 10,
+      h: 10
+    } , b2 = {
+      x: 2,
+      y: 2,
+      w: 5,
+      h: 5 
+    } , b3 = {
+      x: 0,
+      y: 0,
+      w: 1,
+      h: 1 
+    };
+
+    it('should return boolean', function () {
+      assert.isBoolean(Kane.Utils.checkBBCollision(b1, b2));
+    });
+
+    it('should return true if they overlap', function () {
+      assert.isTrue(Kane.Utils.checkBBCollision(b1, b2));
+    });
+
+    it('should return false if they overlap', function () {
+      assert.isFalse(Kane.Utils.checkBBCollision(b2, b3));
+    });
+  });
+
+  describe("#createCanvas()", function () {
+    var h = 400
+      , w = 600
+      , name = "testCanvas";
+
+    it('should return a jquery canvas element', function () {
+      var newCan = Kane.Utils.createCanvas(w, h, name);
+
+      assert.isObject(newCan);
+      assert.equal(newCan.attr('height'), h);
+      assert.equal(newCan.attr('width'), w);
+      assert.equal(newCan.attr('id'), name);
+    });
+  });
 });

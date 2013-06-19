@@ -1,13 +1,20 @@
 Game -> Highest level game object
 
-inject clock and scenes
+For wiring up the game object, we'd like the game object to create instances
+of:
+  inputWizard
+  cache
+  loader 
+  clock
+if none are provided to the constructor.
+We don't expect people to need to create custom versions of these very often.
 
 scenes may be added via constructor in a 'scene's object
 *a scene called "index" must be provided and will be set to the 
 game's default currentScene*
 
 
-Example of instantiation may be:
+Two examples of instantiation may be:
 
 App.game = new Kane.Game({
   scenes: {
@@ -95,3 +102,23 @@ in a k/v pair of the following format:
 {
   youknowit.png: //A Javascript Image object
 }
+
+Camera ->
+The camera is responsible for displaying the view as the user sees it once
+on every frame.  In order to to this, the camera must be able to draw an 
+optional background Image, an optional tilemap background, and an optional 
+entitymanager's content.
+
+The camera is instantiated with a reference to the scene that owns it.
+
+We have an (optional) camera for each scene because this makes it easier to
+customize each scene's drawing rules to avoid bloat/boilerplate in camera
+draw methods.
+
+A default "gamecamera" will be included that assumes the existence of a bgimage
+tilemap, and entitymanager
+
+                                           Game
+                                            ||
+DOM   <->  canvas(s)   <->   Camera  <->   Scene
+

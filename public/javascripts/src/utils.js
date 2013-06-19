@@ -43,4 +43,15 @@ Kane.Utils = {
              ((sub.y + sub.h) > tar.y) 
     );
   },
+  createCanvas: function (w, h, name) {
+    var $canvas = $(document.createElement('canvas'));
+    
+    $canvas.attr({
+      id: name,
+      height: h,
+      width: w
+    }); 
+    $('body').append($canvas);
+    return $canvas;
+  } 
 }
