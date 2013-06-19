@@ -24,12 +24,13 @@ describe("Kane.AssetLoader", function () {
   });
 
   describe("#loadAssets()", function () {
-    it('should throw if not provided a groupName, assets, and callback', function () {
+    it('should throw if not provided a groupName, assets, and callback', 
+    function () {
 
       /*
-      our callback should get called to demonstrate our loadMethod is working
-      since neither item will actually successfully be loaded, we expect
-      to get back 2 errors
+      our callback should get called to demonstrate our 
+      loadMethod is working since neither item will actually 
+      successfully be loaded, we expect to get back 2 errors
       */
       var callback = function (errors) {}
         , groupName = 'testGroup'

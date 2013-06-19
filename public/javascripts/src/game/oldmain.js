@@ -18,6 +18,48 @@ function createCanvas (w, h, name) {
 //we will add our subscriber from the scene instance
 var inputWizard = new Kane.InputWizard({});
 
+//setup image loader/cache/bus.  optionally we inject the bus onto 
+//the cache to be more explicit about its dependencies
+var imageBus = new Bacon.Bus();
+var imageCache = new Kane.Cache({
+  bus: imageBus 
+});
+var imageLoader = new Kane.ImageLoader({
+  cache: imageCache,
+  bus: imageBus 
+});
+
+//let's make our cache 'listen' to our loader's bus
+imageCache.bus.onValue( function (object) {
+  this.cache(object.name, object.asset);
+}.bind(imageCache));
+
+//let's add another bus listener to log the loading 
+imageCache.bus.onValue( function (object) {
+  console.log(object.name, ' has been loaded successfully!');
+});
+
+//setup json loader/cache/bus.  optionally we inject the bus onto
+//this cache to be more explicit about its dependencies
+var jsonBus = new Bacon.Bus();
+var jsonCache = new Kane.Cache({
+  bus: jsonBus 
+});
+var jsonLoader = new Kane.JSONLoader({
+  cache: jsonCache,
+  bus:jsonBus 
+});
+
+//let's make our cache 'listen' to our loader's bus
+jsonCache.bus.onValue( function (object) {
+  this.cache(object.name, object.asset);
+}.bind(jsonCache));
+
+//let's add another bus listener to log the loading
+jsonCache.bus.onValue( function (object) {
+  console.log(object.name, ' has been loaded successfully!');
+});
+
 /*
 Construction of specific scene
 setup entity set for this scene
@@ -26,9 +68,7 @@ var entityCanvas = createCanvas(300, 300, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
   , bgCanvas = createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , cache = new Kane.Cache()
-  , loader = new Kane.AssetLoader({cache: cache});
+  , entityManager = new Kane.EntityManager({drawplane: entityPlane});
 
 //define camera for our ingameScene
 var camera = new Kane.Camera({
@@ -48,9 +88,10 @@ incase we wish to pull objects from them
 */
 var ingame = new Kane.GameScene({
   name: 'ingame',
+  inputWizard: inputWizard, 
   entityManager: entityManager,
-  cache: cache,
-  loader: loader,
+  imageCache: imageCache,
+  jsonCache: jsonCache,
   camera: camera
 });
 
@@ -101,17 +142,15 @@ ingame.onUpdate = function (dT) {
     if ((this.lastShotFired + this.shotTimer) < Date.now()) {
       this.fire(0, 400, Math.random(), -1 * Math.random());
       this.fire(640, 400, -1 * Math.random(), -1 * Math.random());
-      this.fire(800, 100, -1 * Math.random(), -.2 * Math.random());
-      this.fire(200, 100, Math.random(), -.2 * Math.random());
       this.lastShotFired = Date.now();
     }
   }
 };
 
-//DEFINE utility method that fires projectiles
+//DEFINE utility method
 ingame.fire = function (x, y, dx, dy) {
-  var spriteSheet = this.cache.getByName('spritesheet.png')
-    , json = this.cache.getByName('spritesheet.json')
+  var spriteSheet = this.imageCache.getByName('public/images/spritesheet')
+    , json = this.jsonCache.getByName('public/json/spritesheet')
     , data = json.frames['grapebullet.png'].frame
     , sprite = new Kane.Sprite({
         image: spriteSheet,
@@ -144,11 +183,18 @@ caches using the provided loaders and then advance to ingame
 var index = new Kane.LoadingScene({
   name: 'index',
   targetSceneName: 'ingame',
-  cache: cache,
-  loader: loader,
-  assets: ['public/images/spritesheet.png',
-           'public/json/spritesheet.json']
+
+  imageLoader: imageLoader,
+  imageCache: imageCache,
+  imageAssets: ['public/images/spritesheet'],
+
+  jsonLoader: jsonLoader,
+  jsonCache: jsonCache,
+  jsonAssets: ['public/json/spritesheet'],
 });
+
+index.imageLoader.loadAsset('public/images/spritesheet.png');
+index.jsonLoader.loadAsset('public/json/spritesheet.json');
 
 var clock = new Kane.Clock()
   , game = new Kane.Game({

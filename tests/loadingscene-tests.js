@@ -9,12 +9,18 @@ see scene-tests for complete object tests
 var assert = chai.assert;
 
 describe("Kane.LoadingScene", function () {
-  var ls;
+  var ls
+    , cache
+    , loader;
 
   beforeEach(function () {
+    cache = new Kane.Cache();
+    loader = new Kane.AssetLoader({cache: cache})
     ls = new Kane.LoadingScene({
       name: 'loading',
       targetSceneName: 'myTarget',
+      cache: cache,
+      loader: loader
     });
   });
 
@@ -22,15 +28,29 @@ describe("Kane.LoadingScene", function () {
     assert.isObject(ls); 
   });
 
-  describe("#loadComplete()", function () {
-    it('should be a function', function () {
-      assert.isFunction(ls.loadComplete);
+  it('should throw if no cache or loader provided', function () {
+    assert.throws(function () {
+      ls = new Kane.LoadingScene({
+        name: 'loading',
+        targetSceneName: 'myTarget'
+      });
     });
-  });
 
-  describe("#stillLoading()", function () {
-    it('should be a function', function () {
-      assert.isFunction(ls.stillLoading);
+    assert.throws(function () {
+      ls = new Kane.LoadingScene({
+        name: 'loading',
+        targetSceneName: 'myTarget',
+        cache: cache
+      });
+    });
+
+    assert.doesNotThrow(function () {
+      ls = new Kane.LoadingScene({
+        name: 'loading',
+        targetSceneName: 'myTarget',
+        cache: cache,
+        loader: loader
+      });
     });
   });
 });

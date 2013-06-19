@@ -83,6 +83,10 @@ Kane.Game.prototype.start = function () {
   if (!this.currentScene) { 
     throw new Error('must have a currentScene to start!') 
   }
+
+  //call the current Scene's onEnter
+  this.currentScene.onEnter();
+
   this.isRunning = true;
   
   //start the clock
