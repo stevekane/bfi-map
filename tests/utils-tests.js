@@ -43,6 +43,14 @@ describe("Kane.Utils", function () {
     });
   });
 
+  describe("#stripFilePath()", function () {
+    it('should remove the filepath and return the filename.extension', function () {
+      var filePath = '/one/dog/to/rule/them/all.png';
+
+      assert.equal(Kane.Utils.stripFilePath(filePath), 'all.png');
+    });
+  });
+
   describe("#updatePosition()", function () {
     it('should return the new position', function () {
       var dT = 10

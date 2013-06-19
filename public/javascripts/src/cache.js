@@ -1,7 +1,7 @@
 require('kane.js');
 
 var CacheInterface = {
-  cache: function (name, item) {},
+  cache: function (name, asset) {},
   flushByName: function (name) {},
   flush: function () {},
   getByName: function (name) {},
@@ -16,14 +16,14 @@ Kane.Cache = function (settings) {
 
 Kane.Cache.prototype = Object.create(CacheInterface);
 
-Kane.Cache.prototype.cache = function (object) {
-  if (!object.name) {
+Kane.Cache.prototype.cache = function (name, asset) {
+  if (!name) {
     throw new Error('no name provided for the object');
   }
-  if (!object.asset) {
+  if (!asset) {
     throw new Error('no asset provided for the object');
   }
-  this.store[object.name] = object.asset; 
+  this.store[name] = asset; 
 };
 
 Kane.Cache.prototype.flushByName = function (name) {

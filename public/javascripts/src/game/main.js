@@ -31,7 +31,7 @@ var imageLoader = new Kane.ImageLoader({
 
 //let's make our cache 'listen' to our loader's bus
 imageCache.bus.onValue( function (object) {
-  this.cache(object);
+  this.cache(object.name, object.asset);
 }.bind(imageCache));
 
 //let's add another bus listener to log the loading 
@@ -52,7 +52,7 @@ var jsonLoader = new Kane.JSONLoader({
 
 //let's make our cache 'listen' to our loader's bus
 jsonCache.bus.onValue( function (object) {
-  this.cache(object);
+  this.cache(object.name, object.asset);
 }.bind(jsonCache));
 
 //let's add another bus listener to log the loading

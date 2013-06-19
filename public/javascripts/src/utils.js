@@ -15,6 +15,10 @@ Kane.Utils = {
     return name.slice(0, name.indexOf('.'));
   },
 
+  stripFilePath: function (path) {
+    return path.slice(path.lastIndexOf('/') + 1);
+  },
+
   updatePosition: function (dT, v, oldPos) {
     return oldPos + dT * v; 
   },

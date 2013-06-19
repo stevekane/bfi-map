@@ -9,6 +9,7 @@ require('utils.js');
 
 //"utility objects"
 require('clock.js');
+require('assetloader.js');
 require('loader.js');
 require('jsonloader.js');
 require('imageloader.js');

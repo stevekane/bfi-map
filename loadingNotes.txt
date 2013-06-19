@@ -26,3 +26,72 @@ load screens, menus, etc.  They must have a name
 App.ingame = new Kane.Scene({
   name: 'ingame'
 });
+
+InputWizard -> optionally accepts a jquery Dom Node which it will attach
+all the eventHandlers to.  In the event that one is not provided, event handlers
+will be put on $('body')
+
+App.inputWizard = new Kane.InputWizard({});
+
+The wizard has a single exposed stream which it funnels all input events down
+keyboard events arrive as:
+{
+  type: 'keyup' || 'keydown,
+  keyName: 'somename'
+}
+
+mouse events arrive as:
+{
+  type: 'mousemove' || 'mousedown' || 'mouseup',
+  position: {
+    x: x,
+    y: y
+  }
+}
+
+AssetLoader -> asset loader must be provided a cache object.  The scene that 
+is accessing the loader is also able to access the cache that the loader 
+loads assets into.
+
+loader -> scene <- cache
+  ^                  |
+  |__________________|
+
+Loader has 1 method:  LoadAssets(groupName, AssetArray, callback);
+
+The loader will track each asset internally and decrease a counter for 
+each that is loaded successfully.  
+
+It is strongly recommended that assets
+be loaded by priority.  For example, json files containing map data or crucial
+sprite data should be loaded first and the callback should prevent any further
+action if there are errors.  
+
+Less critical data (images etc) may be loaded second and the callback may handle
+errors by substituting files for generic placeholders or some other similar plan.
+
+Format of the callback should be function (errors) {}
+
+If any errors are returned they will be in an array by provided filename
+
+E.G. 
+
+var fileName = 'happy/hands/youknowit.png"
+
+function fileLoadCallback (errors) {
+  //attempt to reload
+  if (errors) {
+    loader.load(errors);
+  } else {
+    this.game.advance();
+  }
+};
+
+loader.loadAssets('myAssets', [fileName], fileLoadCallback);
+
+If our load is successful, this file will be stored in the Cache object 
+in a k/v pair of the following format:
+
+{
+  youknowit.png: //A Javascript Image object
+}
