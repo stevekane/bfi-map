@@ -1,6 +1,11 @@
 require('kane.js');
 
 Kane.Utils = {
+  camel: function (name) {
+    var firstChar = name.charAt(0);
+
+    return name.replace(firstChar, firstChar.toLowerCase());
+  },
   generateColor: function () {
     return "#" + Math.random().toString(16).slice(2, 8);
   },

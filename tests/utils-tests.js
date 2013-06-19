@@ -7,6 +7,16 @@ describe("Kane.Utils", function () {
     assert.isObject(Kane.Utils); 
   });
 
+  describe("#camel", function () {
+    it('shoud return the string in camelCase form', function () {
+      var name = "PopCorn"
+        , camelName;
+
+      camelName = Kane.Utils.camel(name);
+      assert.equal('popCorn', camelName);
+    });
+  });
+
   describe("#generateColor()", function () {
     it('should return a random valid hex number', function () {
       var randColor = Kane.Utils.generateColor();

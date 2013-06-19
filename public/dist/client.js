@@ -905,7 +905,7 @@ Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
 minispade.register('game.js', function() {
 "use strict";
 
-minispade.require('kane.js');
+minispade.require('engine.js');
 
 var GameInterface = {
   getCurrentScene: function () {},
@@ -915,32 +915,99 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
+  cache: null,
+  assetLoader: null,
+  clock: null,
+  inputWizard: null
+  
 };
 
 Kane.Game = function (settings) {
-  if (!settings.clock) { 
-    throw new Error('no clock provided to game'); 
-  }
-
-  if (!settings.scenes) {
-    throw new Error('no scenes object provided to constructor');
+  //required attribute checks for scenes and namespace
+  if (!settings.sceneNames) {
+    throw new Error('no sceneNames array provided to constructor');
   }
   
-  if (!settings.scenes.index) {
-    throw new Error('no index scene provided in scenes object to constructor');
+  if (!settings.namespace) {
+    throw new Error('no namespace provided to constructor');
   }
 
-  _.extend(this, settings);  
+  if (!_(settings.sceneNames).contains('Index')) {
+    throw new Error('no Index included in sceneNames');
+  }
 
-  //set reference to game on each scene
-  _(this.scenes).each(function (scene) {
-    scene.game = this;
+
+  //construct our empty scenes object
+  this.scenes = {};
+
+  /*
+  grab all the values from settings
+  this may include already created instances of:
+  clock
+  inputWizard
+  cache
+  assetLoader 
+  */
+  _.extend(this, settings);
+
+  //check if these optional values are defined, if not use defaults
+  this.clock = this.clock ? this.clock : new Kane.Clock();
+  
+  //default inputWiz attaches to document.body
+  this.inputWizard = 
+    this.inputWizard ? 
+    this.inputWizard : 
+    new Kane.InputWizard({});
+  
+  this.cache = 
+    this.cache ?
+    this.cache :
+    new Kane.Cache();
+
+  //loader requires a ref to the cache
+  this.assetLoader = 
+    this.assetLoader ?
+    this.assetLoader :
+    new Kane.AssetLoader({
+      cache: this.cache
+    });
+
+  /*
+  check array of scene names by inspecting the provided namespace
+  if the scene is found, instantiate it otherwise throw
+  
+  NOTE: scenes MAY very well need more than what is injected onto
+  them here.  This is handled in the constructor for the scene which
+  should call some method or do additional injection to create
+  needed objects.  This includes things like cameras, entitymanager, etc
+  */
+  _(this.sceneNames).each(function (sceneName) {
+    var namespace = this.namespace
+      , targetScene = namespace[sceneName]
+      , camelCaseName = Kane.Utils.camel(sceneName);
+
+    if (!targetScene) {
+      throw new Error(sceneName, ' not found on ', namespace);
+    } else {
+      this.scenes[camelCaseName] = new targetScene({
+        name: camelCaseName,
+        game: this,
+        cache: this.cache,
+        assetLoader: this.assetLoader,
+        inputWizard: this.inputWizard  
+      });
+    }
   }, this);
 
-  //set the current scene to the provided index scene
-  this.currentScene = settings.scenes.index;  
-
+  //set the currentScene to index
+  this.currentScene = this.scenes.index;
+  
+  //set isRunning
   this.isRunning = false;
+
+  //TODO: Perhaps call configure method on the scenes here?
+  //Probably better to have them call their own
+  
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -1034,133 +1101,53 @@ function draw () {
 
 minispade.register('game/main.js', function() {
 "use strict";
+/*
+define a namespace
+this object will hold EVERYTHING in your app
+window.MyNameSpace = {};
+*/
 
+/*
+first, require externally defined objects and the engine
+minispade.require('engine.js');
+minispade.require('ingameScene.js');
+*/
+
+/*
+define a game object
+this object will require a object of scenenames as strings
+these strings must match be camelcase versions of objects
+defined on your namespace object
+E.G.
+MyNameSpace.TestScene should be "testScene"
+the game object optionally takes:  
+cache object
+loader object
+clock object
+inputWizard object
+
+if not provided to constructor, they will be created for
+you using Kane.X objects
+
+E.G
+
+MyNameSpace.game = new Kane.Game({
+  namespace: MyNameSpace,
+  scenes: ['Index', 'Ingame']
+});
+*/
+
+/*
+window.Test = {};
 minispade.require('engine.js');
 
-//TODO: don't create, have game object create a default
-var inputWizard = new Kane.InputWizard({});
-
-/*
-Construction of specific scene
-setup entity set for this scene
-*/
-var entityCanvas = Kane.Utils.createCanvas(300, 300, 'entities')
-  , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , bgCanvas = Kane.Utils.createCanvas(300, 300, 'gameboard')
-  , bgPlane = new Kane.DrawPlane({board: bgCanvas})
-
-//create ingame entitymanager
-var entityManager = new Kane.EntityManager({drawplane: entityPlane});
-
-//TODO: don't create these, have the game create them automatically
-var cache = new Kane.Cache()
-  , loader = new Kane.AssetLoader({cache: cache});
-
-//define ingameCamera
-var ingameCamera = new Kane.Camera({
-  scene: ingame,
-  planes: {
-    entityPlane: entityPlane,
-    bgPlane: bgPlane,
-  },
-  h: 540,
-  w: 1000 
+Test.game = new Kane.Game({
+  namespace: Test,
+  sceneNames: ['Index', 'Ingame']
 });
 
-/*
-pass in our inputWizard and our entityManager
-we also pass it a reference to our image/json cache
-incase we wish to pull objects from them
+Test.game.start();
 */
-var ingame = new Kane.GameScene({
-  name: 'ingame',
-  entityManager: entityManager,
-  cache: cache,
-  loader: loader,
-  camera: ingameCamera
-});
-
-//define onEnter/onExit hook to log
-ingame.onEnter = function () {
-  console.log('ingame entered!');
-};
-
-ingame.onExit = function () {
-  console.log('ingame exited!');
-};
-
-//define a timer to fire new objects (ms)
-ingame.shotTimer = 60;
-
-ingame.onUpdate = function (dT) {
-  var emLen = this.entityManager.length
-    , collisions = this.entityManager.findCollisions();
-
-  if (!this.lastShotFired) {
-    this.lastShotFired = Date.now();
-  } else {
-    if ((this.lastShotFired + this.shotTimer) < Date.now()) {
-      this.fire(0, 400, Math.random(), -1 * Math.random());
-      this.fire(640, 400, -1 * Math.random(), -1 * Math.random());
-      this.fire(800, 100, -1 * Math.random(), -.2 * Math.random());
-      this.fire(200, 100, Math.random(), -.2 * Math.random());
-      this.lastShotFired = Date.now();
-    }
-  }
-};
-
-//DEFINE utility method that fires projectiles
-ingame.fire = function (x, y, dx, dy) {
-  var spriteSheet = this.cache.getByName('spritesheet.png')
-    , json = this.cache.getByName('spritesheet.json')
-    , data = json.frames['grapebullet.png'].frame
-    , sprite = new Kane.Sprite({
-        image: spriteSheet,
-        sx: data.x,
-        sy: data.y,
-        w: data.w,
-        h: data.h
-    });
-
-  this.entityManager.spawn(
-    Kane.Projectile,
-    {
-      currentSprite: sprite,
-      x: x,
-      y: y,
-      dx: dx,
-      dy: dy,
-      ddy: .001,
-      h: 30,
-      w: 30,
-    }
-  );
-};
-
-/*
-this is a loading scene.  It will load assets into the provided
-caches using the provided loaders and then advance to ingame
-*/
-
-var index = new Kane.LoadingScene({
-  name: 'index',
-  targetSceneName: 'ingame',
-  cache: cache,
-  loader: loader,
-  assets: ['public/images/spritesheet.png',
-           'public/json/spritesheet.json']
-});
-
-var clock = new Kane.Clock()
-  , game = new Kane.Game({
-      clock: clock,
-      scenes: {
-        index: index,
-        ingame: ingame
-      },
-  });
-
-game.start();
 
 });
 
@@ -1620,6 +1607,11 @@ minispade.register('utils.js', function() {
 minispade.require('kane.js');
 
 Kane.Utils = {
+  camel: function (name) {
+    var firstChar = name.charAt(0);
+
+    return name.replace(firstChar, firstChar.toLowerCase());
+  },
   generateColor: function () {
     return "#" + Math.random().toString(16).slice(2, 8);
   },

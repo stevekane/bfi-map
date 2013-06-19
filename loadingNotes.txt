@@ -9,7 +9,7 @@ of:
 if none are provided to the constructor.
 We don't expect people to need to create custom versions of these very often.
 
-scenes may be added via constructor in a 'scene's object
+scenes may be added via constructor in a 'sceneNames'array  
 *a scene called "index" must be provided and will be set to the 
 game's default currentScene*
 
@@ -17,11 +17,7 @@ game's default currentScene*
 Two examples of instantiation may be:
 
 App.game = new Kane.Game({
-  scenes: {
-    'index': index //this is a required default and will trigger a throw if not provided
-    'ingame': ingame //this must be previously instantiated and available
-    'loading': loading //this must be previously instantiaed and available
-  },
+  scenes: ['index', 'ingame'],
   clock: new Kane.Clock(),
 });
 

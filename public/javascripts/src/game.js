@@ -1,4 +1,4 @@
-require('kane.js');
+require('engine.js');
 
 var GameInterface = {
   getCurrentScene: function () {},
@@ -8,32 +8,99 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
+  cache: null,
+  assetLoader: null,
+  clock: null,
+  inputWizard: null
+  
 };
 
 Kane.Game = function (settings) {
-  if (!settings.clock) { 
-    throw new Error('no clock provided to game'); 
-  }
-
-  if (!settings.scenes) {
-    throw new Error('no scenes object provided to constructor');
+  //required attribute checks for scenes and namespace
+  if (!settings.sceneNames) {
+    throw new Error('no sceneNames array provided to constructor');
   }
   
-  if (!settings.scenes.index) {
-    throw new Error('no index scene provided in scenes object to constructor');
+  if (!settings.namespace) {
+    throw new Error('no namespace provided to constructor');
   }
 
-  _.extend(this, settings);  
+  if (!_(settings.sceneNames).contains('Index')) {
+    throw new Error('no Index included in sceneNames');
+  }
 
-  //set reference to game on each scene
-  _(this.scenes).each(function (scene) {
-    scene.game = this;
+
+  //construct our empty scenes object
+  this.scenes = {};
+
+  /*
+  grab all the values from settings
+  this may include already created instances of:
+  clock
+  inputWizard
+  cache
+  assetLoader 
+  */
+  _.extend(this, settings);
+
+  //check if these optional values are defined, if not use defaults
+  this.clock = this.clock ? this.clock : new Kane.Clock();
+  
+  //default inputWiz attaches to document.body
+  this.inputWizard = 
+    this.inputWizard ? 
+    this.inputWizard : 
+    new Kane.InputWizard({});
+  
+  this.cache = 
+    this.cache ?
+    this.cache :
+    new Kane.Cache();
+
+  //loader requires a ref to the cache
+  this.assetLoader = 
+    this.assetLoader ?
+    this.assetLoader :
+    new Kane.AssetLoader({
+      cache: this.cache
+    });
+
+  /*
+  check array of scene names by inspecting the provided namespace
+  if the scene is found, instantiate it otherwise throw
+  
+  NOTE: scenes MAY very well need more than what is injected onto
+  them here.  This is handled in the constructor for the scene which
+  should call some method or do additional injection to create
+  needed objects.  This includes things like cameras, entitymanager, etc
+  */
+  _(this.sceneNames).each(function (sceneName) {
+    var namespace = this.namespace
+      , targetScene = namespace[sceneName]
+      , camelCaseName = Kane.Utils.camel(sceneName);
+
+    if (!targetScene) {
+      throw new Error(sceneName, ' not found on ', namespace);
+    } else {
+      this.scenes[camelCaseName] = new targetScene({
+        name: camelCaseName,
+        game: this,
+        cache: this.cache,
+        assetLoader: this.assetLoader,
+        inputWizard: this.inputWizard  
+      });
+    }
   }, this);
 
-  //set the current scene to the provided index scene
-  this.currentScene = settings.scenes.index;  
-
+  //set the currentScene to index
+  this.currentScene = this.scenes.index;
+  
+  //set isRunning
   this.isRunning = false;
+
+  //TODO: Perhaps call configure method on the scenes here?
+  //Probably better to have them call their own
+  
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 

@@ -4,26 +4,20 @@ var assert = chai.assert;
 
 describe('Kane.Game', function () {
   var game
-    , indexScene = {
-        name: 'index',
-        update: function (dT) {}, 
-        draw: function () {}, 
-        onEnter: function () {},
-        onExit: function () {},
-      }
-    , clock = {
-        start: function () {},
-        stop: function () {},
-        getTimeDelta: function () {},
-      }; 
+    , Test = {}
+    , clock = new Kane.Clock()
+    , cache = new Kane.Cache()
+    , inputWizard = new Kane.InputWizard({})
+    , assetLoader = new Kane.AssetLoader({cache: cache});
+
+  Test.Index = Kane.Scene;
+  Test.Ingame = Kane.Scene;
   
   //get a new instance of Kane.Game for each test
   beforeEach(function () {
     game = new Kane.Game({
-      clock: clock,
-      scenes: {
-        index: indexScene
-      }
+      namespace: Test, 
+      sceneNames: ['Index', 'Ingame']
     });
   });
 
@@ -31,20 +25,18 @@ describe('Kane.Game', function () {
     assert.isObject(game); 
   }); 
 
-  it('should throw if no clock is provided', function () {
+  it('should throw if no sceneNames object is provided', function () {
     assert.throws(function () {
       game = new Kane.Game({
-        scenes: {
-          index: indexScene
-        }
+        namespace: Test
       })
     });
   });
 
-  it('should throw if no scenes object is provided', function () {
+  it('should throw if no namespace is provided', function () {
     assert.throws(function () {
       game = new Kane.Game({
-        clock: clock
+        sceneNames: ['Index', 'Ingame']
       })
     });
   });
@@ -52,14 +44,77 @@ describe('Kane.Game', function () {
   it('should throw if no index scene is provided', function () {
     assert.throws(function () {
       game = new Kane.Game({
-        clock: clock,
-        scenes: {}
+        namespace: Test,
+        scenes: ['Ingame'] 
       })
     });
   });
 
-  it('should set the currentScene to the provided index', function () {
-    assert.equal(indexScene, game.getCurrentScene());
+  it('should define a clock attribute', function () {
+    assert.instanceOf(game.clock, Kane.Clock);
+  });
+
+  it('should define a cache attribute', function () {
+    assert.instanceOf(game.cache, Kane.Cache);
+  });
+
+  it('should define a assetLoader attribute', function () {
+    assert.instanceOf(game.assetLoader, Kane.AssetLoader);
+  });
+
+  it('should define an inputWizard', function () {
+    assert.instanceOf(game.inputWizard, Kane.InputWizard);
+  });
+
+  /*
+  Here we check if the provided objects are set on the game instance
+  */
+  it('should set the provided clock as clock attr', function () {
+    game = new Kane.Game({
+      namespace: Test, 
+      sceneNames: ['Index', 'Ingame'],
+      clock: clock,
+      cache: cache,
+      assetLoader: assetLoader,
+      inputWizard: inputWizard 
+    });
+    assert.equal(clock, game.clock);
+  });
+
+  it('should set the provided cache as cache attr', function () {
+    game = new Kane.Game({
+      namespace: Test, 
+      sceneNames: ['Index', 'Ingame'],
+      clock: clock,
+      cache: cache,
+      assetLoader: assetLoader,
+      inputWizard: inputWizard 
+    });
+    assert.equal(cache, game.cache);
+  });
+
+  it('should set the provided assetLoader as assetLoader attr', function () {
+    game = new Kane.Game({
+      namespace: Test, 
+      sceneNames: ['Index', 'Ingame'],
+      clock: clock,
+      cache: cache,
+      assetLoader: assetLoader,
+      inputWizard: inputWizard 
+    });
+    assert.equal(assetLoader, game.assetLoader);
+  });
+
+  it('should set the provided inputWizard as inputWizard attr', function () {
+    game = new Kane.Game({
+      namespace: Test, 
+      sceneNames: ['Index', 'Ingame'],
+      clock: clock,
+      cache: cache,
+      assetLoader: assetLoader,
+      inputWizard: inputWizard 
+    });
+    assert.equal(inputWizard, game.inputWizard);
   });
 
   it('should set isRunning to false', function () {
@@ -76,7 +131,7 @@ describe('Kane.Game', function () {
     });
 
     it('should return the current scene', function () {
-      assert.equal(indexScene, game.getCurrentScene());
+      assert.instanceOf(game.getCurrentScene(), Kane.Scene);
     });
     
     it('should throw if there is no current scene defined', function () {
@@ -102,24 +157,8 @@ describe('Kane.Game', function () {
     });
 
     it('should assign current scene to provided scene name if it exists otherwise throw', function () {
-      var secondScene = {
-        name: 'secondScene',
-        update: function (dT) {}, 
-        draw: function () {}, 
-        onEnter: function () {},
-        onExit: function () {},
-      };
-
-      game = new Kane.Game({
-        clock: clock,
-        scenes: {
-          index: indexScene,
-          second: secondScene
-        }
-      });
-
-      game.setCurrentScene('second');
-      assert.equal(secondScene, game.getCurrentScene());
+      game.setCurrentScene('ingame');
+      assert.instanceOf(game.getCurrentScene(), Kane.Scene);
 
       assert.throws(function () {
         game.setCurrentScene('notValidScene');    
