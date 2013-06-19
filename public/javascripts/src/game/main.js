@@ -1,7 +1,6 @@
 require('engine.js');
 
-//input wizard configuration
-//we will add our subscriber from the scene instance
+//TODO: don't create, have game object create a default
 var inputWizard = new Kane.InputWizard({});
 
 /*
@@ -10,14 +9,18 @@ setup entity set for this scene
 */
 var entityCanvas = Kane.Utils.createCanvas(300, 300, 'entities')
   , entityPlane = new Kane.DrawPlane({board: entityCanvas})
-  , bgCanvas = createCanvas(300, 300, 'gameboard')
+  , bgCanvas = Kane.Utils.createCanvas(300, 300, 'gameboard')
   , bgPlane = new Kane.DrawPlane({board: bgCanvas})
-  , entityManager = new Kane.EntityManager({drawplane: entityPlane})
-  , cache = new Kane.Cache()
+
+//create ingame entitymanager
+var entityManager = new Kane.EntityManager({drawplane: entityPlane});
+
+//TODO: don't create these, have the game create them automatically
+var cache = new Kane.Cache()
   , loader = new Kane.AssetLoader({cache: cache});
 
-//define camera for our ingameScene
-var camera = new Kane.Camera({
+//define ingameCamera
+var ingameCamera = new Kane.Camera({
   scene: ingame,
   planes: {
     entityPlane: entityPlane,
@@ -37,29 +40,7 @@ var ingame = new Kane.GameScene({
   entityManager: entityManager,
   cache: cache,
   loader: loader,
-  camera: camera
-});
-
-/*
-ALL BACON ACTIVITY USES DOM ELEMENTS DEFINED IN THE HTML DOC
-THIS IS JUST TEMPORARY AND CAUSES TESTS TO FAIL
-*/
-//BACON STATS SETUP
-ingame.entityManager.baconLength = new Bacon.Bus();
-ingame.entityManager.baconCollisions = new Bacon.Bus();
-
-//Assign bacon stat streams to behaviors that render in the DOM
-var entCount = document.getElementById('entityCount')
-  , colCount = document.getElementById('collisionCount');
-
-entityManager.baconLength.onValue(function (val) {
-  entCount.textContent = val;  
-});
-
-entityManager.baconCollisions.onValue(function (val) {
-  colCount.textContent = colCount.textContent ? 
-                         parseInt(colCount.textContent) + val : 
-                         val;
+  camera: ingameCamera
 });
 
 //define onEnter/onExit hook to log
@@ -77,9 +58,6 @@ ingame.shotTimer = 60;
 ingame.onUpdate = function (dT) {
   var emLen = this.entityManager.length
     , collisions = this.entityManager.findCollisions();
-
-  this.entityManager.baconLength.push(emLen);
-  this.entityManager.baconCollisions.push(collisions.length);
 
   if (!this.lastShotFired) {
     this.lastShotFired = Date.now();
