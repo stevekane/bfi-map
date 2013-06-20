@@ -65,7 +65,7 @@ Kane.Camera.prototype.draw = function () {
   //TODO: implement draw bg, drawmap
 
   if (this.scene.entityManager && this.gameBoard) {
-    drawEntities.bind(this);
+    drawEntities.call(this);
   }
 };
 
@@ -87,6 +87,7 @@ function drawEntities () {
   //if they should be drawn, calculate where they should be drawn
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
+    
     if (ent.currentSprite) {
       this.gameBoard.drawSprite(
         ent.currentSprite,

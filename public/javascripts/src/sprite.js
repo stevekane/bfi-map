@@ -1,8 +1,6 @@
 require('kane.js');
 
-var SpriteInterface = {
-
-};
+var SpriteInterface = {};
 
 Kane.Sprite = function (settings) {
   var validImage = settings.image instanceof Image;
