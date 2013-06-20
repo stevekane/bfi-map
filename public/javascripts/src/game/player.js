@@ -18,6 +18,9 @@ Test.Player = function (settings) {
   this.h = data.h;
   this.w = data.w;
 
+  //fallback color
+  this.color = "#bbbbbb";
+  //sprite
   this.currentSprite = new Kane.Sprite({
     image: image,
     sx: data.x,

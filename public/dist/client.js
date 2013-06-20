@@ -1146,16 +1146,31 @@ Test.Ingame.prototype.init = function (settings) {
 Test.Ingame.prototype.onEnter = function () {
   console.log('game entered!');
 
-  if (!this.entityManager.player) {
-    this.entityManager.player = 
-      this.entityManager.spawn(
-      Test.Player, 
+  this.entityManager.player = 
+    this.entityManager.spawn(
+    Test.Player, 
+    {
+      x: 900,
+      y: 100,
+    }
+  );
+
+  for (var tcount = 0; tcount < 6; tcount++) {
+    this.entityManager.spawn(
+      Test.Tower, 
       {
         x: 100,
-        y: 100,
+        y: 50 + tcount*80,
       }
     );
   }
+};
+
+Test.Ingame.prototype.onExit = function () {
+  //remove the player, towers, and bullets
+  this.entityManager.findByType('player').kill(); 
+  this.entityManager.findByType('tower').kill();
+  this.entityManager.findByType('bullet').kill();
 };
 
 Test.Ingame.prototype.update = function (dT) {
@@ -1254,6 +1269,9 @@ Test.Player = function (settings) {
   this.h = data.h;
   this.w = data.w;
 
+  //fallback color
+  this.color = "#bbbbbb";
+  //sprite
   this.currentSprite = new Kane.Sprite({
     image: image,
     sx: data.x,
@@ -1278,16 +1296,38 @@ minispade.require('entity.js');
 Test.Tower = function (settings) {
   Kane.Entity.call(this, settings);
 
+  var cache = this.manager.cache
+    , image = cache.getByName('spritesheet.png')
+    , data = cache.getByName('spritesheet.json')
+             .frames['appletower.png']
+             .frame;
+
+  //fallback color
+  this.color = "#123654";
+  this.currentSprite = new Kane.Sprite({
+    image: image,
+    sx: data.x,
+    sy: data.y,
+    h: data.h,
+    w: data.w
+  });
+
+  //set height and width based on data
+  this.h = data.h;
+  this.w = data.w;
+
   //for the time being, towers do not collide
   this.doesCollide = false;
 
   //time between shots
   this.shotTimer = 100;
+  
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
 
 //our tower will check 
+/*
 Test.Tower.prototype.beforeUpdate = function () {
   if (!this.target) {
     this.target = getTarget(this);
@@ -1297,6 +1337,7 @@ Test.Tower.prototype.beforeUpdate = function () {
 function checkForTarget(tower) {
   return tower.manager.player ? tower.manager.player : null;
 };
+*/
 
 });
 

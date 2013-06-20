@@ -28,16 +28,31 @@ Test.Ingame.prototype.init = function (settings) {
 Test.Ingame.prototype.onEnter = function () {
   console.log('game entered!');
 
-  if (!this.entityManager.player) {
-    this.entityManager.player = 
-      this.entityManager.spawn(
-      Test.Player, 
+  this.entityManager.player = 
+    this.entityManager.spawn(
+    Test.Player, 
+    {
+      x: 900,
+      y: 100,
+    }
+  );
+
+  for (var tcount = 0; tcount < 6; tcount++) {
+    this.entityManager.spawn(
+      Test.Tower, 
       {
         x: 100,
-        y: 100,
+        y: 50 + tcount*80,
       }
     );
   }
+};
+
+Test.Ingame.prototype.onExit = function () {
+  //remove the player, towers, and bullets
+  this.entityManager.findByType('player').kill(); 
+  this.entityManager.findByType('tower').kill();
+  this.entityManager.findByType('bullet').kill();
 };
 
 Test.Ingame.prototype.update = function (dT) {
