@@ -56,10 +56,10 @@ Kane.EntityManager.prototype.spawn = function (constructor, args) {
     throw new Error('no constructor provided'); 
   }
 
-  var entity = new constructor(args);
+  //add reference to manager into args so that entity can see its manager
+  args.manager = this;
 
-  //entity has reference to its manager
-  entity.manager = this;
+  var entity = new constructor(args);
 
   //each entity has a unique id
   entity.id = this.generateUniqueId();

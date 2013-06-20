@@ -37,7 +37,9 @@ MyNameSpace.game = new Kane.Game({
 window.Test = {};
 
 require('engine.js');
-require('game/scenes.js');
+require('game/index.js');
+require('game/ingame.js');
+require('game/tower.js');
 
 Test.game = new Kane.Game({
   namespace: Test,
