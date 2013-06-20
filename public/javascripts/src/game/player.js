@@ -17,6 +17,9 @@ Test.Player = function (settings) {
   //set height and width based on data
   this.h = data.h;
   this.w = data.w;
+  
+  //set type
+  this.type = 'player';
 
   //fallback color
   this.color = "#bbbbbb";

@@ -6,7 +6,6 @@ Kane.Particle = function (settings) {
 
   //default settings
   this.lifespan = 600;
-  this.killtimer = Date.now() + this.lifespan;
   this.color = "#1382bb";
   this.h = 5;
   this.w = 5; 
@@ -14,6 +13,7 @@ Kane.Particle = function (settings) {
   this.doesCollide = false;
 
   _.extend(this, settings);
+  this.killtimer = Date.now() + this.lifespan;
 };
 
 Kane.Particle.prototype = Object.create(Kane.Entity.prototype);

@@ -1,5 +1,7 @@
 require('scene.js');
 require('game/player.js');
+require('game/tower.js');
+require('game/bullet.js');
 
 //define our 'ingame scene'
 Test.Ingame = function (settings) {
@@ -41,8 +43,8 @@ Test.Ingame.prototype.onEnter = function () {
     this.entityManager.spawn(
       Test.Tower, 
       {
-        x: 100,
-        y: 50 + tcount*80,
+        x: 100 + Math.random() * 100,
+        y: 50 + tcount * 80,
       }
     );
   }

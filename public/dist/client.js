@@ -1069,6 +1069,79 @@ function draw () {
 
 });
 
+minispade.register('game/bullet.js', function() {
+"use strict";
+/*
+Bullets are fired by towers
+*/
+minispade.require('entity.js');
+
+Test.Bullet = function (settings) {
+  Kane.Entity.call(this, settings);
+
+  var cache = this.manager.cache
+    , image = cache.getByName('spritesheet.png')
+    , data = cache.getByName('spritesheet.json')
+             .frames['applebullet.png']
+             .frame;
+
+  //bullets die after this much time has elapsed
+  this.killTimer = 1000;
+  this.spawnTime = Date.now();
+
+  //set height and width based on data
+  this.h = data.h;
+  this.w = data.w;
+  
+  //set type
+  this.type = 'bullet';
+
+  //fallback color
+  this.color = "#b0b0b0";
+  //sprite
+  this.currentSprite = new Kane.Sprite({
+    image: image,
+    sx: data.x,
+    sy: data.y,
+    h: data.h,
+    w: data.w
+  });
+};
+
+Test.Bullet.prototype = Object.create(Kane.Entity.prototype);
+
+Test.Bullet.prototype.beforeUpdate = function (dT) {
+  if (this.spawnTime + this.killTimer < Date.now()) {
+    this.kill();
+  }
+};
+
+Test.Bullet.prototype.collide = function (target) {
+  if ('player' === target.type) {
+    this.kill();
+    for (var i=0; i<20; i++) {
+      //roll for positive or negative y direction
+      var ySign = Math.random() > .5 ? -1 : 1;
+
+      this.manager.spawn(
+        Kane.Particle,
+        {
+          x: this.x + target.w / 2,
+          y: this.y + target.h / 2,
+          dx: Math.random() * this.dx,
+          dy: ySign * Math.random() * this.dy,
+          lifespan: 400,
+          color: "#b300ff", 
+          h: 3,
+          w: 3 
+        }
+      );
+    }
+  }
+};
+
+});
+
 minispade.register('game/index.js', function() {
 "use strict";
 
@@ -1118,6 +1191,8 @@ minispade.register('game/ingame.js', function() {
 
 minispade.require('scene.js');
 minispade.require('game/player.js');
+minispade.require('game/tower.js');
+minispade.require('game/bullet.js');
 
 //define our 'ingame scene'
 Test.Ingame = function (settings) {
@@ -1159,8 +1234,8 @@ Test.Ingame.prototype.onEnter = function () {
     this.entityManager.spawn(
       Test.Tower, 
       {
-        x: 100,
-        y: 50 + tcount*80,
+        x: 100 + Math.random() * 100,
+        y: 50 + tcount * 80,
       }
     );
   }
@@ -1237,7 +1312,6 @@ window.Test = {};
 minispade.require('engine.js');
 minispade.require('game/index.js');
 minispade.require('game/ingame.js');
-minispade.require('game/tower.js');
 
 Test.game = new Kane.Game({
   namespace: Test,
@@ -1268,6 +1342,9 @@ Test.Player = function (settings) {
   //set height and width based on data
   this.h = data.h;
   this.w = data.w;
+  
+  //set type
+  this.type = 'player';
 
   //fallback color
   this.color = "#bbbbbb";
@@ -1316,28 +1393,73 @@ Test.Tower = function (settings) {
   this.h = data.h;
   this.w = data.w;
 
+  //set type
+  this.type = 'tower';
+
   //for the time being, towers do not collide
   this.doesCollide = false;
 
   //time between shots
-  this.shotTimer = 100;
-  
+  this.shotTimer = 1000;
+  this.lastShot = 0; 
+  this.bulletSpeed = .8;
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
 
-//our tower will check 
-/*
-Test.Tower.prototype.beforeUpdate = function () {
+//our tower will check if it should shoot
+Test.Tower.prototype.beforeUpdate = function (dT) {
+  var currentTime = Date.now();
+
   if (!this.target) {
     this.target = getTarget(this);
   } 
+
+  if (currentTime > this.lastShot+this.shotTimer) {
+    var trajectory = findTrajectory(this, this.target);
+
+    //set lastShot time to now
+    this.lastShot = currentTime;
+     
+    fireBullet(this, trajectory);
+    //vary the shot timer
+    this.shotTimer = generateShotTimer(this);
+  }
 };
 
-function checkForTarget(tower) {
+//return object w/ x/y
+function findTrajectory (tower, target) {
+  var xComp = target.x - tower.x
+    , yComp = target.y - tower.y
+    //TODO: this could be optimized
+    length = Math.sqrt(xComp*xComp + yComp*yComp); 
+
+  //return normalized trajectory
+  return {
+    x: xComp/length,
+    y: yComp/length 
+  }; 
+};
+
+function fireBullet (tower, trajectory) {
+  tower.manager.spawn(
+    Test.Bullet,
+    {
+      x: tower.x + tower.w,
+      y: tower.y,
+      dx: trajectory.x * tower.bulletSpeed,
+      dy: trajectory.y * tower.bulletSpeed
+    }
+  );
+};
+
+function getTarget(tower) {
   return tower.manager.player ? tower.manager.player : null;
 };
-*/
+
+function generateShotTimer (tower) {
+  return 1000 + Math.random() * 300;
+};
 
 });
 
@@ -1599,7 +1721,6 @@ Kane.Particle = function (settings) {
 
   //default settings
   this.lifespan = 600;
-  this.killtimer = Date.now() + this.lifespan;
   this.color = "#1382bb";
   this.h = 5;
   this.w = 5; 
@@ -1607,6 +1728,7 @@ Kane.Particle = function (settings) {
   this.doesCollide = false;
 
   _.extend(this, settings);
+  this.killtimer = Date.now() + this.lifespan;
 };
 
 Kane.Particle.prototype = Object.create(Kane.Entity.prototype);

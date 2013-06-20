@@ -39,7 +39,6 @@ window.Test = {};
 require('engine.js');
 require('game/index.js');
 require('game/ingame.js');
-require('game/tower.js');
 
 Test.game = new Kane.Game({
   namespace: Test,
