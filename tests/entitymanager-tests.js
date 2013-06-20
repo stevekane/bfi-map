@@ -6,7 +6,6 @@ describe('Kane.EntityManager', function () {
   var em;
   
   beforeEach(function () {
-
     em = new Kane.EntityManager();
   });
 

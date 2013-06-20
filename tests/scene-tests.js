@@ -21,6 +21,10 @@ describe('Kane.Scene', function () {
     });
   });
 
+  it('should be initialized after constructor is finished', function () {
+    assert.isTrue(s.initialized);
+  });
+
   describe('#update()', function () {
     it('should be a function', function () {
       assert.isFunction(s.update);

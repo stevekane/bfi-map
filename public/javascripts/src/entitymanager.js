@@ -14,7 +14,6 @@ var EntityManagerInterface = {
   applyForAll: function (methodName, argArray) {},
 };
 
-//requires array of entities
 Kane.EntityManager = function (settings) {
   _.extend(this, settings);
 };

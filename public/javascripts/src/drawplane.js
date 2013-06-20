@@ -16,7 +16,6 @@ Kane.DrawPlane = function (settings) {
     throw new Error('must provide canvas domnode'); 
   }
   
-
   _.extend(this, settings);
 
   //set initial size of canvas

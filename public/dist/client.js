@@ -221,9 +221,6 @@ minispade.require('utils.js');
 var CameraInterface = {
   update: function (dT) {},
   draw: function () {},
-  drawBg: function () {},
-  drawEntities: function () {},
-  drawWorld: function () {},
   setSize: function (w, h) {},
 
   //public interface attributes
@@ -252,20 +249,16 @@ Cameras must be instantiated with a scene object
 the scene tells the camera to draw at 60fps and it provides
 the data for the camera to draw
 
-Cameras must also be instantiated with a planes object that must
-contain at least one Kane.DrawPlane instance 
-
 the camera MUST be attached to a scene before it is made active
 */
 Kane.Camera = function (settings) {
-  if (!settings.planes) {
-    throw new Error('no planes object provided to constructor');
+  if (!settings.gameBoard) {
+    throw new Error('no gameBoard object provided to constructor');
   }
 
-  if (0 === _.keys(settings.planes).length) {
-    throw new Error('no planes provided to constructor'); 
+  if (!settings.scene) {
+    throw new Error('no scene provided to constructor');
   }
-
   _.extend(this, settings);
 
   //set the size of the camera and all drawplanes
@@ -286,34 +279,21 @@ Kane.Camera.prototype.update = function (dT) {
 };
 
 Kane.Camera.prototype.draw = function () {
-  if (this.scene.bgImage && this.planes.bgPlane) {
-    this.drawBg();
-  } 
-  if (this.scene.world && this.planes.worldPlane) {
-    this.drawWorld();
-  } 
-  if (this.scene.entityManager && this.planes.entityPlane) {
-    this.drawEntities();
-  } 
+  //TODO: implement draw bg, drawmap
+
+  if (this.scene.entityManager && this.gameBoard) {
+    drawEntities.bind(this);
+  }
 };
 
-Kane.Camera.prototype.drawBg = function () {
-  this.planes.bgPlane.clearAll();
-  this.planes.bgPlane.drawImage(this.scene.bgImage, 0, 0);
-};
-
-Kane.Camera.prototype.drawWorld = function () {
-
-};
-
-Kane.Camera.prototype.drawEntities = function () {
+function drawEntities () {
   //local ref to ents in entityManager
   var ents = this.scene.entityManager.listEntities()
     , checkCollision = Kane.Utils.checkBBCollision
     , entsToDraw;
 
   //clear the canvas each draw cycle
-  this.planes.entityPlane.clearAll();
+  this.gameBoard.clearAll();
 
   //loop over all entities and check if they "collide" w/ the camera
   //which means they should be drawn 
@@ -325,7 +305,7 @@ Kane.Camera.prototype.drawEntities = function () {
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
     if (ent.currentSprite) {
-      this.planes.entityPlane.drawSprite(
+      this.gameBoard.drawSprite(
         ent.currentSprite,
         ent.x - this.y,
         ent.y - this.y,
@@ -333,7 +313,7 @@ Kane.Camera.prototype.drawEntities = function () {
         ent.h
       );
     } else {
-      this.planes.entityPlane.drawRect(
+      this.gameBoard.drawRect(
         ent.color,
         ent.x - this.x,
         ent.y - this.y,
@@ -348,10 +328,8 @@ Kane.Camera.prototype.setSize = function (w, h) {
   this.w = w;
   this.h = h;
 
-  //set the size of all the planes this camera controls
-  _.each(this.planes, function (plane) {
-    plane.setSize(w, h);
-  }); 
+  //set gameBoard size as well
+  this.gameBoard.setSize(w, h);
 };
 
 });
@@ -445,7 +423,6 @@ Kane.DrawPlane = function (settings) {
     throw new Error('must provide canvas domnode'); 
   }
   
-
   _.extend(this, settings);
 
   //set initial size of canvas
@@ -713,7 +690,6 @@ var EntityManagerInterface = {
   applyForAll: function (methodName, argArray) {},
 };
 
-//requires array of entities
 Kane.EntityManager = function (settings) {
   _.extend(this, settings);
 };
@@ -915,11 +891,6 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
-  cache: null,
-  assetLoader: null,
-  clock: null,
-  inputWizard: null
-  
 };
 
 Kane.Game = function (settings) {
@@ -979,7 +950,9 @@ Kane.Game = function (settings) {
   NOTE: scenes MAY very well need more than what is injected onto
   them here.  This is handled in the constructor for the scene which
   should call some method or do additional injection to create
-  needed objects.  This includes things like cameras, entitymanager, etc
+  needed objects.  
+  This includes things like cameras, entitymanager, etc
+  See Kane.Scene.init for details.
   */
   _(this.sceneNames).each(function (sceneName) {
     var namespace = this.namespace
@@ -1004,10 +977,6 @@ Kane.Game = function (settings) {
   
   //set isRunning
   this.isRunning = false;
-
-  //TODO: Perhaps call configure method on the scenes here?
-  //Probably better to have them call their own
-  
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
@@ -1137,9 +1106,9 @@ MyNameSpace.game = new Kane.Game({
 });
 */
 
-/*
 window.Test = {};
 minispade.require('engine.js');
+minispade.require('game/scenes.js');
 
 Test.game = new Kane.Game({
   namespace: Test,
@@ -1147,7 +1116,70 @@ Test.game = new Kane.Game({
 });
 
 Test.game.start();
-*/
+
+});
+
+minispade.register('game/scenes.js', function() {
+"use strict";
+
+minispade.require('engine.js');
+
+//inherit the basic behavior from Kane.Scene
+Test.Index = function (settings) {
+  Kane.Scene.call(this, settings);
+};
+
+//inherit from scene's prototype
+Test.Index.prototype = Object.create(Kane.Scene.prototype);
+
+Test.Index.prototype.init = function (settings) {
+  //declare some assets we want to load
+  this.assets = ['public/images/spritesheet.png',
+                 'public/json/spritesheet.json']; 
+
+  //the scene we will transition to when loading is done
+  this.targetSceneName = "index";
+};
+
+Test.Index.prototype.onEnter = function () {
+  console.log('loading assets for ', this.targetSceneName);
+
+  //call load assets, last argument is callback upon completion
+  this.assetLoader.loadAssets(
+    this.name, 
+    this.assets, 
+    loadingComplete.bind(this)
+  );
+};
+
+//when loading is complete, we will call this function
+function loadingComplete (errors) {
+  if (0 < errors.length) {
+    console.log(errors, ' failed to load');
+  } else {
+    this.game.setCurrentScene(this.targetSceneName);
+  }
+};
+
+//define our 'ingame scene'
+Test.Ingame = function (settings) {
+  Kane.Scene.call(this, settings);
+};
+
+//again, we set the prototype to Kane.Scene's prototype
+Test.Ingame.prototype = Object.create(Kane.Scene.prototype);
+
+Test.Ingame.prototype.init = function (settings) {
+  //setup an entityManager
+  this.entityManager = new Kane.EntityManager();  
+  this.gameBoard = new Kane.DrawPlane({
+    board: $('#gameboard')
+  });
+  this.camera = new Kane.Camera({
+    scene: this,
+    gameBoard: gameBoard
+  }); 
+};
 
 });
 
@@ -1362,8 +1394,8 @@ Kane.LoadingScene = function (settings) {
     throw new Error('no cache provided');
   }
 
-  if (!settings.loader) {
-    throw new Error('no loader provided');
+  if (!settings.assetLoader) {
+    throw new Error('no assetLoader provided');
   }
 
   if (!settings.targetSceneName) {
@@ -1375,7 +1407,13 @@ Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
 
 Kane.LoadingScene.prototype.onEnter = function () {
   console.log('loading assets for ', this.targetSceneName);
-  this.loader.loadAssets('ingameAssets', this.assets, loadingComplete.bind(this));
+
+  //call load assets, last argument is callback upon completion
+  this.assetLoader.loadAssets(
+    this.name, 
+    this.assets, 
+    loadingComplete.bind(this)
+  );
 };
 
 Kane.LoadingScene.prototype.onExit = function () {
@@ -1483,13 +1521,16 @@ minispade.register('scene.js', function() {
 minispade.require('kane.js');
 
 /*
-update and draw generally should be left alone.  they both expose hooks
-for calling onUpdate and onDraw which may be defined however you desire
+update and draw generally should be left alone.  
+They both expose hooks for calling onUpdate and 
+onDraw which may be defined however you desire
 
-onEnter and onExit may be defined to do w/e you desire and they will be called
-by the game object that owns this scene on scene transitions 
+onEnter and onExit may be defined to do w/e you desire 
+and they will be called by the game object that owns 
+this scene on scene transitions 
 */
 var SceneInterface = {
+  init: function(settings) {},
   update: function (dT) {},
   draw: function () {},
 
@@ -1502,12 +1543,13 @@ var SceneInterface = {
   onUpdate: function (dT) {},
 
   name: '',
+  initialized: false,
   keyMap: {},
 };
 
 /*
-note, if the settings provided include a name it will be overwritten
-by the provided name 
+note, if the settings provided include a name it 
+will be overwritten by the provided name 
 */
 Kane.Scene = function (settings) {
   if (!settings.name) {
@@ -1519,9 +1561,31 @@ Kane.Scene = function (settings) {
 
   //apply settings object to this scene
   _.extend(this, settings);
+
+  /*
+  This is extremely important to call!
+  when you want to 'subclass' scene be certain to call this
+  or better yet, don't override the constructor
+  instead, add your constructions details/implementation to
+  init
+  */
+  this.initialized = false;
+  this.init(settings);
+  this.initialized = true;
 };
 
 Kane.Scene.prototype = Object.create(SceneInterface);
+
+/*
+This method is responsible for instantiating and wiring together
+whatever additional objects your scene may require.  Examples include:
+entityManager (or multiple?)
+camera
+world (perhaps?)
+and customization for what should be sent to the loader
+*/
+Kane.Scene.prototype.init = function (settings) {
+};
 
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 

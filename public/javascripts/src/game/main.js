@@ -34,10 +34,10 @@ MyNameSpace.game = new Kane.Game({
 });
 */
 
-/*
 window.Test = {};
 
 require('engine.js');
+require('game/scenes.js');
 
 Test.game = new Kane.Game({
   namespace: Test,
@@ -45,4 +45,3 @@ Test.game = new Kane.Game({
 });
 
 Test.game.start();
-*/

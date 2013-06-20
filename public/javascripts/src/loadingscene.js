@@ -7,8 +7,8 @@ Kane.LoadingScene = function (settings) {
     throw new Error('no cache provided');
   }
 
-  if (!settings.loader) {
-    throw new Error('no loader provided');
+  if (!settings.assetLoader) {
+    throw new Error('no assetLoader provided');
   }
 
   if (!settings.targetSceneName) {
@@ -20,7 +20,13 @@ Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
 
 Kane.LoadingScene.prototype.onEnter = function () {
   console.log('loading assets for ', this.targetSceneName);
-  this.loader.loadAssets('ingameAssets', this.assets, loadingComplete.bind(this));
+
+  //call load assets, last argument is callback upon completion
+  this.assetLoader.loadAssets(
+    this.name, 
+    this.assets, 
+    loadingComplete.bind(this)
+  );
 };
 
 Kane.LoadingScene.prototype.onExit = function () {

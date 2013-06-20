@@ -5,20 +5,17 @@ var assert = chai.assert;
 
 describe("Kane.Camera", function () {
   var c
-    , bgPlane 
     , $canvas = $(document.createElement('canvas'));
 
-  $canvas.attr({id: 'bgPlane'});
+  $canvas.attr({id: 'gameboard'});
   $('body').append($canvas);
   
-  bgPlane = new Kane.DrawPlane({board: $canvas}); 
+  gameBoard = new Kane.DrawPlane({board: $canvas}); 
 
   beforeEach(function () {
     c = new Kane.Camera({
       scene: {},
-      planes: {
-        bgPlane: bgPlane
-      }
+      gameBoard: gameBoard
     });
   });
 
@@ -26,19 +23,10 @@ describe("Kane.Camera", function () {
     assert.isObject(c); 
   });
 
-  it('should throw if no planes provided to constructor', function () {
+  it('should throw if no gameboard provided to constructor', function () {
     assert.throws(function () {
       c = new Kane.Camera({
         scene: {},
-      });
-    });
-  });
-
-  it('should throw if planes object contains no planes', function () {
-    assert.throws(function () {
-      c = new Kane.Camera({
-        scene: {},
-        planes: {}
       });
     });
   });
@@ -84,34 +72,16 @@ describe("Kane.Camera", function () {
     });
   });
 
-  describe("drawBg()", function () {
-    it('should be a function', function () {
-      assert.isFunction(c.drawBg);
-    });
-  });
-
-  describe("drawWorld()", function () {
-    it('should be a function', function () {
-      assert.isFunction(c.drawWorld);
-    });
-  });
-
-  describe("drawEntities()", function () {
-    it('should be a function', function () {
-      assert.isFunction(c.drawEntities);
-    });
-  });
-
   describe("#setSize()", function () {
-    it('should set the height and width of the camera and its drawplanes', function () {
+    it('should set the height/width of the camera and gameBoard', function () {
       var h = 200
         , w = 200;
 
       c.setSize(w, h);
       assert.equal(c.h, h);
       assert.equal(c.w, w);
-      assert.equal(c.planes.bgPlane.getWidth(), w);
-      assert.equal(c.planes.bgPlane.getHeight(), h);
+      assert.equal(c.gameBoard.getWidth(), w);
+      assert.equal(c.gameBoard.getHeight(), h);
     });
   });
 });

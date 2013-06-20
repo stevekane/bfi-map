@@ -11,16 +11,16 @@ var assert = chai.assert;
 describe("Kane.LoadingScene", function () {
   var ls
     , cache
-    , loader;
+    , assetLoader;
 
   beforeEach(function () {
     cache = new Kane.Cache();
-    loader = new Kane.AssetLoader({cache: cache})
+    assetLoader = new Kane.AssetLoader({cache: cache})
     ls = new Kane.LoadingScene({
       name: 'loading',
       targetSceneName: 'myTarget',
       cache: cache,
-      loader: loader
+      assetLoader: assetLoader
     });
   });
 
@@ -28,7 +28,7 @@ describe("Kane.LoadingScene", function () {
     assert.isObject(ls); 
   });
 
-  it('should throw if no cache or loader provided', function () {
+  it('should throw if no cache or assetLoader provided', function () {
     assert.throws(function () {
       ls = new Kane.LoadingScene({
         name: 'loading',
@@ -49,7 +49,7 @@ describe("Kane.LoadingScene", function () {
         name: 'loading',
         targetSceneName: 'myTarget',
         cache: cache,
-        loader: loader
+        assetLoader: assetLoader
       });
     });
   });

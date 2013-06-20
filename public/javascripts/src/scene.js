@@ -1,13 +1,16 @@
 require('kane.js');
 
 /*
-update and draw generally should be left alone.  they both expose hooks
-for calling onUpdate and onDraw which may be defined however you desire
+update and draw generally should be left alone.  
+They both expose hooks for calling onUpdate and 
+onDraw which may be defined however you desire
 
-onEnter and onExit may be defined to do w/e you desire and they will be called
-by the game object that owns this scene on scene transitions 
+onEnter and onExit may be defined to do w/e you desire 
+and they will be called by the game object that owns 
+this scene on scene transitions 
 */
 var SceneInterface = {
+  init: function(settings) {},
   update: function (dT) {},
   draw: function () {},
 
@@ -20,12 +23,13 @@ var SceneInterface = {
   onUpdate: function (dT) {},
 
   name: '',
+  initialized: false,
   keyMap: {},
 };
 
 /*
-note, if the settings provided include a name it will be overwritten
-by the provided name 
+note, if the settings provided include a name it 
+will be overwritten by the provided name 
 */
 Kane.Scene = function (settings) {
   if (!settings.name) {
@@ -37,9 +41,31 @@ Kane.Scene = function (settings) {
 
   //apply settings object to this scene
   _.extend(this, settings);
+
+  /*
+  This is extremely important to call!
+  when you want to 'subclass' scene be certain to call this
+  or better yet, don't override the constructor
+  instead, add your constructions details/implementation to
+  init
+  */
+  this.initialized = false;
+  this.init(settings);
+  this.initialized = true;
 };
 
 Kane.Scene.prototype = Object.create(SceneInterface);
+
+/*
+This method is responsible for instantiating and wiring together
+whatever additional objects your scene may require.  Examples include:
+entityManager (or multiple?)
+camera
+world (perhaps?)
+and customization for what should be sent to the loader
+*/
+Kane.Scene.prototype.init = function (settings) {
+};
 
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 

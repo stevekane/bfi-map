@@ -8,11 +8,6 @@ var GameInterface = {
 
   //required public api attribtues
   isRunning: false,
-  cache: null,
-  assetLoader: null,
-  clock: null,
-  inputWizard: null
-  
 };
 
 Kane.Game = function (settings) {
@@ -72,7 +67,9 @@ Kane.Game = function (settings) {
   NOTE: scenes MAY very well need more than what is injected onto
   them here.  This is handled in the constructor for the scene which
   should call some method or do additional injection to create
-  needed objects.  This includes things like cameras, entitymanager, etc
+  needed objects.  
+  This includes things like cameras, entitymanager, etc
+  See Kane.Scene.init for details.
   */
   _(this.sceneNames).each(function (sceneName) {
     var namespace = this.namespace
@@ -97,10 +94,6 @@ Kane.Game = function (settings) {
   
   //set isRunning
   this.isRunning = false;
-
-  //TODO: Perhaps call configure method on the scenes here?
-  //Probably better to have them call their own
-  
 };
 
 Kane.Game.prototype = Object.create(GameInterface); 
