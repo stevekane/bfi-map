@@ -14,7 +14,7 @@ Test.Bullet = function (settings) {
              .frame;
 
   //bullets die after this much time has elapsed
-  this.killTimer = 1000;
+  this.killTimer = 1500;
   this.spawnTime = Date.now();
 
   //set height and width based on data
@@ -59,7 +59,7 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: "#b300ff", 
+          color: "#f00000", 
           h: 3,
           w: 3 
         }

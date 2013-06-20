@@ -27,6 +27,57 @@ Test.Ingame.prototype.init = function (settings) {
   }); 
 };
 
+//Configure our hotkeys!
+Test.Ingame.prototype.keydown = function (keyName) {
+  var p = this.entityManager.player
+    , speed = p.moveSpeed;
+
+  switch (keyName) {
+    case "left":
+      p.dx = -speed;
+      break;
+    case "right":
+      p.dx = speed;
+      break;
+    case "up":
+      p.dy = -speed;
+      break;
+    case "down":
+      p.dy = speed;
+      break;
+  }
+};
+
+//TODO: This must get fixed as this style of checking for event order is
+//extremely hacky and brittle ...and bad
+Test.Ingame.prototype.keyup = function (keyName) {
+  var p = this.entityManager.player
+    , speed = p.moveSpeed;
+
+  switch (keyName) {
+    case "left":
+      if (-speed === p.dx) {
+        p.dx = 0;
+      }
+      break;
+    case "right":
+      if (speed === p.dx) {
+        p.dx = 0;
+      }
+      break;
+    case "up":
+      if (-speed === p.dy) {
+        p.dy = 0;
+      }
+      break;
+    case "down":
+      if (speed === p.dy) {
+        p.dy = 0;
+      }
+      break;
+  }
+};
+
 Test.Ingame.prototype.onEnter = function () {
   console.log('game entered!');
 

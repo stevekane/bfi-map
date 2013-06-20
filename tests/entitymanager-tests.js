@@ -28,14 +28,14 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should create a new entity with provided constructor/settings object', function () {
-      var ent = em.spawn(Kane.Entity);
+      var ent = em.spawn(Kane.Entity, {});
 
       assert.isObject(ent);
       assert.instanceOf(ent, Kane.Entity);
     });
 
     it('should assign itself as a value called manager to the newly created entity', function () {
-      var ent = em.spawn(Kane.Entity);
+      var ent = em.spawn(Kane.Entity, {});
       //TODO: probably should access this via getter
       assert.equal(ent.manager, em);
     });
@@ -53,8 +53,8 @@ describe('Kane.EntityManager', function () {
     });
 
     it('should return a list of all dead entities', function () {
-      var deadEnt1 = em.spawn(Kane.Entity)
-        , deadEnt2 = em.spawn(Kane.Entity)
+      var deadEnt1 = em.spawn(Kane.Entity, {})
+        , deadEnt2 = em.spawn(Kane.Entity, {})
         , deadEnts
         , remainingEnts;
 

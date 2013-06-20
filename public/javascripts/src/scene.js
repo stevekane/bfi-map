@@ -14,8 +14,8 @@ var SceneInterface = {
   update: function (dT) {},
   draw: function () {},
 
-  keyDown: function (keyName) {},
-  keyUp: function (keyName) {},
+  keydown: function (keyName) {},
+  keyup: function (keyName) {},
 
   onEnter: function () {},
   onExit: function () {},
@@ -42,6 +42,20 @@ Kane.Scene = function (settings) {
   //apply settings object to this scene
   _.extend(this, settings);
 
+  //Listen on inputWizardStream and fire appropriate events
+  this.inputWizard.stream.onValue(function (val) {
+    //call the appropriate handler for input type
+    switch (val.type) {
+      case 'keydown':
+        this.keydown.call(this, val.keyName);
+        break;
+      case 'keyup':
+        this.keyup.call(this, val.keyName);
+        break;
+      //HANDLE MOUSE HERE TOO
+    }
+  }.bind(this));
+
   /*
   This is extremely important to call!
   when you want to 'subclass' scene be certain to call this
@@ -64,8 +78,7 @@ camera
 world (perhaps?)
 and customization for what should be sent to the loader
 */
-Kane.Scene.prototype.init = function (settings) {
-};
+Kane.Scene.prototype.init = function (settings) {};
 
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 
@@ -78,35 +91,15 @@ Kane.Scene.prototype.draw = function () {
   this.onDraw();
 };
 
-Kane.Scene.prototype.keyDown = function (keyName) {
-  var action;
-
+Kane.Scene.prototype.keydown = function (keyName) {
   if (!keyName) {
     throw new Error('no keyName provided to keyDown');
-  }
-
-  //identify our action from the keyMap
-  action = this.keyMap[keyName].keyDown;
-
-  //if there is an action, execute it
-  if (action) {
-    action.call(this);
   }
 };
 
-Kane.Scene.prototype.keyUp = function (keyName) {
-  var action;
-
+Kane.Scene.prototype.keyup = function (keyName) {
   if (!keyName) {
     throw new Error('no keyName provided to keyDown');
-  }
-
-  //identify our action from the keyMap
-  action = this.keyMap[keyName].keyUp;
-
-  //if there is an action, execute it
-  if (action) {
-    action.call(this);
   }
 };
 

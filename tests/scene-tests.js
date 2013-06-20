@@ -49,18 +49,18 @@ describe('Kane.Scene', function () {
     });
   });
 
-  describe("#keyDown()", function () {
+  describe("#keydown()", function () {
     it('should throw if no keyName provided', function () {
       assert.throws(function () {
-        s.keyDown();
+        s.keydown();
       });
     });
   });
 
-  describe("#keyUp()", function () {
+  describe("#keyup()", function () {
     it('should throw if no keyName provided', function () {
       assert.throws(function () {
-        s.keyUp();
+        s.keyup();
       });
     });
   });

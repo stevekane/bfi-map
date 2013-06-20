@@ -21,16 +21,23 @@ Kane.InputWizard = function (settings) {
   add keyboard event handlers and filter out the keyName
   TODO: add touch event handlers
   */
+
+  function sameKey (prev, cur) {
+    return prev.keyName === cur.keyName; 
+  };
+
   streams.push(
-    domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
-    domNode.asEventStream('keydown').filter(filterKey).map(mapKey),
+    domNode.asEventStream('keyup').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
+    domNode.asEventStream('keydown').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
     domNode.asEventStream('mousemove').map(mapMouse),
     domNode.asEventStream('mousedown').map(mapMouse),
     domNode.asEventStream('mouseup').map(mapMouse)
   );
 
   //merge all input streams from mouse/touch/keyboard onto main stream
-  this.stream = Bacon.mergeAll(streams);
+  //we skip duplicates so that keys already pressed don't jam up the stream
+  this.stream = Bacon.mergeAll(streams)
+                .log();
 };
 
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);

@@ -1086,7 +1086,7 @@ Test.Bullet = function (settings) {
              .frame;
 
   //bullets die after this much time has elapsed
-  this.killTimer = 1000;
+  this.killTimer = 1500;
   this.spawnTime = Date.now();
 
   //set height and width based on data
@@ -1131,7 +1131,7 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: "#b300ff", 
+          color: "#f00000", 
           h: 3,
           w: 3 
         }
@@ -1216,6 +1216,57 @@ Test.Ingame.prototype.init = function (settings) {
     h: document.height,
     w: document.width
   }); 
+};
+
+//Configure our hotkeys!
+Test.Ingame.prototype.keydown = function (keyName) {
+  var p = this.entityManager.player
+    , speed = p.moveSpeed;
+
+  switch (keyName) {
+    case "left":
+      p.dx = -speed;
+      break;
+    case "right":
+      p.dx = speed;
+      break;
+    case "up":
+      p.dy = -speed;
+      break;
+    case "down":
+      p.dy = speed;
+      break;
+  }
+};
+
+//TODO: This must get fixed as this style of checking for event order is
+//extremely hacky and brittle ...and bad
+Test.Ingame.prototype.keyup = function (keyName) {
+  var p = this.entityManager.player
+    , speed = p.moveSpeed;
+
+  switch (keyName) {
+    case "left":
+      if (-speed === p.dx) {
+        p.dx = 0;
+      }
+      break;
+    case "right":
+      if (speed === p.dx) {
+        p.dx = 0;
+      }
+      break;
+    case "up":
+      if (-speed === p.dy) {
+        p.dy = 0;
+      }
+      break;
+    case "down":
+      if (speed === p.dy) {
+        p.dy = 0;
+      }
+      break;
+  }
 };
 
 Test.Ingame.prototype.onEnter = function () {
@@ -1345,6 +1396,9 @@ Test.Player = function (settings) {
   
   //set type
   this.type = 'player';
+  
+  //set moveSpeed
+  this.moveSpeed = .3;
 
   //fallback color
   this.color = "#bbbbbb";
@@ -1402,7 +1456,7 @@ Test.Tower = function (settings) {
   //time between shots
   this.shotTimer = 1000;
   this.lastShot = 0; 
-  this.bulletSpeed = .8;
+  this.bulletSpeed = .5;
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
@@ -1458,7 +1512,7 @@ function getTarget(tower) {
 };
 
 function generateShotTimer (tower) {
-  return 1000 + Math.random() * 300;
+  return 1000 + Math.random() * 2000;
 };
 
 });
@@ -1531,16 +1585,23 @@ Kane.InputWizard = function (settings) {
   add keyboard event handlers and filter out the keyName
   TODO: add touch event handlers
   */
+
+  function sameKey (prev, cur) {
+    return prev.keyName === cur.keyName; 
+  };
+
   streams.push(
-    domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
-    domNode.asEventStream('keydown').filter(filterKey).map(mapKey),
+    domNode.asEventStream('keyup').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
+    domNode.asEventStream('keydown').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
     domNode.asEventStream('mousemove').map(mapMouse),
     domNode.asEventStream('mousedown').map(mapMouse),
     domNode.asEventStream('mouseup').map(mapMouse)
   );
 
   //merge all input streams from mouse/touch/keyboard onto main stream
-  this.stream = Bacon.mergeAll(streams);
+  //we skip duplicates so that keys already pressed don't jam up the stream
+  this.stream = Bacon.mergeAll(streams)
+                .log();
 };
 
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);
@@ -1814,8 +1875,8 @@ var SceneInterface = {
   update: function (dT) {},
   draw: function () {},
 
-  keyDown: function (keyName) {},
-  keyUp: function (keyName) {},
+  keydown: function (keyName) {},
+  keyup: function (keyName) {},
 
   onEnter: function () {},
   onExit: function () {},
@@ -1842,6 +1903,20 @@ Kane.Scene = function (settings) {
   //apply settings object to this scene
   _.extend(this, settings);
 
+  //Listen on inputWizardStream and fire appropriate events
+  this.inputWizard.stream.onValue(function (val) {
+    //call the appropriate handler for input type
+    switch (val.type) {
+      case 'keydown':
+        this.keydown.call(this, val.keyName);
+        break;
+      case 'keyup':
+        this.keyup.call(this, val.keyName);
+        break;
+      //HANDLE MOUSE HERE TOO
+    }
+  }.bind(this));
+
   /*
   This is extremely important to call!
   when you want to 'subclass' scene be certain to call this
@@ -1864,8 +1939,7 @@ camera
 world (perhaps?)
 and customization for what should be sent to the loader
 */
-Kane.Scene.prototype.init = function (settings) {
-};
+Kane.Scene.prototype.init = function (settings) {};
 
 Kane.Scene.prototype.update = function (dT) {
   if (!dT) { 
@@ -1878,35 +1952,15 @@ Kane.Scene.prototype.draw = function () {
   this.onDraw();
 };
 
-Kane.Scene.prototype.keyDown = function (keyName) {
-  var action;
-
+Kane.Scene.prototype.keydown = function (keyName) {
   if (!keyName) {
     throw new Error('no keyName provided to keyDown');
-  }
-
-  //identify our action from the keyMap
-  action = this.keyMap[keyName].keyDown;
-
-  //if there is an action, execute it
-  if (action) {
-    action.call(this);
   }
 };
 
-Kane.Scene.prototype.keyUp = function (keyName) {
-  var action;
-
+Kane.Scene.prototype.keyup = function (keyName) {
   if (!keyName) {
     throw new Error('no keyName provided to keyDown');
-  }
-
-  //identify our action from the keyMap
-  action = this.keyMap[keyName].keyUp;
-
-  //if there is an action, execute it
-  if (action) {
-    action.call(this);
   }
 };
 

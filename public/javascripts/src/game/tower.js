@@ -36,7 +36,7 @@ Test.Tower = function (settings) {
   //time between shots
   this.shotTimer = 1000;
   this.lastShot = 0; 
-  this.bulletSpeed = .8;
+  this.bulletSpeed = .5;
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
@@ -92,5 +92,5 @@ function getTarget(tower) {
 };
 
 function generateShotTimer (tower) {
-  return 1000 + Math.random() * 300;
+  return 1000 + Math.random() * 2000;
 };

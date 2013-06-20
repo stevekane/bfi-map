@@ -20,6 +20,9 @@ Test.Player = function (settings) {
   
   //set type
   this.type = 'player';
+  
+  //set moveSpeed
+  this.moveSpeed = .3;
 
   //fallback color
   this.color = "#bbbbbb";
