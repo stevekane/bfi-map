@@ -1,3 +1,82 @@
+minispade.register('animation.js', function() {
+"use strict";
+/*
+An Animation should define the x, y, w, h of each frame that is found 
+on a provided spritesheet (Kane.Image).  
+
+when an animation is running the following happens:
+
+determine if the frametime for the current frame has elapsed
+If so, it should advance to the next frame
+if not, it should re-render the current frame
+
+if the frame being rendered is the last frame, it should check
+the 'shouldLoop' flag to determine if it should go to the first frame
+or simply stop
+
+To create an animation, you must provide an instance of an Image
+and an array of Kane.Frames
+*/
+minispade.require('kane.js');
+minispade.require('frame.js');
+minispade.require('clock.js');
+
+var AnimationInterface = {
+  start: function (frameNum) {},
+  stop: function () {},
+  getCurrentFrame: function () {},
+
+  fps: null,
+  frameInterval: null,
+  startTime: null
+};
+
+Kane.Animation = function (settings) {
+  var error;
+
+  if (!settings.image) { error = "no valid image provided"; }
+  if (!(settings.frames instanceof Array)) { 
+    error = "no frames array provided"; 
+  }
+  if (error) { throw new Error(error) }
+
+  //SET DEFAULTS FOR INTERFACE ATTRS
+  //defines number of frames shown per second
+  this.fps = 24;
+
+  //more useful value for determining active frame (ms/frame)
+  this.frameInterval = 1 / (this.fps / 1000);
+
+  //capture the time this animation started
+  this.startTime = Date.now();
+
+  //this clock instance is used to track animation progress
+  this.clock = new Kane.Clock();
+
+  _.extend(this, settings);
+};
+
+Kane.Animation.prototype = Object.create(AnimationInterface);
+
+Kane.Animation.prototype.start = function (frameNum) {
+  //start our clock
+  this.clock.start(); 
+
+  //if frameNum specified, start there else start at 0
+  this.currentFrame = frameNum ? this.frames[frameNum] : this.frames[0];
+};
+
+Kane.Animation.prototype.stop = function () {
+  //stop the clock
+  this.clock.stop();   
+};
+
+Kane.Animation.prototype.getCurrentFrame = function () {
+  return this.currentFrame;  
+};
+
+});
+
 minispade.register('assetloader.js', function() {
 "use strict";
 /*
@@ -537,6 +616,8 @@ minispade.require('cache.js');
 
 //"types"
 minispade.require('sprite.js');
+minispade.require('frame.js');
+minispade.require('animation.js');
 
 //"dom objects"
 minispade.require('inputwizard.js');
@@ -877,6 +958,27 @@ Kane.EntityManager.prototype.applyForAll = function (methodName, argsArray) {
 
 });
 
+minispade.register('frame.js', function() {
+"use strict";
+var FrameInterface = {};
+
+Kane.Frame = function (settings) {
+  var error;
+
+  if (undefined === settings.x) { error = "no x provided"; }
+  if (undefined === settings.y) { error = "no y provided"; }
+  if (undefined === settings.w) { error = "no w provided"; }
+  if (undefined === settings.h) { error = "no h provided"; }
+  if (error) { throw new Error(error); }
+
+  _.extend(this, settings);
+};
+
+Kane.Frame.prototype = Object.create(FrameInterface);
+
+
+});
+
 minispade.register('game.js', function() {
 "use strict";
 
@@ -1149,7 +1251,7 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: this.color, 
+          color: "#ee00ee", 
           h: 4,
           w: 4 
         }

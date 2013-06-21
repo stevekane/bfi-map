@@ -14,6 +14,8 @@ require('cache.js');
 
 //"types"
 require('sprite.js');
+require('frame.js');
+require('animation.js');
 
 //"dom objects"
 require('inputwizard.js');

@@ -79,7 +79,7 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: this.color, 
+          color: "#ee00ee", 
           h: 4,
           w: 4 
         }
