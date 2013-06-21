@@ -28,12 +28,18 @@ var SceneInterface = {
 };
 
 /*
-note, if the settings provided include a name it 
-will be overwritten by the provided name 
+Scene objects are rarely created manually and are almost always
+instantiated by the Game class during its constructor.  If you need
+to construct one manually, be sure to subclass it and add your scene-
+specific behavior to the init method
 */
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
+  }
+
+  if (!settings.inputWizard) {
+    throw new Error('no inputWizard provided in settings hash');
   }
 
   //set default keyMap

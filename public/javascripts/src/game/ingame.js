@@ -56,24 +56,16 @@ Test.Ingame.prototype.keyup = function (keyName) {
 
   switch (keyName) {
     case "left":
-      if (-speed === p.dx) {
-        p.dx = 0;
-      }
+      p.dx = 0;
       break;
     case "right":
-      if (speed === p.dx) {
-        p.dx = 0;
-      }
+      p.dx = 0;
       break;
     case "up":
-      if (-speed === p.dy) {
-        p.dy = 0;
-      }
+      p.dy = 0;
       break;
     case "down":
-      if (speed === p.dy) {
-        p.dy = 0;
-      }
+      p.dy = 0;
       break;
   }
 };

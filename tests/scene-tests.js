@@ -5,9 +5,12 @@ var assert = chai.assert;
 describe('Kane.Scene', function () {
   var s;
 
+  //Scenes are almost always created by the game object
+  //but they require many dependencies
   beforeEach(function () {
     s = new Kane.Scene({
       name: 'testScene',
+      inputWizard: new Kane.InputWizard({}),
     });
   });
 
@@ -17,7 +20,17 @@ describe('Kane.Scene', function () {
 
   it('should throw if no name provided in settings hash', function () {
     assert.throw(function (){
-      s = new Kane.Scene({});
+      s = new Kane.Scene({
+        inputWizard: new Kane.InputWizard({})
+      });
+    });
+  });
+
+  it('should throw if no inputWizard provided in settings hash', function () {
+    assert.throw(function (){
+      s = new Kane.Scene({
+        name: 'testScene'
+      });
     });
   });
 

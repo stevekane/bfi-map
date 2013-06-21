@@ -12,7 +12,8 @@ var InputWizardInterface = {
 
 Kane.InputWizard = function (settings) {
   var domNode = settings.domNode ? settings.domNode : $('body')
-    , streams = [];
+    , streams = []
+    , keyStreams = [];
 
   _.extend(this, settings);
 
@@ -23,21 +24,27 @@ Kane.InputWizard = function (settings) {
   */
 
   function sameKey (prev, cur) {
-    return prev.keyName === cur.keyName; 
+    return (prev.keyName === cur.keyName && prev.type === cur.type); 
   };
 
   streams.push(
-    domNode.asEventStream('keyup').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
-    domNode.asEventStream('keydown').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
     domNode.asEventStream('mousemove').map(mapMouse),
     domNode.asEventStream('mousedown').map(mapMouse),
     domNode.asEventStream('mouseup').map(mapMouse)
   );
 
+  //group together the keyboard streams
+  keyStreams.push(
+    domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
+    domNode.asEventStream('keydown').filter(filterKey).map(mapKey)
+  );
+
+  //merge keyboard streams and skip the duplicates
+  streams.push(Bacon.mergeAll(keyStreams).skipDuplicates(sameKey));
+
   //merge all input streams from mouse/touch/keyboard onto main stream
   //we skip duplicates so that keys already pressed don't jam up the stream
-  this.stream = Bacon.mergeAll(streams)
-                .log();
+  this.stream = Bacon.mergeAll(streams);
 };
 
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);

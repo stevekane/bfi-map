@@ -10,7 +10,7 @@ Test.Bullet = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['applebullet.png']
+             .frames['grapebullet.png']
              .frame;
 
   //bullets die after this much time has elapsed
@@ -21,6 +21,8 @@ Test.Bullet = function (settings) {
   this.h = data.h;
   this.w = data.w;
   
+  this.ddy = .001;
+
   //set type
   this.type = 'bullet';
 
@@ -32,7 +34,7 @@ Test.Bullet = function (settings) {
     sx: data.x,
     sy: data.y,
     h: data.h,
-    w: data.w
+    w: data.w,
   });
 };
 
@@ -41,6 +43,24 @@ Test.Bullet.prototype = Object.create(Kane.Entity.prototype);
 Test.Bullet.prototype.beforeUpdate = function (dT) {
   if (this.spawnTime + this.killTimer < Date.now()) {
     this.kill();
+  }
+};
+
+Test.Bullet.prototype.afterUpdate = function (dT) {
+  for (var i=0; i<5; i++) {
+    this.manager.spawn(
+      Kane.Particle,
+      {
+        x: this.x,
+        y: this.y + Math.round(Math.random() * this.h),
+        dx: Math.random() * -this.dx,
+        dy: Math.random() * -this.dy,
+        lifespan: 100,
+        color: '#dd0000', 
+        h: 2 + Math.round(Math.random() *4),
+        w: 2 + Math.round(Math.random() * 4) 
+      }
+    );
   }
 };
 
@@ -59,9 +79,9 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: "#f00000", 
-          h: 3,
-          w: 3 
+          color: this.color, 
+          h: 4,
+          w: 4 
         }
       );
     }

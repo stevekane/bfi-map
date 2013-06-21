@@ -11,7 +11,7 @@ Test.Player = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['grape-antidude.png']
+             .frames['banana-antidude.png']
              .frame;
 
   //set height and width based on data

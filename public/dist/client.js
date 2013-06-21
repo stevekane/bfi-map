@@ -547,8 +547,6 @@ minispade.require('game.js');
 minispade.require('world.js');
 minispade.require('camera.js');
 minispade.require('scene.js');
-minispade.require('loadingscene.js');
-minispade.require('gamescene.js');
 
 //"entity objects"
 minispade.require('entitymanager.js');
@@ -1082,7 +1080,7 @@ Test.Bullet = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['applebullet.png']
+             .frames['grapebullet.png']
              .frame;
 
   //bullets die after this much time has elapsed
@@ -1093,6 +1091,8 @@ Test.Bullet = function (settings) {
   this.h = data.h;
   this.w = data.w;
   
+  this.ddy = .001;
+
   //set type
   this.type = 'bullet';
 
@@ -1104,7 +1104,7 @@ Test.Bullet = function (settings) {
     sx: data.x,
     sy: data.y,
     h: data.h,
-    w: data.w
+    w: data.w,
   });
 };
 
@@ -1113,6 +1113,24 @@ Test.Bullet.prototype = Object.create(Kane.Entity.prototype);
 Test.Bullet.prototype.beforeUpdate = function (dT) {
   if (this.spawnTime + this.killTimer < Date.now()) {
     this.kill();
+  }
+};
+
+Test.Bullet.prototype.afterUpdate = function (dT) {
+  for (var i=0; i<5; i++) {
+    this.manager.spawn(
+      Kane.Particle,
+      {
+        x: this.x,
+        y: this.y + Math.round(Math.random() * this.h),
+        dx: Math.random() * -this.dx,
+        dy: Math.random() * -this.dy,
+        lifespan: 100,
+        color: '#dd0000', 
+        h: 2 + Math.round(Math.random() *4),
+        w: 2 + Math.round(Math.random() * 4) 
+      }
+    );
   }
 };
 
@@ -1131,9 +1149,9 @@ Test.Bullet.prototype.collide = function (target) {
           dx: Math.random() * this.dx,
           dy: ySign * Math.random() * this.dy,
           lifespan: 400,
-          color: "#f00000", 
-          h: 3,
-          w: 3 
+          color: this.color, 
+          h: 4,
+          w: 4 
         }
       );
     }
@@ -1247,24 +1265,16 @@ Test.Ingame.prototype.keyup = function (keyName) {
 
   switch (keyName) {
     case "left":
-      if (-speed === p.dx) {
-        p.dx = 0;
-      }
+      p.dx = 0;
       break;
     case "right":
-      if (speed === p.dx) {
-        p.dx = 0;
-      }
+      p.dx = 0;
       break;
     case "up":
-      if (-speed === p.dy) {
-        p.dy = 0;
-      }
+      p.dy = 0;
       break;
     case "down":
-      if (speed === p.dy) {
-        p.dy = 0;
-      }
+      p.dy = 0;
       break;
   }
 };
@@ -1387,7 +1397,7 @@ Test.Player = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['grape-antidude.png']
+             .frames['banana-antidude.png']
              .frame;
 
   //set height and width based on data
@@ -1416,6 +1426,38 @@ Test.Player.prototype = Object.create(Kane.Entity.prototype);
 
 });
 
+minispade.register('game/stream.js', function() {
+"use strict";
+Test.Stream = function (settings) {
+  Kane.Particle.call(this, settings);
+};
+
+Test.Stream.prototype = Object.create(Kane.Particle.prototype);
+
+Test.Stream.prototype.collide = function (target) {
+  if ('player' === target.type) {
+    this.kill();
+    for (var i=0; i<30; i++) {
+      this.manager.spawn(
+        Kane.Particle,
+        {
+          x: this.x,
+          y: this.y,
+          dx: -this.dx / 2 * Math.random(),
+          dy: -.25 * Math.random(),
+          color: "#bbbb00",
+          h: 2,
+          w: 2,
+          ddy: .001,
+          doesCollide: false
+        } 
+      );
+    }
+  }
+};
+
+});
+
 minispade.register('game/tower.js', function() {
 "use strict";
 /*
@@ -1423,6 +1465,7 @@ Towers are entities that never move but will
 shoot projectiles at the player every so often
 */
 minispade.require('entity.js');
+minispade.require('particle.js');
 
 Test.Tower = function (settings) {
   Kane.Entity.call(this, settings);
@@ -1430,7 +1473,7 @@ Test.Tower = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['appletower.png']
+             .frames['grapetower.png']
              .frame;
 
   //fallback color
@@ -1454,9 +1497,9 @@ Test.Tower = function (settings) {
   this.doesCollide = false;
 
   //time between shots
-  this.shotTimer = 1000;
+  this.shotTimer = 200;
   this.lastShot = 0; 
-  this.bulletSpeed = .5;
+  this.bulletSpeed = 1;
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
@@ -1475,8 +1518,10 @@ Test.Tower.prototype.beforeUpdate = function (dT) {
     //set lastShot time to now
     this.lastShot = currentTime;
      
+    //fire a bullet
     fireBullet(this, trajectory);
-    //vary the shot timer
+    
+    //vary the shotTimer
     this.shotTimer = generateShotTimer(this);
   }
 };
@@ -1484,7 +1529,7 @@ Test.Tower.prototype.beforeUpdate = function (dT) {
 //return object w/ x/y
 function findTrajectory (tower, target) {
   var xComp = target.x - tower.x
-    , yComp = target.y - tower.y
+    , yComp = target.y - Math.random() * 200 - tower.y
     //TODO: this could be optimized
     length = Math.sqrt(xComp*xComp + yComp*yComp); 
 
@@ -1512,49 +1557,7 @@ function getTarget(tower) {
 };
 
 function generateShotTimer (tower) {
-  return 1000 + Math.random() * 2000;
-};
-
-});
-
-minispade.register('gamescene.js', function() {
-"use strict";
-
-minispade.require('scene.js');
-
-Kane.GameScene = function (settings) {
-  Kane.Scene.call(this, settings);
-
-  if (!settings.entityManager) {
-    throw new Error('no entityManager provided to constructor');
-  }
-
-  if (!settings.camera) {
-    throw new Error('no camera provided to constructor');
-  }
-
-  //inject the scene onto the camera (used to access other scene objects)
-  settings.camera.scene = this; 
-  
-  _.extend(this, settings);
-};
-
-Kane.GameScene.prototype = Object.create(Kane.Scene.prototype);
-
-Kane.GameScene.prototype.update = function (dT) {
-  if (!dT) { 
-    throw new Error('no dT provided to update'); 
-  }
-
-  this.entityManager.removeDead();
-  this.entityManager.sortBy('zIndex'); 
-  this.entityManager.updateAll(dT);  
-  this.onUpdate(dT);
-};
-
-Kane.GameScene.prototype.draw = function () {
-  this.camera.draw();
-  this.onDraw();
+  return 2000 + Math.random() * 100;
 };
 
 });
@@ -1576,7 +1579,8 @@ var InputWizardInterface = {
 
 Kane.InputWizard = function (settings) {
   var domNode = settings.domNode ? settings.domNode : $('body')
-    , streams = [];
+    , streams = []
+    , keyStreams = [];
 
   _.extend(this, settings);
 
@@ -1587,21 +1591,27 @@ Kane.InputWizard = function (settings) {
   */
 
   function sameKey (prev, cur) {
-    return prev.keyName === cur.keyName; 
+    return (prev.keyName === cur.keyName && prev.type === cur.type); 
   };
 
   streams.push(
-    domNode.asEventStream('keyup').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
-    domNode.asEventStream('keydown').filter(filterKey).map(mapKey).skipDuplicates(sameKey),
     domNode.asEventStream('mousemove').map(mapMouse),
     domNode.asEventStream('mousedown').map(mapMouse),
     domNode.asEventStream('mouseup').map(mapMouse)
   );
 
+  //group together the keyboard streams
+  keyStreams.push(
+    domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
+    domNode.asEventStream('keydown').filter(filterKey).map(mapKey)
+  );
+
+  //merge keyboard streams and skip the duplicates
+  streams.push(Bacon.mergeAll(keyStreams).skipDuplicates(sameKey));
+
   //merge all input streams from mouse/touch/keyboard onto main stream
   //we skip duplicates so that keys already pressed don't jam up the stream
-  this.stream = Bacon.mergeAll(streams)
-                .log();
+  this.stream = Bacon.mergeAll(streams);
 };
 
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);
@@ -1723,54 +1733,6 @@ window.Kane = {};
 
 });
 
-minispade.register('loadingscene.js', function() {
-"use strict";
-
-minispade.require('scene.js');
-
-Kane.LoadingScene = function (settings) {
-  Kane.Scene.call(this, settings);
-
-  if (!settings.cache) {
-    throw new Error('no cache provided');
-  }
-
-  if (!settings.assetLoader) {
-    throw new Error('no assetLoader provided');
-  }
-
-  if (!settings.targetSceneName) {
-    this.targetSceneName = this.name;
-  }
-};
-
-Kane.LoadingScene.prototype = Object.create(Kane.Scene.prototype);
-
-Kane.LoadingScene.prototype.onEnter = function () {
-  console.log('loading assets for ', this.targetSceneName);
-
-  //call load assets, last argument is callback upon completion
-  this.assetLoader.loadAssets(
-    this.name, 
-    this.assets, 
-    loadingComplete.bind(this)
-  );
-};
-
-Kane.LoadingScene.prototype.onExit = function () {
-  console.log('transitioning from ', this.name, ' to', this.targetSceneName);
-};
-
-function loadingComplete (errors) {
-  if (0 < errors.length) {
-    console.log(errors, ' failed to load');
-  } else {
-    this.game.setCurrentScene(this.targetSceneName);
-  }
-};
-
-});
-
 minispade.register('particle.js', function() {
 "use strict";
 
@@ -1889,12 +1851,18 @@ var SceneInterface = {
 };
 
 /*
-note, if the settings provided include a name it 
-will be overwritten by the provided name 
+Scene objects are rarely created manually and are almost always
+instantiated by the Game class during its constructor.  If you need
+to construct one manually, be sure to subclass it and add your scene-
+specific behavior to the init method
 */
 Kane.Scene = function (settings) {
   if (!settings.name) {
     throw new Error('no name provided in settings hash');
+  }
+
+  if (!settings.inputWizard) {
+    throw new Error('no inputWizard provided in settings hash');
   }
 
   //set default keyMap

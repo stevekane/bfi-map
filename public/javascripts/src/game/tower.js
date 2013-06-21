@@ -3,6 +3,7 @@ Towers are entities that never move but will
 shoot projectiles at the player every so often
 */
 require('entity.js');
+require('particle.js');
 
 Test.Tower = function (settings) {
   Kane.Entity.call(this, settings);
@@ -10,7 +11,7 @@ Test.Tower = function (settings) {
   var cache = this.manager.cache
     , image = cache.getByName('spritesheet.png')
     , data = cache.getByName('spritesheet.json')
-             .frames['appletower.png']
+             .frames['grapetower.png']
              .frame;
 
   //fallback color
@@ -34,9 +35,9 @@ Test.Tower = function (settings) {
   this.doesCollide = false;
 
   //time between shots
-  this.shotTimer = 1000;
+  this.shotTimer = 200;
   this.lastShot = 0; 
-  this.bulletSpeed = .5;
+  this.bulletSpeed = 1;
 };
 
 Test.Tower.prototype = Object.create(Kane.Entity.prototype);
@@ -55,8 +56,10 @@ Test.Tower.prototype.beforeUpdate = function (dT) {
     //set lastShot time to now
     this.lastShot = currentTime;
      
+    //fire a bullet
     fireBullet(this, trajectory);
-    //vary the shot timer
+    
+    //vary the shotTimer
     this.shotTimer = generateShotTimer(this);
   }
 };
@@ -64,7 +67,7 @@ Test.Tower.prototype.beforeUpdate = function (dT) {
 //return object w/ x/y
 function findTrajectory (tower, target) {
   var xComp = target.x - tower.x
-    , yComp = target.y - tower.y
+    , yComp = target.y - Math.random() * 200 - tower.y
     //TODO: this could be optimized
     length = Math.sqrt(xComp*xComp + yComp*yComp); 
 
@@ -92,5 +95,5 @@ function getTarget(tower) {
 };
 
 function generateShotTimer (tower) {
-  return 1000 + Math.random() * 2000;
+  return 2000 + Math.random() * 100;
 };
