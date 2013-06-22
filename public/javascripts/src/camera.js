@@ -88,7 +88,24 @@ function drawEntities () {
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
     
-    if (ent.currentSprite) {
+    //attempt to draw currentAnim, currentSprite, or a rect
+    if (ent.currentAnimation) {
+      var frame = ent.currentAnimation.currentFrame;
+
+      this.gameBoard.drawSprite(
+        {
+          image: ent.currentAnimation.image,
+          sx: frame.x,
+          sy: frame.y,
+          h: frame.h,
+          w: frame.w,
+        },
+        ent.x - this.y,
+        ent.y - this.y,
+        ent.w,
+        ent.h
+      );
+    } else if (ent.currentSprite) {
       this.gameBoard.drawSprite(
         ent.currentSprite,
         ent.x - this.y,

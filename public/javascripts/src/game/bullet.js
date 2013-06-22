@@ -44,6 +44,11 @@ Test.Bullet.prototype.beforeUpdate = function (dT) {
   if (this.spawnTime + this.killTimer < Date.now()) {
     this.kill();
   }
+
+  //update the animationsheet
+  if (this.currentAnimation) {
+    this.currentAnimation.updateCurrentFrame(dT);
+  }
 };
 
 Test.Bullet.prototype.afterUpdate = function (dT) {

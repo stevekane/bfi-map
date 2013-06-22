@@ -42,7 +42,7 @@ isPlaying: boolean for playing status of this animation
 currentFrame: tracks the current active frame
 startTime: time of most recent start call
 startingFrame: frame that animation started from
-nextFrameTimeStamp: timestamp that is updated by each update call
+nextFrameTimeDelta: timestamp that is updated by each update call
                     which tells the game when it should transition
                     to the next frame
 
@@ -69,7 +69,7 @@ Kane.Animation = function (settings) {
   this.currentFrameIndex = 0;
   this.startTime = null;
   this.startingFrame = this.currentFrame;
-  this.nextFrameTimeStamp = null;
+  this.nextFrameTimeDelta = null;
 };
 
 Kane.Animation.prototype = Object.create(AnimationInterface);
@@ -77,7 +77,7 @@ Kane.Animation.prototype = Object.create(AnimationInterface);
 Kane.Animation.prototype.start = function (frameNum) {
   this.startTime = Date.now();
   //TODO: in the future, possbly include a duration attr on frames
-  //and use that attr to calculate nextFrameTimeStamp
+  //and use that attr to calculate nextFrameTimeDelta
   this.nextFrameTimeDelta = this.frameInterval;
   this.isPlaying = true;
 
@@ -111,6 +111,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
   var nextFrame
     , overshoot;
     
+
   if (undefined === dT || null === dT) {
     throw new Error('no dT provided to updateCurrentFrame');
   } 
@@ -134,7 +135,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
         this.stop(); 
 
       //otherwise, set next frame/index and 
-      //calculate nextFrameTimeStamp
+      //calculate nextFrameTimeDelta
       } else {
         this.currentFrame = this.frames[0];
         this.currentFrameIndex = 0;
@@ -145,6 +146,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
     } else {
       this.currentFrame = this.frames[this.currentFrameIndex + 1];
       this.currentFrameIndex = this.currentFrameIndex + 1;
+      this.nextFrameTimeDelta = this.frameInterval - overshoot;
     }
   
   //if not enough time has passed, just update the nextFrameTimeDelta

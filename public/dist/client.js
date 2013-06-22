@@ -42,7 +42,7 @@ isPlaying: boolean for playing status of this animation
 currentFrame: tracks the current active frame
 startTime: time of most recent start call
 startingFrame: frame that animation started from
-nextFrameTimeStamp: timestamp that is updated by each update call
+nextFrameTimeDelta: timestamp that is updated by each update call
                     which tells the game when it should transition
                     to the next frame
 
@@ -69,7 +69,7 @@ Kane.Animation = function (settings) {
   this.currentFrameIndex = 0;
   this.startTime = null;
   this.startingFrame = this.currentFrame;
-  this.nextFrameTimeStamp = null;
+  this.nextFrameTimeDelta = null;
 };
 
 Kane.Animation.prototype = Object.create(AnimationInterface);
@@ -77,7 +77,7 @@ Kane.Animation.prototype = Object.create(AnimationInterface);
 Kane.Animation.prototype.start = function (frameNum) {
   this.startTime = Date.now();
   //TODO: in the future, possbly include a duration attr on frames
-  //and use that attr to calculate nextFrameTimeStamp
+  //and use that attr to calculate nextFrameTimeDelta
   this.nextFrameTimeDelta = this.frameInterval;
   this.isPlaying = true;
 
@@ -111,6 +111,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
   var nextFrame
     , overshoot;
     
+
   if (undefined === dT || null === dT) {
     throw new Error('no dT provided to updateCurrentFrame');
   } 
@@ -134,7 +135,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
         this.stop(); 
 
       //otherwise, set next frame/index and 
-      //calculate nextFrameTimeStamp
+      //calculate nextFrameTimeDelta
       } else {
         this.currentFrame = this.frames[0];
         this.currentFrameIndex = 0;
@@ -145,6 +146,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
     } else {
       this.currentFrame = this.frames[this.currentFrameIndex + 1];
       this.currentFrameIndex = this.currentFrameIndex + 1;
+      this.nextFrameTimeDelta = this.frameInterval - overshoot;
     }
   
   //if not enough time has passed, just update the nextFrameTimeDelta
@@ -462,7 +464,24 @@ function drawEntities () {
   //subtract their position in the world from the camera's
   _(entsToDraw).each(function (ent, index, ents) {
     
-    if (ent.currentSprite) {
+    //attempt to draw currentAnim, currentSprite, or a rect
+    if (ent.currentAnimation) {
+      var frame = ent.currentAnimation.currentFrame;
+
+      this.gameBoard.drawSprite(
+        {
+          image: ent.currentAnimation.image,
+          sx: frame.x,
+          sy: frame.y,
+          h: frame.h,
+          w: frame.w,
+        },
+        ent.x - this.y,
+        ent.y - this.y,
+        ent.w,
+        ent.h
+      );
+    } else if (ent.currentSprite) {
       this.gameBoard.drawSprite(
         ent.currentSprite,
         ent.x - this.y,
@@ -1302,6 +1321,11 @@ Test.Bullet.prototype.beforeUpdate = function (dT) {
   if (this.spawnTime + this.killTimer < Date.now()) {
     this.kill();
   }
+
+  //update the animationsheet
+  if (this.currentAnimation) {
+    this.currentAnimation.updateCurrentFrame(dT);
+  }
 };
 
 Test.Bullet.prototype.afterUpdate = function (dT) {
@@ -1579,6 +1603,36 @@ The player respawns to input from keyboard and mouse
 */
 minispade.require('entity.js');
 
+/*
+TODO:
+used to build animations.  This needs to be moved almost
+certainly to some sort of animation sheet object
+*/
+function buildAnimation (cache, image, json, frameNames) {
+  var frames = [];
+
+  for (var i=0; i<frameNames.length; i++) {
+    var frameName = frameNames[i];
+    var data = cache.getByName(json).frames[frameName].frame;
+
+    frames.push(
+      new Kane.Frame({
+        x: data.x,
+        y: data.y,
+        w: data.w,
+        h: data.h
+      })
+    );   
+  }
+
+  return new Kane.Animation({
+    image: cache.getByName(image),
+    frames: frames,
+    shouldLoop: true,
+    fps: 1 
+  });
+};
+
 Test.Player = function (settings) {
   Kane.Entity.call(this, settings);
 
@@ -1587,6 +1641,20 @@ Test.Player = function (settings) {
     , data = cache.getByName('spritesheet.json')
              .frames['banana-antidude.png']
              .frame;
+
+  this.currentAnimation = buildAnimation(
+    this.manager.cache,
+    'spritesheet.png',
+    'spritesheet.json',
+    [
+      'grape-antidude.png', 
+      'grape-antitower.png', 
+      'grape-antibase.png'
+    ]
+  );
+
+  //start the currentAnimation
+  this.currentAnimation.start();
 
   //set height and width based on data
   this.h = data.h;
@@ -1611,6 +1679,13 @@ Test.Player = function (settings) {
 };
 
 Test.Player.prototype = Object.create(Kane.Entity.prototype);
+
+Test.Player.prototype.beforeUpdate = function (dT) {
+  //update the animationsheet
+  if (this.currentAnimation) {
+    this.currentAnimation.updateCurrentFrame(dT);
+  }
+};
 
 });
 
@@ -2152,8 +2227,8 @@ var SpriteInterface = {};
 Kane.Sprite = function (settings) {
   var validImage = settings.image instanceof Image;
 
-  this.x = 0;
-  this.y = 0;
+  this.sx = 0;
+  this.sy = 0;
   this.w = 0;
   this.h = 0;
 
