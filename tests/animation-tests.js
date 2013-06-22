@@ -101,18 +101,84 @@ describe("Kane.Animation", function () {
         anim.updateCurrentFrame();
       });
     });
-    it('should change current frame based timeTillNextFrame and dT', 
-    function () {
-      var timeStep = 10;
 
-      anim.start();
-      anim.updateCurrentFrame(timeStep);
-      assert.equal(anim.currentFrame, frameOne);
-      assert.equal(anim.nextFrameTimeDelta, anim.frameInterval - timeStep);
+    describe("the case when the  frame shouldnot advance", function () {
+      it('should keep the same frame as before the update', function () {
+        var frameBefore
+          , frameAfter;
 
-      anim.updateCurrentFrame(anim.frameInterval);
-      assert.equal(anim.nextFrameTimeDelta, anim.frameInterval - timeStep);
-      assert.equal(anim.currentFrame, frameTwo);
+        anim.start();
+        frameBefore = anim.currentFrame;
+        //default time interval for animatiosn is 41.6 ms
+        anim.updateCurrentFrame(10);        
+        frameAfter = anim.currentFrame;
+        assert.equal(frameBefore, frameAfter);
+      });
+    });
+
+    describe("the case when the frame should not advance", function () {
+      it('should not change the currentFrame', function () {
+        var frameBefore
+          , indexBefore
+          , frameAfter
+          , indexAfter;
+
+        anim.start();
+        frameBefore = anim.currentFrame;
+        indexBefore = anim.currentFrameIndex;
+        //provide dT that is smaller than required frameInterval(41.6)
+        anim.updateCurrentFrame(10); 
+        frameAfter = anim.currentFrame;
+        indexAfter = anim.currentFrameIndex;
+        assert.equal(frameAfter, frameBefore);
+        assert.equal(indexAfter, indexBefore);
+      });
+    });
+    describe("the case when the frame should advance", function () {
+      describe("the case when the currentFrame is last frame", function () {
+        describe("the case when shouldLoop is false", function () {
+          it('should stop the animation and reset the current frame', 
+          function () {
+            anim.shouldLoop = false;
+            //start at last frame
+            anim.start(1); 
+            //provide a dT larger than the frameInterval (41.6)
+            anim.updateCurrentFrame(50);
+            
+            assert.equal(frameOne, anim.currentFrame);
+            assert.equal(0, anim.currentFrameIndex);
+            assert.isFalse(anim.isPlaying);
+          });
+        });
+
+        describe("the case when shouldLoop is true", function () {
+          it('should reset the current frame and keep playing', function () {
+            anim.shouldLoop = true;
+            //start at last frame
+            anim.start(1);
+            //provide dT larger than the frameInterval (41.6)
+            anim.updateCurrentFrame(50);
+            
+            assert.equal(frameOne, anim.currentFrame);
+            assert.equal(0, anim.currentFrameIndex);
+            assert.isTrue(anim.isPlaying);
+          });
+        });
+      });
+      
+      describe('the case when the currentSlide is NOT the last frame',
+      function () {
+        it('should advance the frame and frame index by 1', function () {
+          //start anim at first frame
+          anim.start();
+          //provide dT larger than frameInterval (41.6)
+          anim.updateCurrentFrame(50);
+          
+          assert.equal(frameTwo, anim.currentFrame);
+          assert.equal(1, anim.currentFrameIndex); 
+          assert.isTrue(anim.isPlaying);
+        });
+      });
     });
   });
 });

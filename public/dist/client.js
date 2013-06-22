@@ -155,6 +155,7 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
   }
 };
 
+
 });
 
 minispade.register('assetloader.js', function() {

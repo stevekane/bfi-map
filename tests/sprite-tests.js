@@ -22,30 +22,30 @@ describe("Kane.Sprite", function () {
     });
   });
 
-  it('should assign a default value of 0 to x, y, w, h if none provided', function () {
+  it('should assign a default value of 0 to sx, sy, w, h if none provided', function () {
     s = new Kane.Sprite({
       image: image
     });
 
-    assert.equal(s.x, 0);
-    assert.equal(s.y, 0);
+    assert.equal(s.sx, 0);
+    assert.equal(s.sy, 0);
     assert.equal(s.w, 0);
     assert.equal(s.h, 0);
   });
 
   it('should assign values to x, y, w, h if provided', function () {
-    var x = 1, y = 2, w = 3, h = 4;
+    var sx = 1, sy = 2, w = 3, h = 4;
   
     s = new Kane.Sprite({
       image: image,
-      x: x,
-      y: y,
+      sx: sx,
+      sy: sy,
       w: w, 
       h: h
     });
 
-    assert.equal(s.x, x);
-    assert.equal(s.y, y);
+    assert.equal(s.sx, sx);
+    assert.equal(s.sy, sy);
     assert.equal(s.w, w);
     assert.equal(s.h, h);
   });

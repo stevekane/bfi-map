@@ -154,3 +154,4 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
     this.nextFrameTimeDelta = this.nextFrameTimeDelta - dT;
   }
 };
+
