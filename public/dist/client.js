@@ -19,17 +19,34 @@ and an array of Kane.Frames
 */
 minispade.require('kane.js');
 minispade.require('frame.js');
-minispade.require('clock.js');
 
 var AnimationInterface = {
   start: function (frameNum) {},
   stop: function () {},
-  getCurrentFrame: function () {},
+  reset: function () {},
+  updateCurrentFrame: function (dT) {},
 
+  //interface attributes
   fps: null,
   frameInterval: null,
-  startTime: null
+  currentFrame: null,
+  currentFrameIndex: null,
+  isPlaying: false,
+  shouldLoop: false
 };
+
+/**
+fps: frames per second
+frameInterval: inverse of fps converted to ms
+isPlaying: boolean for playing status of this animation
+currentFrame: tracks the current active frame
+startTime: time of most recent start call
+startingFrame: frame that animation started from
+nextFrameTimeStamp: timestamp that is updated by each update call
+                    which tells the game when it should transition
+                    to the next frame
+
+*/
 
 Kane.Animation = function (settings) {
   var error;
@@ -40,39 +57,100 @@ Kane.Animation = function (settings) {
   }
   if (error) { throw new Error(error) }
 
-  //SET DEFAULTS FOR INTERFACE ATTRS
-  //defines number of frames shown per second
   this.fps = 24;
-
-  //more useful value for determining active frame (ms/frame)
-  this.frameInterval = 1 / (this.fps / 1000);
-
-  //capture the time this animation started
-  this.startTime = Date.now();
-
-  //this clock instance is used to track animation progress
-  this.clock = new Kane.Clock();
+  this.shouldLoop = false;
 
   _.extend(this, settings);
+
+  //calc these after the parsing the settings
+  this.isPlaying = false;  
+  this.frameInterval = 1 / (this.fps / 1000);
+  this.currentFrame = this.frames[0];
+  this.currentFrameIndex = 0;
+  this.startTime = null;
+  this.startingFrame = this.currentFrame;
+  this.nextFrameTimeStamp = null;
 };
 
 Kane.Animation.prototype = Object.create(AnimationInterface);
 
 Kane.Animation.prototype.start = function (frameNum) {
-  //start our clock
-  this.clock.start(); 
+  this.startTime = Date.now();
+  //TODO: in the future, possbly include a duration attr on frames
+  //and use that attr to calculate nextFrameTimeStamp
+  this.nextFrameTimeDelta = this.frameInterval;
+  this.isPlaying = true;
 
   //if frameNum specified, start there else start at 0
-  this.currentFrame = frameNum ? this.frames[frameNum] : this.frames[0];
+  if (null !== frameNum && undefined !== frameNum) {
+    this.currentFrame = this.frames[frameNum];
+    this.currentFrameIndex = frameNum;
+  } 
+
+  this.startingFrame = this.currentFrame;
 };
 
+//stop playing and reset to first frame
 Kane.Animation.prototype.stop = function () {
-  //stop the clock
-  this.clock.stop();   
+  this.currentFrame = this.frames[0];
+  this.currentFrameIndex = 0;
+  this.isPlaying = false;
 };
 
-Kane.Animation.prototype.getCurrentFrame = function () {
-  return this.currentFrame;  
+//resets the anim and resumes playing (alias for stop/start())
+Kane.Animation.prototype.reset = function () {
+  this.stop();
+  this.start();
+};
+
+/*
+Here we use the startingFrame, startingTime, and a 
+Date.now to compute what frame we should be showing
+*/
+Kane.Animation.prototype.updateCurrentFrame = function (dT) {
+  var nextFrame
+    , overshoot;
+    
+  if (undefined === dT || null === dT) {
+    throw new Error('no dT provided to updateCurrentFrame');
+  } 
+
+  //if we are not playing, do nothing
+  if (!this.isPlaying) {
+    return; 
+  }
+
+  //calculate how much we overshot the next transition
+  overshoot = dT - this.nextFrameTimeDelta;
+ 
+  //we use this expression instead of overshoot > 0 because it's clearer
+  if (dT >= this.nextFrameTimeDelta) {
+
+    //is this the last frame?
+    if (this.currentFrameIndex === this.frames.length - 1) {
+
+      //if we shouldn't loop, animation is done
+      if (!this.shouldLoop) { 
+        this.stop(); 
+
+      //otherwise, set next frame/index and 
+      //calculate nextFrameTimeStamp
+      } else {
+        this.currentFrame = this.frames[0];
+        this.currentFrameIndex = 0;
+        this.nextFrameTimeDelta = this.frameInterval - overshoot;
+      }
+    
+    //if not last frame, advance 1 frame
+    } else {
+      this.currentFrame = this.frames[this.currentFrameIndex + 1];
+      this.currentFrameIndex = this.currentFrameIndex + 1;
+    }
+  
+  //if not enough time has passed, just update the nextFrameTimeDelta
+  } else {
+    this.nextFrameTimeDelta = this.nextFrameTimeDelta - dT;
+  }
 };
 
 });
@@ -423,6 +501,7 @@ var ClockInterface = {
   start: function () {},
   stop: function () {},
   getTimeDelta: function () {},
+  timeSinceStart: function () {},
 
   //public interface attributes
   isRecording: false,
@@ -478,6 +557,13 @@ Kane.Clock.prototype.getTimeDelta = function () {
   this.timeStamp = timeStamp;
   
   return dT;
+};
+
+Kane.Clock.prototype.timeSinceStart = function () {
+  if (!this.isRecording) {
+    throw new Error('clock not currently running');
+  }
+  return Date.now() - this.startTime;
 };
 
 });
@@ -1697,25 +1783,40 @@ Kane.InputWizard = function (settings) {
   };
 
   streams.push(
-    domNode.asEventStream('mousemove').map(mapMouse),
-    domNode.asEventStream('mousedown').map(mapMouse),
-    domNode.asEventStream('mouseup').map(mapMouse)
+    domNode
+      .asEventStream('mousemove')
+      .map(mapMouse),
+    domNode
+      .asEventStream('mousedown')
+      .map(mapMouse),
+    domNode
+      .asEventStream('mouseup')
+      .map(mapMouse)
   );
 
   //group together the keyboard streams
   keyStreams.push(
-    domNode.asEventStream('keyup').filter(filterKey).map(mapKey),
-    domNode.asEventStream('keydown').filter(filterKey).map(mapKey)
+    domNode
+      .asEventStream('keyup')
+      .filter(filterKey)
+      .map(mapKey),
+    domNode
+      .asEventStream('keydown')
+      .filter(filterKey)
+      .map(mapKey)
   );
 
   //merge keyboard streams and skip the duplicates
-  streams.push(Bacon.mergeAll(keyStreams).skipDuplicates(sameKey));
+  streams
+    .push(Bacon.mergeAll(keyStreams).skipDuplicates(sameKey));
 
-  //merge all input streams from mouse/touch/keyboard onto main stream
-  //we skip duplicates so that keys already pressed don't jam up the stream
+  /*
+  merge all input streams from mouse/touch/keyboard 
+  onto main stream we skip duplicates so that keys 
+  already pressed don't jam up the stream
+  */
   this.stream = Bacon.mergeAll(streams);
 };
-
 Kane.InputWizard.prototype = Object.create(InputWizardInterface);
 
 function filterKey (e) {

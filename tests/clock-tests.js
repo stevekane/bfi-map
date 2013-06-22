@@ -58,7 +58,8 @@ describe('Kane.Clock', function () {
       });
     });
 
-    it('should a number of ms since the last getTimeDelta was called', function () {
+    it('should a number of ms since the last getTimeDelta was called', 
+    function () {
       var dT;
 
       clock.start();
@@ -68,4 +69,23 @@ describe('Kane.Clock', function () {
     });
   });
 
+  describe("#timeSinceStart()", function () {
+    it('should return the amount of time in ms since start', function (done) {
+      var startTime
+        , timeSinceStart;
+
+      clock.start();
+      startTime = clock.startTime;      
+      
+      timeSinceStart = clock.timeSinceStart(); 
+      assert.equal(0, timeSinceStart);
+
+      setTimeout(function () {
+        var timeAtleastFifty = (50 <= clock.timeSinceStart()) ? true : false;
+        
+        assert.isTrue(timeAtleastFifty);
+        done();
+      }, 50);
+    });
+  });
 });

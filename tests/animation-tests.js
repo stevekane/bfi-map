@@ -49,16 +49,16 @@ describe("Kane.Animation", function () {
       assert.isFunction(anim.start);
     });
 
-    it('should set the current frame to the specified frame or 0', function () {
-      var currentFrame;
+    it('should set the current frame to the specified frame or currentFrame', 
+    function () {
 
       anim.start();
-      currentFrame = anim.getCurrentFrame();       
-      assert.equal(currentFrame, frameOne);
+      assert.equal(anim.currentFrame, frameOne);
+      anim.reset();
 
       anim.start(1);
-      currentFrame = anim.getCurrentFrame();       
-      assert.equal(currentFrame, frameTwo);
+      assert.equal(anim.currentFrame, frameTwo);
+      assert.equal(anim.currentFrameIndex, 1);
     });
   });
 
@@ -66,11 +66,53 @@ describe("Kane.Animation", function () {
     it('should be a function', function () {
       assert.isFunction(anim.stop);
     });
+    
+    it('should reset the currentFrame to the first frame', function () {
+      anim.start(1);
+      anim.stop();
+
+      assert.equal(anim.currentFrame, frameOne);
+      assert.equal(anim.currentFrameIndex, 0);
+    });
+
+    it('should set isPlaying to false', function () {
+      anim.start();
+      anim.stop();
+
+      assert.isFalse(anim.isPlaying);
+    });
   });
 
-  describe("#getCurrentFrame()", function () {
-    it('should be a function', function () {
-      assert.isFunction(anim.getCurrentFrame);
+  describe("#reset()", function () {
+    it('should return to the first frame', 
+    function () {
+
+      anim.start(1);
+      anim.reset();
+
+      assert.equal(anim.currentFrame, frameOne); 
+      assert.equal(anim.currentFrameIndex, 0); 
+    });
+  });
+
+  describe("#updateCurrentFrame()", function () {
+    it('should throw if no dT is provided', function () {
+      assert.throws(function () {
+        anim.updateCurrentFrame();
+      });
+    });
+    it('should change current frame based timeTillNextFrame and dT', 
+    function () {
+      var timeStep = 10;
+
+      anim.start();
+      anim.updateCurrentFrame(timeStep);
+      assert.equal(anim.currentFrame, frameOne);
+      assert.equal(anim.nextFrameTimeDelta, anim.frameInterval - timeStep);
+
+      anim.updateCurrentFrame(anim.frameInterval);
+      assert.equal(anim.nextFrameTimeDelta, anim.frameInterval - timeStep);
+      assert.equal(anim.currentFrame, frameTwo);
     });
   });
 });

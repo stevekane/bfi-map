@@ -4,6 +4,7 @@ var ClockInterface = {
   start: function () {},
   stop: function () {},
   getTimeDelta: function () {},
+  timeSinceStart: function () {},
 
   //public interface attributes
   isRecording: false,
@@ -59,4 +60,11 @@ Kane.Clock.prototype.getTimeDelta = function () {
   this.timeStamp = timeStamp;
   
   return dT;
+};
+
+Kane.Clock.prototype.timeSinceStart = function () {
+  if (!this.isRecording) {
+    throw new Error('clock not currently running');
+  }
+  return Date.now() - this.startTime;
 };
