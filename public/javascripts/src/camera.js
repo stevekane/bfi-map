@@ -65,24 +65,24 @@ Kane.Camera.prototype.draw = function () {
   //TODO: implement draw bg, drawmap
 
   if (this.scene.entityManager && this.gameBoard) {
-    drawEntities.call(this);
+    drawEntities(this);
   }
 };
 
-function drawEntities () {
+function drawEntities (camera) {
   //local ref to ents in entityManager
-  var ents = this.scene.entityManager.listEntities()
+  var ents = camera.scene.entityManager.listEntities()
     , checkCollision = Kane.Utils.checkBBCollision
     , entsToDraw;
 
   //clear the canvas each draw cycle
-  this.gameBoard.clearAll();
+  camera.gameBoard.clearAll();
 
   //loop over all entities and check if they "collide" w/ the camera
   //which means they should be drawn 
   entsToDraw = _(ents).filter(function (ent) {
-    return checkCollision(ent, this);
-  }, this);
+    return checkCollision(ent, camera);
+  });
   
   //if they should be drawn, calculate where they should be drawn
   //subtract their position in the world from the camera's
@@ -92,7 +92,7 @@ function drawEntities () {
     if (ent.currentAnimation) {
       var frame = ent.currentAnimation.currentFrame;
 
-      this.gameBoard.drawSprite(
+      camera.gameBoard.drawSprite(
         {
           image: ent.currentAnimation.image,
           sx: frame.x,
@@ -100,29 +100,29 @@ function drawEntities () {
           h: frame.h,
           w: frame.w,
         },
-        ent.x - this.y,
-        ent.y - this.y,
+        ent.x - camera.y,
+        ent.y - camera.y,
         ent.w,
         ent.h
       );
     } else if (ent.currentSprite) {
-      this.gameBoard.drawSprite(
+      camera.gameBoard.drawSprite(
         ent.currentSprite,
-        ent.x - this.y,
-        ent.y - this.y,
+        ent.x - camera.y,
+        ent.y - camera.y,
         ent.w,
         ent.h
       );
     } else {
-      this.gameBoard.drawRect(
+      camera.gameBoard.drawRect(
         ent.color,
-        ent.x - this.x,
-        ent.y - this.y,
+        ent.x - camera.x,
+        ent.y - camera.y,
         ent.w,
         ent.h 
       ); 
     }
-  }, this);
+  });
 };
 
 Kane.Camera.prototype.setSize = function (w, h) {
