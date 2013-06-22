@@ -111,7 +111,6 @@ Kane.Animation.prototype.updateCurrentFrame = function (dT) {
   var nextFrame
     , overshoot;
     
-
   if (undefined === dT || null === dT) {
     throw new Error('no dT provided to updateCurrentFrame');
   } 

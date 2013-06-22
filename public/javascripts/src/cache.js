@@ -43,6 +43,7 @@ this is most often used by objects to determine if everything they
 need is loaded and available in the cache
 */
 Kane.Cache.prototype.allInCache = function (nameArray) {
+  //not terribly perf sensitive so this is fine
   return _(nameArray).every(function (name) {
     return Boolean(this.getByName(name));
   }, this);

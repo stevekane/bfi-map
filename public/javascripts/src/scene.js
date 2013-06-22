@@ -53,10 +53,10 @@ Kane.Scene = function (settings) {
     //call the appropriate handler for input type
     switch (val.type) {
       case 'keydown':
-        this.keydown.call(this, val.keyName);
+        this.keydown(val.keyName);
         break;
       case 'keyup':
-        this.keyup.call(this, val.keyName);
+        this.keyup(val.keyName);
         break;
       //HANDLE MOUSE HERE TOO
     }

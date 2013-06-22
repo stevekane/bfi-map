@@ -104,17 +104,34 @@ Kane.EntityManager.prototype.sortBy = function (propName, ascending) {
   });
 };
 
+//performance sensitive
 Kane.EntityManager.prototype.updateAll = function (dT) {
   var collisions;
 
   this.callForAll('update', dT);
+  
+  //find objects in array that collide
+  collisions = this.findCollisions(this);
 
-  //send out notification of collisions
-  collisions = this.findCollisions();
-  _(collisions).each(function (collision) {
-    collision.subject.collide.call(collision.subject, collision.target);
-  }); 
+  for (var i = 0, len = collisions.length;i < len; i++) {
+    collisions[i].subject.collide(collisions[i].target);
+  }
 };
+
+/*
+//TODO: WIP PERF REPLACEMENT LOOP.  FINISH!
+Kane.EntityManager.prototype.findCollisions = function (entities) {
+  var checkBBCollision = Kane.Utils.checkBBCollision
+    , colliders = [];
+
+  //loop over all entities
+  for (var c = 0, len = entities.length; c < len; c++) {
+    for (var t = 0; t < len; t++) {
+
+    } 
+  }
+};
+*/
 
 Kane.EntityManager.prototype.findCollisions = function () {
   var collisions = []
@@ -182,7 +199,7 @@ Kane.EntityManager.prototype.callForAll = function (methodName) {
 
   _(this).each(function (entity) {
     if (entity[methodName]) {
-      entity[methodName].apply(entity, args);
+      entity[methodName].call(entity, args);
     }
   });
 };

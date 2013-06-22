@@ -129,11 +129,11 @@ Kane.Game.prototype.setCurrentScene = function (name) {
     if (oldScene.name === name) {
       return;
     }
-    oldScene.onExit.call(oldScene) 
+    oldScene.onExit() 
   };
 
   //call new scene's onEnter hook
-  matchingScene.onEnter.call(matchingScene);
+  matchingScene.onEnter();
    
   this.currentScene = matchingScene;
 };
@@ -152,7 +152,10 @@ Kane.Game.prototype.start = function () {
   //start the clock
   this.clock.start();
 
-  //call update at fixed interval
+  /*
+  because we are blocked on perf by the interval,
+  there is no reason to replace bind w/ closure
+  */
   window.setInterval(update.bind(this), this.interval || 25);
 
   //start the draw method firing on every render
@@ -164,12 +167,13 @@ Kane.Game.prototype.stop = function () {
   this.clock.stop();
 };
 
-
 //increment game logic
 function update () {
   if (!this.isRunning) { return; }
 
   var dT = this.clock.getTimeDelta();
+
+  //TODO: should this be just the currentScene?
   _(this.scenes).each(function (scene) {
     scene.update(dT)
   }, this);
