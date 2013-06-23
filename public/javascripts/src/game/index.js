@@ -13,6 +13,16 @@ Test.Index.prototype.init = function (settings) {
   this.assets = ['public/images/spritesheet.png',
                  'public/json/spritesheet.json']; 
 
+  this.gameBoard = new Kane.DrawPlane({
+    board: $('#gameboard')
+  });
+  this.camera = new Kane.Camera({
+    scene: this,
+    gameBoard: this.gameBoard,
+    h: document.height,
+    w: document.width
+  }); 
+
   //the scene we will transition to when loading is done
   this.targetSceneName = "ingame";
 };
@@ -20,6 +30,7 @@ Test.Index.prototype.init = function (settings) {
 Test.Index.prototype.onEnter = function () {
   console.log('loading assets for ', this.targetSceneName);
 
+  this.text = "loading in progress!";
   //call load assets, last argument is callback upon completion
   this.assetLoader.loadAssets(
     this.name, 
@@ -28,11 +39,25 @@ Test.Index.prototype.onEnter = function () {
   );
 };
 
+Test.Index.prototype.draw = function () {
+  this.camera.gameBoard.clearAll();
+  this.camera.gameBoard.renderText(this.text, 'Arial', '30px', 50, 50);
+};
+
 //when loading is complete, we will call this function
 function loadingComplete (errors) {
   if (0 < errors.length) {
     console.log(errors, ' failed to load');
   } else {
-    this.game.setCurrentScene(this.targetSceneName);
+
+    this.text = "load complete press enter!";
+
+    //this.game.setCurrentScene(this.targetSceneName);
+    this.keyup = function (keyName) {
+      if ('enter' === keyName) {
+        this.game.setCurrentScene(this.targetSceneName);
+      }
+
+    };
   }
 };

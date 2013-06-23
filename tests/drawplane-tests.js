@@ -126,6 +126,15 @@ describe('Kane.DrawPlane', function () {
     });
   });
 
+  
+  describe("#renderText()", function () {
+    it('should run without error', function () {
+      assert.doesNotThrow(function () {
+        drawPlane.renderText('test words', 'Arial', '20px', 50, 50);
+      });
+    });
+  });
+
   //we don't test the functionality for ease
   describe("#clearAll", function () {
     it('should run without error', function () {

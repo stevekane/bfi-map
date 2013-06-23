@@ -5,6 +5,7 @@ var DrawPlaneInterface = {
   drawRect: function (color, x, y, w, h) {},
   drawImage: function (image, sx, sy) {},
   drawSprite: function (sprite, x, y, w, h) {},
+  renderText: function (text, font, size, x, y) {},
   clearAll: function () {},
   setSize: function (w, h) {},
   getWidth: function () {},
@@ -82,6 +83,16 @@ Kane.DrawPlane.prototype.drawSprite = function (sprite, x, y, w, h) {
     w,
     h
   );
+};
+
+Kane.DrawPlane.prototype.renderText = function (text, font, size, x, y) {
+  if ('number' === typeof size) {
+    //coerce to string and attach px
+    size = size + px;
+  }
+
+  this.ctx.font = size + " " + font;
+  this.ctx.fillText(text, x, y);
 };
 
 Kane.DrawPlane.prototype.clearAll = function () {
