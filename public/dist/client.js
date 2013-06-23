@@ -969,8 +969,10 @@ Kane.EntityManager.prototype.sortBy = function (propName, ascending) {
 //performance sensitive
 Kane.EntityManager.prototype.updateAll = function (dT) {
   
-  //TODO: replace w/ iteration that is faster
-  this.callForAll('update', dT);
+  //call update on each entity
+  for (var eCount = 0, len = this.length; eCount < len; eCount++) {
+    this[eCount].update(dT);
+  }
   
   //check all entities for collisions and fire collide methods
   this.processCollisions(this);
@@ -982,8 +984,8 @@ Kane.EntityManager.prototype.processCollisions = function (entities) {
 
   /*
   loop over all entities
-  within loop, entities[t] is current "target"
-  while entities[s] is current "subject"
+  entities[t] is current "target"
+  entities[s] is current "subject"
   */
   for (var s = 0, len = entities.length; s < len; s++) {
 
@@ -1002,6 +1004,7 @@ Kane.EntityManager.prototype.processCollisions = function (entities) {
 
       //checks for collision where both subject/target doesCollide
       if (checkBBCollision(entities[s], entities[t])) {
+
         //fire each collision method
         entities[s].collide(entities[t]);
       } 
