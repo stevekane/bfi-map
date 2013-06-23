@@ -121,43 +121,76 @@ describe('Kane.EntityManager', function () {
     });
   });
 
-  describe("#findCollisions()", function () {
-    it('should be a function', function () {
-      assert.isFunction(em.findCollisions);
-    });
-    it('should return array of collision maps', function () {
-      var noOverlap = {
-        x: 0,
-        y: 20,
-        h: 20,
-        w: 20,
-      },  overlap1 = {
-        x: 5,
-        y: 5,
-        h: 5,
-        w: 5,
-      },  overlap2 = {
-        x: 5,
-        y: 5,
-        h: 2,
-        w: 2,
-      }
-        , collisions;
+  /*
+  we have no asserts here, if the expected collide method is called
+  then mocha's done function will be called and this is successful
+  else, we will timeout and fail (indicating collide was not called)
+  */
+  describe("#processCollisions()", function () {
+      var collide = function () {
+        this.done();
+      } , noOverlap = { 
+        x: 0, y: 20, h: 20, w: 20, 
+      } , overlap1 = {
+        x: 5, y: 5, h: 5, w: 5, collide: collide
+      } , overlap2 = {
+        x: 5, y: 5, h: 2, w: 2, collide: collide
+      };
+
+    it('should fire collide method if entities collide', function (done) {
+      //this is weird, but we are injecting a ref to mocha's done onto
+      //the objects so that their collide methods will call it
+      overlap1.done = done; 
+      overlap2.done = done; 
 
       //add three entities, 2 of whom should overlap
       em.spawn(Kane.Entity, noOverlap);
       em.spawn(Kane.Entity, overlap1);
       em.spawn(Kane.Entity, overlap2);
+      em.processCollisions(em); 
+    });
+    
+    it('should NOT fire collide if objects checked do not collide', 
+    function () {
+      //another weird thing.  Here we throw an error to indicate
+      //an incorrect collide call and provide a failure
+      overlap1.collide = null;
+      noOverlap.collide = function () {
+        throw new Error('collide erroneously called');
+      };
 
-      collisions = em.findCollisions(); 
+      em.spawn(Kane.Entity, noOverlap);
+      em.spawn(Kane.Entity, overlap1);
+      em.processCollisions(em);
+    });
 
-      assert.isArray(collisions);
-      assert.lengthOf(collisions, 2);
-      //check that subject/target are all valid entities
-      assert.instanceOf(collisions[0].subject, Kane.Entity);
-      assert.instanceOf(collisions[0].target, Kane.Entity);
-      assert.instanceOf(collisions[1].subject, Kane.Entity);
-      assert.instanceOf(collisions[1].target, Kane.Entity);
+    it('should not fire collide for an object if it collides with itself',
+    function () {
+      //here we add a method that will throw if an object improperly
+      //detects a collision with itself
+      overlap1.collide = function () {
+        throw new Error('Object incorrectly collided with itself');
+      };
+
+      em.spawn(Kane.Entity, overlap1);
+      em.processCollisions(em);
+    });
+
+    it('should not fire a collision if the subject does not collide', 
+    function () {
+      //here we add a method that will throw if an object that is flagged
+      //doesCollide = false triggers a collide call
+      var badCollide = function () {
+        throw new Error('Object with doesCollide=false has collided');
+      };
+    
+      overlap1.collide = badCollide;
+      overlap1.doesCollide = false;
+      overlap2.collide = badCollide;
+
+      em.spawn(Kane.Entity, overlap1);
+      em.spawn(Kane.Entity, overlap2);
+      em.processCollisions(em);
     });
   });
 

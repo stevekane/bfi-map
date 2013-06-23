@@ -7,7 +7,7 @@ var EntityManagerInterface = {
   removeDead: function () {},
   sortBy: function (propName, ascending) {},
   updateAll: function (dT) {},
-  findCollisions: function () {},
+  processCollisions: function () {},
   listEntities: function () {},
   findByType: function (type) {},
   callForAll: function (methodName, args) {},
@@ -106,60 +106,45 @@ Kane.EntityManager.prototype.sortBy = function (propName, ascending) {
 
 //performance sensitive
 Kane.EntityManager.prototype.updateAll = function (dT) {
-  var collisions;
-
+  
+  //TODO: replace w/ iteration that is faster
   this.callForAll('update', dT);
   
-  //find objects in array that collide
-  collisions = this.findCollisions(this);
-
-  for (var i = 0, len = collisions.length;i < len; i++) {
-    collisions[i].subject.collide(collisions[i].target);
-  }
+  //check all entities for collisions and fire collide methods
+  this.processCollisions(this);
 };
 
-/*
-//TODO: WIP PERF REPLACEMENT LOOP.  FINISH!
-Kane.EntityManager.prototype.findCollisions = function (entities) {
-  var checkBBCollision = Kane.Utils.checkBBCollision
-    , colliders = [];
+//check entities for collisions with eachother and fire collide methods
+Kane.EntityManager.prototype.processCollisions = function (entities) {
+  var checkBBCollision = Kane.Utils.checkBBCollision;
 
-  //loop over all entities
-  for (var c = 0, len = entities.length; c < len; c++) {
+  /*
+  loop over all entities
+  within loop, entities[t] is current "target"
+  while entities[s] is current "subject"
+  */
+  for (var s = 0, len = entities.length; s < len; s++) {
+
+    //check if target === subject and skip if so
+    if (entities[s] === entities[t]) { continue; }
+
+    //if this does not collide, no need to check it
+    if (!entities[s].doesCollide) { continue; }
+
+    //each element is treated as subject and compared to every
+    //other element to check collisions
     for (var t = 0; t < len; t++) {
+      
+      //if the target does not collide, no need to check it
+      if (!entities[t].doesCollide) { continue; }
 
+      //checks for collision where both subject/target doesCollide
+      if (checkBBCollision(entities[s], entities[t])) {
+        //fire each collision method
+        entities[s].collide(entities[t]);
+      } 
     } 
   }
-};
-*/
-
-Kane.EntityManager.prototype.findCollisions = function () {
-  var collisions = []
-    , checkCollision = Kane.Utils.checkBBCollision;
-
-  function doesCollide (ent) {
-    return ent.doesCollide;
-  };
-
-  //iterate through all colliding entities
-  _(this).filter(doesCollide).each(function (subjectEnt, index, entities) {
-
-    //compare subjectEnt to all entities (discarding self)
-    _(entities).each(function (targetEnt) {
-
-      //perform collision detection here       
-      if (checkCollision(subjectEnt, targetEnt)) {
-
-        //if a collision is detected, push this object onto collisions array
-        collisions.push({
-          subject: subjectEnt, 
-          target: targetEnt
-        });
-      }      
-    });
-  });
-
-  return collisions; 
 };
 
 Kane.EntityManager.prototype.listEntities = function () {
