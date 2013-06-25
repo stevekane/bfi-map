@@ -11,6 +11,14 @@ module.exports = (grunt) ->
     jsLibDir: "<%= jsDir %>/libs"
     jsCompiled: "client.js"
 
+    #compiled js directoty
+    coffeeDir: "public/coffee"
+    compJsSrcDir: "public/compiledJS"
+
+    #handlebars files
+    hbDir: "public/handlebars"
+    hbCompiled: "apptemplates.js"
+
     #tests
     testDir: "tests/"
 
@@ -22,15 +30,36 @@ module.exports = (grunt) ->
     #output files
     distDir: "public/dist"
 
+    clean: ['public/compiledJS']
+      
     minispade:
       options:
         renameRequire: true
         useStrict: true
-        prefixToRemove: '<%= jsSrcDir %>'+'/'
+        prefixToRemove: '<%= compJsSrcDir %>'+'/'
       files:
-        src: ['<%= jsSrcDir %>/**/*.js']
+        src: ['<%= compJsSrcDir %>/**/*.js']
         dest: '<%= distDir %>/<%= jsCompiled %>'
 
+    emberTemplates:
+      compile:
+        options:
+          templateName: (sourceFile) ->
+            #TODO: THIS IS HARDCODED...SHOULD CHANGE TO REF GLOBAL
+            return sourceFile.replace("public/handlebars/", "")
+        files:
+          "<%= distDir%>/<%= hbCompiled %>": "<%= hbDir %>/**/*.handlebars"
+
+    coffee:
+      options:
+        bare: true
+      glob_to_multiple:
+        expand: true
+        cwd: '<%= coffeeDir %>'
+        src: ['**/*.coffee']
+        dest: '<%= compJsSrcDir %>'
+        ext: '.js'
+      
     sass:
       dist:
         options:
@@ -39,11 +68,6 @@ module.exports = (grunt) ->
         files:
           '<%= distDir %>/<%= sassCompiled %>': '<%= sassDir %>/<%= mainSassFile %>'
 
-    jshint:
-      options:
-        laxcomma: true
-      all: ['<%= jsSrcDir %>/**/*.js']
-
     watch:
       sass:
         files: ['<%= sassDir %>/**/*.sass']
@@ -51,18 +75,24 @@ module.exports = (grunt) ->
         options:
           livereload: true
 
-      js:
-        files: ['<%= jsSrcDir %>/**/*.js', '<%= testDir %>/**/*.js']
-        tasks: ['minispade']
+      coffee:
+        files: ['<%= coffeeDir %>/**/*.coffee']
+        tasks: ['clean', 'coffee', 'minispade']
         options:
           livereload: true
-    
-  grunt.loadNpmTasks('grunt-minispade')
-  grunt.loadNpmTasks('grunt-contrib-sass')
-  grunt.loadNpmTasks('grunt-contrib-jshint')
-  grunt.loadNpmTasks('grunt-contrib-watch')
 
+      handlebars:
+        files: ['<%= hbDir %>/**/*.handlebars']
+        tasks: ['emberTemplates']
+        options:
+          livereload: true
+
+  require('matchdep').filterDev('grunt-*').forEach grunt.loadNpmTasks
+  
   grunt.registerTask('default', [
+                                        'clean',
+                                        'emberTemplates',
                                         'sass',
+                                        'coffee',
                                         'minispade',
                                         'watch'])

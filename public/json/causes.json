@@ -1,0 +1,24 @@
+{
+  "causes": [
+    {
+      "name": "ted cause",
+      "lat": "75.5",
+      "long": "73.1"
+    },
+    {
+      "name": "bobs cause",
+      "lat": "12.5",
+      "long": "12.6"
+    },
+    {
+      "name": "save the platypi",
+      "lat": "71.1",
+      "long": "71.2"
+    },
+    {
+      "name": "friendship yay!",
+      "lat": "30",
+      "long": "30"
+    }
+  ]
+}

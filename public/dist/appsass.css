@@ -1,5 +1,40 @@
-canvas {
-  position: absolute;
-  left: 0px;
-  top: 0px;
+div#map {
+  top: 0;
+  left: 0;
+  height: 600px;
+  z-index: 0;
+}
+
+div#causecontainer {
+  z-index: 1;
+  position: fixed;
+  left: 10px;
+  top: 10px;
+}
+div#causecontainer ul.pricing-table {
+  background-color: white;
+  border-radius: 5px;
+  border: 2px solid #cccccc;
+}
+div#causecontainer ul.pricing-table li {
+  margin-left: 1px;
+  margin-right: 1px;
+}
+div#causecontainer ul.pricing-table li.title {
+  padding: 10px 5px;
+  font-size: 1.5em;
+  font-family: "Berkshire Swash", cursive;
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+}
+div#causecontainer ul.pricing-table li.bullet-item {
+  background-color: #dddddd;
+  font-family: "Jura", sans-serif;
+  text-align: left;
+  padding: 2px 2px 2px 2px;
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+}
+div#causecontainer ul.pricing-table li.bullet-item div.progress {
+  background-color: white;
 }

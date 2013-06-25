@@ -1,14 +1,14 @@
 {
-  "name": "jumpduck",
+  "name": "bfi-map",
   "version": "0.0.0",
-  "description": "recreation of classic game from fusion frenzy",
+  "description": "bfi map development",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stevekane/jumpduck"
+    "url": "https://github.com/MantraChicago/bfi-map"
   },
   "keywords": [
     "game"
@@ -19,11 +19,14 @@
     "grunt": "~0.4.1",
     "grunt-minispade": "~0.1.7",
     "grunt-contrib-sass": "~0.3.0",
-    "grunt-contrib-jshint": "~0.5.4",
     "grunt-contrib-watch": "~0.4.3",
     "grunt-mocha": "~0.3.2",
     "mocha": "~1.10.0",
-    "phantomjs": "~1.9.0-4"
+    "phantomjs": "~1.9.0-4",
+    "grunt-contrib-coffee": "~0.7.0",
+    "matchdep": "~0.1.2",
+    "grunt-ember-templates": "~0.4.8",
+    "grunt-contrib-clean": "~0.4.1"
   },
   "dependencies": {
     "express": "~3.2.5"

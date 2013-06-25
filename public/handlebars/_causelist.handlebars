@@ -1,0 +1,28 @@
+<div class="row" id="causecontainer">
+  <ul class="pricing-table large-3 columns">
+
+    <li class="title">Causes in Chicago</li>
+
+    <li class="description">
+      Click on any of these causes for more details and to locate them on the map!
+    </li>
+
+    {{#each cause in controller.controllers.causes.content}}
+
+      <li class="bullet-item row">
+
+        <div class="large-6 columns">
+          {{cause.name}}
+        </div>
+
+        <div class="progress large-6 columns round alert">
+          <span class="meter" {{bindAttr style="cause.progressStyle"}}>
+          </span>
+        </div>
+
+      </li>
+
+    {{/each}}
+
+  </ul>
+</div>
