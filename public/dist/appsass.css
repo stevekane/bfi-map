@@ -1,6 +1,4 @@
 div#map {
-  top: 0;
-  left: 0;
   height: 600px;
   z-index: 0;
 }
@@ -12,6 +10,8 @@ div#causecontainer {
   top: 10px;
 }
 div#causecontainer ul.pricing-table {
+  padding-top: 20px;
+  padding-bottom: 20px;
   background-color: white;
   border-radius: 5px;
   border: 2px solid #cccccc;

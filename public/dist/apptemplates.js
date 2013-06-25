@@ -20,7 +20,7 @@ function program1(depth0,data) {
   return buffer;
   }
 
-  data.buffer.push("<div class=\"row\" id=\"causecontainer\">\n  <ul class=\"pricing-table large-3 columns\">\n\n    <li class=\"title\">Causes in Chicago</li>\n\n    <li class=\"description\">\n      Click on any of these causes for more details and to locate them on the map!\n    </li>\n\n    ");
+  data.buffer.push("<div class=\"row large-2\" id=\"causecontainer\">\n  <ul class=\"pricing-table large-12 columns\">\n\n    <li class=\"title\">Causes in Chicago</li>\n\n    <li class=\"description\">\n      Click on any of these causes for more details and to locate them on the map!\n    </li>\n\n    ");
   hashTypes = {};
   hashContexts = {};
   stack1 = helpers.each.call(depth0, "cause", "in", "controller.controllers.causes.content", {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
