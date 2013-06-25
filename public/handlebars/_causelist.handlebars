@@ -4,10 +4,12 @@
     <li class="title">Causes in Chicago</li>
 
     <li class="description">
-      Click on any of these causes for more details and to locate them on the map!
+      <b>Click</b> on any of these causes for more details 
+      and to locate them on the map!
     </li>
 
-    {{#each cause in controller.controllers.causes.content}}
+    {{#each cause in controller.controllers.causes.content
+      itemViewClass="BFI.CauseView"}}
 
       <li class="bullet-item row">
 

@@ -2,23 +2,23 @@
   "causes": [
     {
       "name": "ted cause",
-      "lat": "75.5",
-      "long": "73.1"
+      "lat": "41.88",
+      "long": "-87.65"
     },
     {
       "name": "bobs cause",
-      "lat": "12.5",
-      "long": "12.6"
+      "lat": "41.90",
+      "long": "-87.66"
     },
     {
       "name": "save the platypi",
-      "lat": "71.1",
-      "long": "71.2"
+      "lat": "41.85",
+      "long": "-87.71"
     },
     {
       "name": "friendship yay!",
-      "lat": "30",
-      "long": "30"
+      "lat": "41.88",
+      "long": "-87.70"
     }
   ]
 }
