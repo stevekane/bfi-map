@@ -1,5 +1,47 @@
-{{#with view.content}}
-  {{name}}
-  {{lat}}
-  {{long}}
+<div class="featured_need">
+  {{#with view.content}}
+
+  <header class="cause_header" {{bindAttr style="backgroundImage"}}>
+  </header>
+
+  <div class="cause_title">
+    <div class="need_title_upper">
+      GOAL
+    </div>
+    <div class="need_title_lower">
+      <a href="#">{{description}}</a>
+    </div>
+  </div>
+
+  <div class="featured_need_cause>
+    <a href="#">{{name}}</a>
+  </div>
+
+  <div class="goal_progress_holder">
+    <div class="goal_progress" {{bindAttr style="progressStyle"}}>
+    </div>
+  </div>
+  
+  <div class="goal_stats">
+    <div class="goal_stat goal_upper">
+      {{percentOfGoal}}%
+    </div>
+    <div class="goal_stat goal_lower">
+      Goal Met
+    </div>
+    <div class="goal_stat goal_upper">
+      {{followers}}
+    </div>
+    <div class="goal_stat goal_lower">
+      Followers 
+    </div>
+    <div class="goal_stat goal_upper">
+      {{daysToGo}}
+    </div>
+    <div class="goal_stat goal_lower">
+      Days to Go
+    </div>
+  </div>
+
 {{/with}}
+</div>

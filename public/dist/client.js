@@ -55,13 +55,19 @@ BFI.Cause = Ember.Object.extend({
   long: null,
   goal: null,
   progress: null,
-  progressStyle: (function() {
-    var goal, percentage, progress;
+  followers: null,
+  daysToGo: null,
+  description: "",
+  backgroundImage: "background-image: url(http://christiannewsng.com/wp-content/uploads/2013/03/Charity.jpg);\nbackground-size: contain;",
+  percentOfGoal: (function() {
+    var goal, progress;
     goal = this.get('goal');
     progress = this.get('progress');
-    percentage = Math.round(progress / goal * 100);
-    return "width: " + percentage + "%";
-  }).property('goal', 'progress')
+    return Math.round(progress / goal * 100);
+  }).property('goal', 'progress'),
+  progressStyle: (function() {
+    return "width: " + (this.get("percentOfGoal")) + "%";
+  }).property('percentOfGoal')
 });
 
 BFI.Cause.reopenClass({

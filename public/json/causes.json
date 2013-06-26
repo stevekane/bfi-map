@@ -5,28 +5,40 @@
       "lat": "41.88",
       "long": "-87.65",
       "goal": "2000",
-      "progress": "300"
+      "progress": "300",
+      "followers": "166",
+      "daysToGo": "31",
+      "description": "Ted needs a new house"
     },
     {
       "name": "bobs cause",
       "lat": "41.90",
       "long": "-87.66",
       "goal": "7000",
-      "progress": "1500"
+      "progress": "1500",
+      "followers": "10",
+      "daysToGo": "45",
+      "description": "Bob needs 600 cats"
     },
     {
       "name": "save the platypi",
       "lat": "41.85",
       "long": "-87.71",
       "goal": "1000",
-      "progress": "900"
+      "progress": "900",
+      "followers": "66",
+      "daysToGo": "13",
+      "description": "Save 100 platypi"
     },
     {
       "name": "friendship yay!",
       "lat": "41.88",
       "long": "-87.70",
       "goal": "4050",
-      "progress": "2050"
+      "progress": "2050",
+      "followers": "12",
+      "daysToGo": "45",
+      "description": "Obtain 100 new friends"
     }
   ]
 }

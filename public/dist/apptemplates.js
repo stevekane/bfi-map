@@ -114,28 +114,49 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
 
 function program1(depth0,data) {
   
-  var buffer = '', hashTypes, hashContexts;
-  data.buffer.push("\n  ");
+  var buffer = '', hashContexts, hashTypes;
+  data.buffer.push("\n\n  <header class=\"cause_header\" ");
+  hashContexts = {'style': depth0};
+  hashTypes = {'style': "STRING"};
+  data.buffer.push(escapeExpression(helpers.bindAttr.call(depth0, {hash:{
+    'style': ("backgroundImage")
+  },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push(">\n  </header>\n\n  <div class=\"cause_title\">\n    <div class=\"need_title_upper\">\n      GOAL\n    </div>\n    <div class=\"need_title_lower\">\n      <a href=\"#\">");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "description", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("</a>\n    </div>\n  </div>\n\n  <div class=\"featured_need_cause>\n    <a href=\"#\">");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "name", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("\n  ");
+  data.buffer.push("</a>\n  </div>\n\n  <div class=\"goal_progress_holder\">\n    <div class=\"goal_progress\" ");
+  hashContexts = {'style': depth0};
+  hashTypes = {'style': "STRING"};
+  data.buffer.push(escapeExpression(helpers.bindAttr.call(depth0, {hash:{
+    'style': ("progressStyle")
+  },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push(">\n    </div>\n  </div>\n  \n  <div class=\"goal_stats\">\n    <div class=\"goal_stat goal_upper\">\n      ");
   hashTypes = {};
   hashContexts = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "lat", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("\n  ");
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "percentOfGoal", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("%\n    </div>\n    <div class=\"goal_stat goal_lower\">\n      Goal Met\n    </div>\n    <div class=\"goal_stat goal_upper\">\n      ");
   hashTypes = {};
   hashContexts = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "long", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("\n");
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "followers", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n    </div>\n    <div class=\"goal_stat goal_lower\">\n      Followers \n    </div>\n    <div class=\"goal_stat goal_upper\">\n      ");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "daysToGo", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n    </div>\n    <div class=\"goal_stat goal_lower\">\n      Days to Go\n    </div>\n  </div>\n\n");
   return buffer;
   }
 
+  data.buffer.push("<div class=\"featured_need\">\n  ");
   hashTypes = {};
   hashContexts = {};
   stack1 = helpers['with'].call(depth0, "view.content", {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
   if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-  data.buffer.push("\n");
+  data.buffer.push("\n</div>\n");
   return buffer;
   
 });

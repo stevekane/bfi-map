@@ -1,0 +1,62 @@
+.featured_need{
+  border:1px solid #e3e3e3;
+  margin: 10px;
+  width:210px;
+  display:inline-block;
+  .cause_header{
+    margin:10px;
+    height: 175px;
+  }
+
+  .featured_need_cause{
+    margin-left:10px;
+    padding-bottom:20px;
+    a{
+      font-weight:bold;
+      color:black;
+    }
+  }
+
+  .need_title_upper{
+    font-weight: bold;
+    margin-left:10px;
+    color:#959494;
+    font-size:14px;
+  }
+
+  .need_title_lower{
+
+    margin: 5px 0px 10px 10px;
+    color:#000;
+    font-size:16px;
+  }
+
+  .goal_progress_holder{
+    height: 15px;
+    background-color:#c2c2c2;
+    .goal_progress{
+      display:inline-block;
+      background-color:#00af43;
+      height:100%;
+    }
+  }
+
+  .goal_stats{
+
+    padding:10px;
+    .goal_stat{
+      padding-right:5px;
+
+    }
+    .goal_upper{
+      color: blue;
+      font-weight:bold;
+      font-size: 18px;
+    }
+    .goal_lower{
+      font-size: 15px;
+      color: #959494;
+    }
+  }
+
+}
