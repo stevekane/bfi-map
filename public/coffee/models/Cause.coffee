@@ -2,10 +2,17 @@ BFI.Cause = Ember.Object.extend
   name: ""
   lat: null
   long: null
+  goal: null
+  progress: null
   
   progressStyle: (->
-    "width: #{@get('progress')}"
-  ).property('progress')
+    goal = @get 'goal'
+    progress = @get 'progress'
+    percentage = Math.round(progress/goal * 100)
+
+    "width: #{percentage}%"
+  ).property('goal', 'progress')
+
 
 BFI.Cause.reopenClass
   fetch: (controller) ->

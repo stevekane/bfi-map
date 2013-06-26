@@ -1,18 +1,48 @@
-BFI.IndexView = Ember.View.extend
+BFI.MapView = Ember.View.extend
+  templateName: "map"
 
   #this is an array of all current markers
   markers: []
 
   didInsertElement: ->
-    @createMap()
+    mapDiv = $("<div></div>")
+    mapDiv.attr({id: "map"})
+    mapDiv.appendTo @$()
+
+    self = @
+    self.createMap()
+
+    #add observation of causes to re-draw markers
+    self.addObserver(
+      "controller.content.@each",
+      self,
+      self.placeMarkers
+    )
+
+    #add observer to position map around active cause
+    self.addObserver(
+      "controller.controllers.cause.content",
+      self,
+      self.highlightActive
+    )
 
   willDestroyElement: () ->
-    #should add teardown procedure here
+    #remove marker placement observer
+    self = @
+    self.removeObserver(
+      "controller.content.@each",
+      self,
+      self.placeMarkers
+    )
+    self.removeObserver(
+      "controller.controllers.cause.content",
+      self,
+      self.highlightActive
+    )
+
+    @get('map').remove()
 
   createMap: ->
-    #reference to all our loaded causes
-    causes = @get 'controller.controllers.causes.content'
-
     zoomControls = @createZoomControl 'topright'
     mapData = @createMapData()
 
@@ -25,24 +55,28 @@ BFI.IndexView = Ember.View.extend
     )
 
   #observer that re-creates markers whenever causes change
-  markerObserver: (->
+  placeMarkers: (->
     map = @get 'map'
     markers = @get 'markers'
-    causes = @get 'controller.controllers.causes.content'
+    causes = @get 'controller.content'
 
     #wipe out old markers
     for marker in markers
       map.removeLayer marker
 
-    #flush the markers
+    ##flush the markers
     markers = []
 
     #create new markers
     for cause in causes
       marker = @createMarker(cause.lat, cause.long, cause.name)
       map.addLayer marker
+  )
 
-  ).observes('controller.controllers.causes.content.@each')
+  highlightActive: () ->
+    activeCause = @get 'controller.controllers.cause.content'
+    if activeCause
+      @get('map').setView([activeCause.lat, activeCause.long], 13)
 
   createZoomControl: (position) ->
     new L.Control.Zoom({position: position})
@@ -61,6 +95,7 @@ BFI.IndexView = Ember.View.extend
     )
   
   createMarker: (lat, long, name) ->
+    console.log 'createMarker fired'
     new L.Marker(
       [lat, long],
       {
@@ -69,4 +104,3 @@ BFI.IndexView = Ember.View.extend
         riseOnHover: true
       }
     )
-

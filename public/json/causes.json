@@ -3,22 +3,30 @@
     {
       "name": "ted cause",
       "lat": "41.88",
-      "long": "-87.65"
+      "long": "-87.65",
+      "goal": "2000",
+      "progress": "300"
     },
     {
       "name": "bobs cause",
       "lat": "41.90",
-      "long": "-87.66"
+      "long": "-87.66",
+      "goal": "7000",
+      "progress": "1500"
     },
     {
       "name": "save the platypi",
       "lat": "41.85",
-      "long": "-87.71"
+      "long": "-87.71",
+      "goal": "1000",
+      "progress": "900"
     },
     {
       "name": "friendship yay!",
       "lat": "41.88",
-      "long": "-87.70"
+      "long": "-87.70",
+      "goal": "4050",
+      "progress": "2050"
     }
   ]
 }
