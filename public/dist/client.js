@@ -1,6 +1,8 @@
 minispade.register('application.js', function() {
 "use strict";
-window.BFI = Ember.Application.create();
+window.BFI = Ember.Application.create({
+  rootElement: "#causesapp"
+});
 minispade.require('controllers/CausesController.js');
 minispade.require('controllers/CauseController.js');
 minispade.require('views/CausesView.js');
@@ -36,7 +38,11 @@ BFI.CausesController = Ember.ArrayController.extend({
       _results.push(this.pushObject(BFI.Cause.create(cause)));
     }
     return _results;
-  }
+  },
+  cities: ['Chicago', 'New York', 'San Francisco'],
+  activeCity: 'Chicago',
+  types: ['Art', 'Education', 'Philanthropy'],
+  activeType: 'Art'
 });
 
 });
@@ -81,6 +87,12 @@ BFI.Cause.reopenClass({
     });
   }
 });
+
+});
+
+minispade.register('models/Location.js', function() {
+"use strict";
+BFI.Location = Ember.Object.extend();
 
 });
 
@@ -246,6 +258,7 @@ BFI.MapView = Ember.View.extend({
     mapDiv.appendTo(this.$());
     self = this;
     self.createMap();
+    this.placeMarkers();
     self.addObserver("controller.content.@each", self, self.placeMarkers);
     return self.addObserver("controller.controllers.cause.content", self, self.highlightActive);
   },
@@ -262,7 +275,7 @@ BFI.MapView = Ember.View.extend({
     mapData = this.createMapData();
     return this.set('map', new L.map('map').setView([41.87, -87.65], 13).addLayer(mapData).addControl(zoomControls));
   },
-  placeMarkers: (function() {
+  placeMarkers: function() {
     var cause, causes, map, marker, markers, _i, _j, _len, _len1, _results;
     map = this.get('map');
     markers = this.get('markers');
@@ -279,7 +292,7 @@ BFI.MapView = Ember.View.extend({
       _results.push(map.addLayer(marker));
     }
     return _results;
-  }),
+  },
   highlightActive: function() {
     var activeCause;
     activeCause = this.get('controller.controllers.cause.content');
@@ -299,7 +312,6 @@ BFI.MapView = Ember.View.extend({
     });
   },
   createMarker: function(lat, long, name) {
-    console.log('createMarker fired');
     return new L.Marker([lat, long], {
       title: name,
       zIndexOffset: 5,

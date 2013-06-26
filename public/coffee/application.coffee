@@ -1,4 +1,5 @@
-window.BFI = Ember.Application.create()
+window.BFI = Ember.Application.create
+  rootElement: "#causesapp"
   #LOG_ACTIVE_GENERATION: true
   #LOG_VIEW_LOOKUPS: true
 

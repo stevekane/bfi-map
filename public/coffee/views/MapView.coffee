@@ -12,6 +12,8 @@ BFI.MapView = Ember.View.extend
     self = @
     self.createMap()
 
+    @placeMarkers()
+
     #add observation of causes to re-draw markers
     self.addObserver(
       "controller.content.@each",
@@ -55,7 +57,7 @@ BFI.MapView = Ember.View.extend
     )
 
   #observer that re-creates markers whenever causes change
-  placeMarkers: (->
+  placeMarkers: ->
     map = @get 'map'
     markers = @get 'markers'
     causes = @get 'controller.content'
@@ -71,7 +73,6 @@ BFI.MapView = Ember.View.extend
     for cause in causes
       marker = @createMarker(cause.lat, cause.long, cause.name)
       map.addLayer marker
-  )
 
   highlightActive: () ->
     activeCause = @get 'controller.controllers.cause.content'
@@ -95,7 +96,6 @@ BFI.MapView = Ember.View.extend
     )
   
   createMarker: (lat, long, name) ->
-    console.log 'createMarker fired'
     new L.Marker(
       [lat, long],
       {

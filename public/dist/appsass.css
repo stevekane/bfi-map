@@ -43,6 +43,7 @@
   padding-right: 5px;
 }
 .featured_need .goal_stats .goal_upper {
+  color: blue;
   font-weight: bold;
   font-size: 18px;
 }
@@ -51,43 +52,44 @@
   color: #959494;
 }
 
-div#map {
+#map {
+  top: 40px;
   height: 600px;
   z-index: 0;
 }
 
-div#causenav {
+#causenav {
   position: fixed;
   top: 5px;
   left: 10px;
   z-index: 1;
 }
 
-div#causecontainer {
+#causecontainer {
   position: fixed;
   top: 40px;
   left: 10px;
   z-index: 1;
 }
-div#causecontainer ul.pricing-table {
+#causecontainer .pricing-table {
   padding-top: 20px;
   padding-bottom: 20px;
   background-color: white;
   border-radius: 5px;
   border: 2px solid #cccccc;
 }
-div#causecontainer ul.pricing-table li {
+#causecontainer .pricing-table li.title {
   margin-left: 1px;
   margin-right: 1px;
-}
-div#causecontainer ul.pricing-table li.title {
   padding: 10px 5px;
   font-size: 1.5em;
   font-family: "Berkshire Swash", cursive;
   border-radius: 5px;
   border: 1px solid #cccccc;
 }
-div#causecontainer ul.pricing-table li.bullet-item {
+#causecontainer .pricing-table li.bullet-item {
+  margin-left: 1px;
+  margin-right: 1px;
   background-color: #dddddd;
   font-family: "Jura", sans-serif;
   text-align: left;
@@ -95,6 +97,6 @@ div#causecontainer ul.pricing-table li.bullet-item {
   border-radius: 5px;
   border: 1px solid #cccccc;
 }
-div#causecontainer ul.pricing-table li.bullet-item div.progress {
+#causecontainer .pricing-table li.bullet-item .progress {
   background-color: white;
 }

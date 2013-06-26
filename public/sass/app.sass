@@ -1,41 +1,43 @@
 @import "featured_need"
 
-div#map
+#map
+  top: 40px
   height: 600px
   z-index: 0
 
-div#causenav
+#causenav
   position: fixed
   top: 5px
   left: 10px
   z-index: 1
 
-div#causecontainer
+#causecontainer
   position: fixed
   top: 40px
   left: 10px
   z-index: 1
-  ul.pricing-table
+  .pricing-table
     padding-top: 20px
     padding-bottom: 20px
     background-color: white 
     border-radius: 5px
     border: 2px solid #CCCCCC 
-    li
+    li.title
       margin-left: 1px
       margin-right: 1px
-    li.title
       padding: 10px 5px
       font-size: 1.5em  
       font-family: 'Berkshire Swash', cursive
       border-radius: 5px
       border: 1px solid #CCCCCC
     li.bullet-item
+      margin-left: 1px
+      margin-right: 1px
       background-color: #DDDDDD
       font-family: "Jura", sans-serif
       text-align: left
       padding: 2px 2px 2px 2px
       border-radius: 5px
       border: 1px solid #CCCCCC
-      div.progress
+      .progress
         background-color: white

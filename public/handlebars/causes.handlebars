@@ -10,6 +10,22 @@
         Grid 
       </a>
     </li>
+
+    <li>
+    {{
+      view Ember.Select 
+      contentBinding="controller.cities"
+      selectionBinding="controller.activeCity" 
+    }}
+    </li>
+    <li>
+    {{
+      view Ember.Select 
+      contentBinding="controller.types"
+      selectionBinding="controller.activeType" 
+    }}
+      
+    </li>
   </ul>
 </div>
 

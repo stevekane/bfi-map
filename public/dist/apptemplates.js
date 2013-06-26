@@ -36,10 +36,36 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
 Ember.TEMPLATES["causelist"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [3,'>= 1.0.0-rc.4'];
 helpers = helpers || Ember.Handlebars.helpers; data = data || {};
+  var buffer = '', stack1, hashTypes, hashContexts, escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
   
+  var buffer = '', hashContexts, hashTypes;
+  data.buffer.push("\n      ");
+  hashContexts = {'contentBinding': depth0};
+  hashTypes = {'contentBinding': "STRING"};
+  data.buffer.push(escapeExpression(helpers.view.call(depth0, "BFI.CauseItemView", {hash:{
+    'contentBinding': ("cause")
+  },contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n    ");
+  return buffer;
+  }
 
-
-  data.buffer.push("<div class=\"row large-2\" id=\"causecontainer\">\n  <ul class=\"pricing-table large-12 columns\">\n\n    <li class=\"title\">Causes in Chicago</li>\n\n    <li class=\"description\">\n      <b>Click</b> on any of these causes for more details \n      and to locate them on the map!\n    </li>\n\n  </ul>\n</div>\n");
+  data.buffer.push("<div class=\"row large-2\" id=\"causecontainer\">\n  <ul class=\"pricing-table large-12 columns\">\n\n    <li class=\"title\">\n      ");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "controller.activeType", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n      Causes in \n      ");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "controller.activeCity", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n    </li>\n\n    <li class=\"description\">\n      <b>Click</b> on any of these causes for more details \n      and to locate them on the map!\n    </li>\n\n    ");
+  hashTypes = {};
+  hashContexts = {};
+  stack1 = helpers.each.call(depth0, "cause", "in", "controller.content", {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
+  if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+  data.buffer.push("\n    \n  </ul>\n</div>\n");
+  return buffer;
   
 });
 
@@ -57,7 +83,21 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers.action.call(depth0, "showgrid", {hash:{},contexts:[depth0],types:["STRING"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push(">\n        Grid \n      </a>\n    </li>\n  </ul>\n</div>\n\n");
+  data.buffer.push(">\n        Grid \n      </a>\n    </li>\n\n    <li>\n    ");
+  hashContexts = {'contentBinding': depth0,'selectionBinding': depth0};
+  hashTypes = {'contentBinding': "STRING",'selectionBinding': "STRING"};
+  data.buffer.push(escapeExpression(helpers.view.call(depth0, "Ember.Select", {hash:{
+    'contentBinding': ("controller.cities"),
+    'selectionBinding': ("controller.activeCity")
+  },contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n    </li>\n    <li>\n    ");
+  hashContexts = {'contentBinding': depth0,'selectionBinding': depth0};
+  hashTypes = {'contentBinding': "STRING",'selectionBinding': "STRING"};
+  data.buffer.push(escapeExpression(helpers.view.call(depth0, "Ember.Select", {hash:{
+    'contentBinding': ("controller.types"),
+    'selectionBinding': ("controller.activeType")
+  },contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("\n      \n    </li>\n  </ul>\n</div>\n\n");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "outlet", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
